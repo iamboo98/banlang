@@ -1,0 +1,38 @@
+{
+  "name": "Bản Làng",
+  "short_name": "Bản Làng",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "lang": "vi",
+  "dir": "ltr",
+  "background_color": "#131a33",
+  "theme_color": "#1b2445",
+  "description": "Xây bản làng vùng cao: dựng nhà sàn, khai ruộng bậc thang, mở trường, hiện đại hoá từ xóm nhỏ thành huyện. Chơi offline, lưu trên máy.",
+  "categories": [
+    "games",
+    "simulation"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

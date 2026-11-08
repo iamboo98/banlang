@@ -1,0 +1,24 @@
+BẢN LÀNG – BẢN ỨNG DỤNG (PWA)
+
+Thư mục này là trò chơi Bản Làng dạng ứng dụng web: có biểu tượng riêng, mở toàn màn hình như app, chơi được khi không có mạng, tiến trình lưu trên máy.
+
+1) ĐƯA LÊN MẠNG (miễn phí)
+   Cách dễ nhất: mở https://app.netlify.com/drop trên máy tính, kéo cả thư mục banlang-app (hoặc file banlang-app.zip) vào ô Drop.
+   Netlify cho một đường link dạng https://ten-gi-do.netlify.app. Đăng ký tài khoản miễn phí và bấm giữ (claim) trang đó, nếu không trang sẽ bị xoá sau khoảng 1 giờ.
+   Cách khác: GitHub Pages, Vercel, Cloudflare Pages… Chỉ cần thả nguyên các file trong thư mục này lên, index.html nằm ở ngoài cùng.
+
+2) CÀI LÊN ĐIỆN THOẠI
+   Android (Chrome): mở link, bấm menu ⋮ > Cài đặt ứng dụng (hoặc Thêm vào màn hình chính).
+   iPhone (Safari): mở link, bấm nút Chia sẻ > Thêm vào MH chính.
+   Biểu tượng Bản Làng sẽ nằm trên màn hình chính, mở ra chơi toàn màn hình.
+
+3) MUỐN CÓ FILE APK / ĐƯA LÊN GOOGLE PLAY
+   Mở https://www.pwabuilder.com, dán link ở bước 1, bấm Start > Package for stores > Android > Generate.
+   PWABuilder trả về một file zip có .apk (cài thử trên điện thoại Android) và .aab (nộp lên Google Play, cần tài khoản nhà phát triển Google Play).
+
+4) MANG TIẾN TRÌNH TỪ BẢN TRÊN CLAUDE SANG
+   Trong bản trên Claude: tab Bản làng > Mã lưu > Tạo mã lưu > Sao chép.
+   Trong ứng dụng: màn hình đầu (hoặc tab Bản làng) > Nhập mã lưu > dán > Nhập.
+   Làm ngược lại để mang bản từ ứng dụng về Claude hoặc sang máy khác.
+
+Lưu ý: bản ứng dụng không đăng nhập tài khoản Claude, tiến trình chỉ nằm trên máy đang chơi. Thỉnh thoảng hãy Tạo mã lưu và cất đi để phòng khi xoá dữ liệu trình duyệt.
