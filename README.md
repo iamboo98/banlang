@@ -21,6 +21,13 @@ Trò chơi dựng bản làng vùng cao qua **9 thời kỳ lịch sử Việt N
 
 Mỗi thời kỳ có mục tiêu riêng (dân số, công trình, dự án, góp lương thực). Xong hết mục tiêu là sang thời kỳ sau, kèm một đoạn sự kiện lịch sử mở đầu.
 
+### Vật liệu, tên gọi và tầng lớp xã hội thay đổi theo thời kỳ
+
+- **Vật liệu mở dần:** đồng (Dựng nước, Lò đúc đồng) → sắt (Bắc thuộc, Lò rèn) → gạch ngói (Phong kiến, Lò gạch ngói) → xi măng (Pháp thuộc, Xưởng xi măng) → thép (Chống Mỹ, Lò luyện gang thép) → linh kiện điện tử (Đổi mới, Nhà máy linh kiện). Nhà cửa, trường học, dự án cấp cao cần các vật liệu này; mua được ở chợ khi đã mở.
+- **Tên công trình đổi theo thời kỳ:** ví dụ Trường làng → Trường sơ học → Trường cấp 1 → Trường tiểu học; Chợ phiên → Cửa hàng mậu dịch → Chợ và siêu thị.
+- **Các cấp hành chính:** Bầy người, Thị tộc (nguyên thuỷ) → Chạ, Chiềng, Bộ (Văn Lang) → Bản, Làng, Mường, Châu, Huyện, Phủ (phong kiến) → Thôn, Xã, Thị trấn, Thị xã → Thành phố, Đô thị loại I.
+- **Tầng lớp xã hội:** mỗi thời kỳ có tháp tầng lớp riêng (Lạc hầu, Lạc tướng, Lạc dân, nô tì; vua quan, địa chủ, nho sĩ, nông dân, thợ thủ công, thương nhân; công nhân, tư sản, tiểu tư sản; xã viên hợp tác xã; doanh nhân, trí thức...). Đủ các tầng lớp thì mọi công trình làm ra thêm 5%.
+
 ## Bật GitHub Pages
 
 Settings → Pages → Build and deployment → Source: **Deploy from a branch** → Branch: **main**, thư mục **/ (root)** → Save. Sau 1–2 phút trò chơi có ở https://iamboo98.github.io/banlang/.

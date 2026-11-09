@@ -59,6 +59,11 @@ svg{display:block}
 .chip em{font-style:normal;font-size:10px;opacity:.72;white-space:nowrap;display:block}
 .chip em.up{color:#9be08a;opacity:1}.chip em.down{color:#ff8f80;opacity:1}
 .chip.full b{color:var(--nghe)}
+.mats{display:flex;gap:4px;margin-top:5px}
+.mat{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:3px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:2px 4px;cursor:pointer}
+.mat svg{width:15px;height:15px;flex:0 0 auto}
+.mat b{font-family:var(--disp);font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff8e6}
+.mat i{font-style:normal;font-size:9px;opacity:.7;white-space:nowrap}
 .band{height:7px;background:var(--brocade);background-size:auto 7px;flex:0 0 auto}
 
 /* Stage */
@@ -202,6 +207,15 @@ svg{display:block}
 .tgl.on{background:var(--ok)}
 .tgl.on i{left:23px}
 .modcard{margin-bottom:8px}
+.icn{display:inline-block;width:16px;height:16px;vertical-align:-3px;margin-right:3px}.icn svg{width:100%;height:100%;display:block}
+.soc .pyr{display:flex;flex-direction:column;align-items:center;gap:3px}
+.ptier{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:5px 9px;border-radius:7px;font-size:12.5px;background:rgba(184,50,42,calc(var(--f)*.85));color:#fff;min-width:0}
+.ptier span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ptier b{font-family:var(--disp);font-size:13px;flex:0 0 auto}
+.ptier.miss{background:repeating-linear-gradient(45deg,#e6dcc2,#e6dcc2 6px,#efe6cf 6px,#efe6cf 12px);color:#8a7f66}
+.socd{margin-top:8px;font-size:12.5px;line-height:1.45}
+.socd summary{cursor:pointer;color:#8a6a2a;font-weight:600}
+.socd p{margin:5px 0}
 .gbtn{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;color:#1f1f1f;border:1px solid #dadce0}
 .st-card .gbtn{width:100%;margin:2px 0 10px}
 .glist{list-style:none;margin:0 0 6px;padding:0}
@@ -359,6 +373,7 @@ svg{display:block}
       <button class="cloud" id="cloudBtn" data-act="panel" data-p="village" aria-label="Tài khoản và lưu trữ"><span id="cloudIco"></span></button>
     </div>
     <div class="res" id="res"></div>
+    <div class="mats" id="mats" hidden></div>
   </header>
   <div class="band"></div>
   <main id="stage">
@@ -400,10 +415,11 @@ const SEASONS = [
   {k:'thu',  name:'Thu',  field:1.6, msg:'Mùa Thu: lúa chín vàng ruộng bậc thang, được mùa ×1,6!'},
   {k:'dong', name:'Đông', field:0.35, msg:'Mùa Đông: gió lạnh, ruộng nghỉ. Nhớ tích trữ lúa!'},
 ];
-const RES_KEYS = ['lua','go','da','tc','bac'];
-const RES_NAME = {lua:'Lúa', go:'Gỗ', da:'Đá', tc:'Thổ cẩm', bac:'Bạc'};
-const RES_COL = {lua:'#ffd45e', go:'#f0b679', da:'#dfe4ea', tc:'#ff8d7e', bac:'#ffffff'};
-const BASE_CAP = {lua:150, go:120, da:80, tc:20, bac:1e12};
+const RES_KEYS = ['lua','go','da','tc','bac','cu','sat','gach','xm','thep','ldt'];
+const MATS = ['cu','sat','gach','xm','thep','ldt'], MAT_ERA = {cu:1, sat:2, gach:3, xm:4, thep:6, ldt:8};
+const RES_NAME = {lua:'Lúa', go:'Gỗ', da:'Đá', tc:'Thổ cẩm', bac:'Bạc', cu:'Đồng', sat:'Sắt', gach:'Gạch ngói', xm:'Xi măng', thep:'Thép', ldt:'Linh kiện'};
+const RES_COL = {lua:'#ffd45e', go:'#f0b679', da:'#dfe4ea', tc:'#ff8d7e', bac:'#ffffff', cu:'#e8b45a', sat:'#c3ccd4', gach:'#f08a5d', xm:'#e2e4de', thep:'#a9c4da', ldt:'#7fe0a8'};
+const BASE_CAP = {lua:150, go:120, da:80, tc:20, bac:1e12, cu:60, sat:60, gach:120, xm:120, thep:60, ldt:30};
 const RANKS = [{min:0,name:'Xóm nhỏ'},{min:8,name:'Bản'},{min:16,name:'Bản lớn'},{min:26,name:'Làng'},{min:40,name:'Mường'},{min:60,name:'Mường lớn'},{min:85,name:'Châu'},{min:120,name:'Châu lớn'},{min:170,name:'Huyện'},{min:240,name:'Phủ'},{min:320,name:'Trấn'},{min:420,name:'Xứ sở'}];
 const HIGH_LV_RANK = 5, TOP_LV_RANK = 8, EXPAND_RANK = 3, POP_CAP = 3000;
 const lvRank = l => l >= 13 ? 11 : l >= 11 ? 10 : l >= 9 ? 9 : l >= 6 ? TOP_LV_RANK : l >= 4 ? HIGH_LV_RANK : 0;
@@ -451,11 +467,142 @@ const B = {
   van_mieu:{name:'Văn Miếu', desc:'Năm 1070 vua Lý Thánh Tông cho dựng Văn Miếu ở Thăng Long; năm 1076 lập Quốc Tử Giám, trường đại học đầu tiên của nước ta. Khuyến học: mọi công trình làm ra thêm 5%, +6 vui.', rank:4, max:1, unique:true, w:[2], cost:[{go:180,da:120,bac:200,tc:8}], h:62},
   hoang_thanh:{name:'Hoàng thành', desc:'Cổng thành kinh đô với ba cửa vòm, lầu gỗ lợp ngói vàng. Năm 1010 nhà Lý dời đô về Thăng Long. Kinh đô thịnh vượng: mọi công trình làm ra thêm 5%, +10 vui.', rank:5, max:1, unique:true, w:[3], cost:[{go:250,da:250,bac:400,tc:12}], h:52},
   tuong_dai:{name:'Đài tưởng niệm', desc:'Đài tưởng niệm các anh hùng liệt sĩ đã hy sinh vì độc lập, thống nhất. Hầu hết các xã, phường ở Việt Nam đều có đài tưởng niệm. +8 vui.', rank:8, max:1, unique:true, w:[0], cost:[{da:300,bac:500}], h:66},
+  lo_ren:{name:'Lò rèn', desc:'Nung sắt, rèn lưỡi cày, dao, rìu, cuốc. Làm ra sắt để xây dựng và làm công cụ. Thời Bắc thuộc, đồ sắt ngày càng phổ biến ở làng xã.', rank:2, max:3, w:[1,2,3], cost:[{go:40,da:30,cu:10},{go:70,da:50,cu:20},{go:110,da:80,bac:60}], h:40},
+  lo_gach:{name:'Lò gạch ngói', desc:'Nhào đất sét, đóng khuôn, nung gạch và ngói để xây nhà, lợp mái, dựng trường học, đền đài.', rank:3, max:3, w:[2,3,4], cost:[{go:70,da:40,sat:5},{go:100,da:60,sat:15},{go:140,da:90,sat:25}], h:40},
+  xuong_xm:{name:'Xưởng xi măng', desc:'Nung đá vôi với đất sét thành xi măng. Đặt gần núi đá; mỗi núi đá xung quanh thêm 15% (tối đa 4). Năm 1899, nhà máy xi măng Hải Phòng ra đời, một trong những nhà máy xi măng đầu tiên ở nước ta.', rank:5, max:3, w:[3,4,5], cost:[{go:80,da:120,gach:40,sat:20},{da:200,gach:80,sat:40},{da:300,gach:120,sat:60,bac:300}], h:44},
+  xuong_thep:{name:'Lò luyện gang thép', desc:'Luyện quặng thành gang, thép cho nhà cao tầng, cầu, máy móc. Ngày 29/11/1963, khu gang thép Thái Nguyên ra mẻ gang đầu tiên.', rank:7, max:2, w:[4,6], cost:[{da:200,gach:120,xm:60,sat:40},{da:300,gach:160,xm:120,sat:80,bac:800}], h:78},
+  nm_dien_tu:{name:'Nhà máy linh kiện điện tử', desc:'Sản xuất chip, bảng mạch, linh kiện cho điện thoại, máy tính, pin mặt trời và thành phố thông minh.', rank:9, max:2, w:[5,8], cost:[{xm:200,thep:80,bac:1500},{xm:300,thep:140,bac:3000,ldt:20}], h:40},
   cot_co:{name:'Cột cờ', desc:'Cột cờ trên đỉnh núi, niềm tự hào của cả châu. +15 vui.', rank:7, max:1, unique:true, w:[0], cost:[{go:150,da:200,bac:300,tc:20}], h:112},
 };
-const B_ERA = {lan_san:0, lo_duc:1, trong_dong:1, don_luy:2, van_mieu:3, hoang_thanh:3, dai_hoc:3, truong_nghe:4, cot_co:5, tram_y_te:5, thuy_dien:6, tuong_dai:7};
+const MOD_MAT = {duong:{xm:120}, dien:{xm:80, thep:20}, song:{thep:40, ldt:5}, kien_co:{xm:300, gach:200}, co_gioi:{thep:120, sat:100}, mat_troi:{ldt:20, thep:60}, so_hoa:{ldt:60}, xanh:{thep:200, ldt:40}, thong_minh:{ldt:150, thep:200}};
+const B_ERA = {lo_ren:2, lo_gach:3, xuong_xm:4, xuong_thep:6, nm_dien_tu:8, lan_san:0, lo_duc:1, trong_dong:1, don_luy:2, van_mieu:3, hoang_thanh:3, dai_hoc:3, truong_nghe:4, cot_co:5, tram_y_te:5, thuy_dien:6, tuong_dai:7};
 for (const k in B_ERA) if (B_ERA[k]) B[k].era = B_ERA[k];
-const MODERN = [
+B.lo_duc.desc = 'Nấu đồng, đúc rìu, lưỡi cày, mũi giáo như người Đông Sơn. Làm ra đồng để đúc trống, cồng chiêng, nông cụ; có lò đúc đồng hoạt động thì ruộng và lán tiều phu làm ra thêm 10%.';
+const MAT_COST = {
+  nha_san:{5:{sat:5}, 6:{gach:30, sat:6}, 7:{gach:50, sat:8}, 8:{xm:30, gach:60}, 9:{xm:50, gach:80}, 10:{xm:70, gach:90, thep:5}, 11:{xm:90, gach:100, thep:10}, 12:{xm:120, thep:30}, 13:{xm:160, thep:50}, 14:{xm:200, thep:70, ldt:2}, 15:{xm:260, thep:100, ldt:5}},
+  ruong:{3:{cu:5}, 4:{sat:8}, 5:{sat:12}}, tieu_phu:{2:{cu:4}, 3:{sat:8}}, mo_da:{2:{cu:4}, 3:{sat:8}}, mo_bac:{2:{cu:6}, 3:{sat:10}, 4:{sat:15, gach:10}},
+  khung_det:{2:{cu:4}, 3:{sat:6}}, nha_rong:{1:{cu:10}}, cong_ban:{1:{cu:10}}, nuong_che:{3:{sat:6}, 4:{sat:10}},
+  truong_mn:{2:{gach:20}, 3:{gach:40, xm:10}}, truong_th:{2:{gach:40}, 3:{gach:60, xm:30}}, truong_hoc:{2:{gach:40, sat:10}, 3:{gach:80, xm:40}}, truong_thpt:{1:{gach:40}, 2:{gach:60, xm:40}, 3:{xm:80, thep:10}},
+  truong_nghe:{1:{gach:60, xm:20}, 2:{xm:80, thep:20}}, dai_hoc:{1:{gach:80}, 2:{xm:100, thep:30}}, homestay:{2:{gach:30}, 3:{xm:30}}, tram_y_te:{1:{gach:60, xm:20}},
+  thuy_dien:{1:{xm:120, thep:30}}, tram_song:{1:{thep:40, xm:40}}, ben_xe:{1:{xm:60}}, cot_co:{1:{xm:30, gach:40}},
+  tua_bin_gio:{1:{thep:60, ldt:2}, 2:{thep:100, ldt:3}, 3:{thep:150, ldt:5}}, trang_trai_doc:{1:{thep:60, ldt:5}, 2:{thep:90, ldt:8}, 3:{thep:130, ldt:12}}, trung_tam_cn:{1:{ldt:20, thep:40}, 2:{ldt:35, thep:60}},
+  lo_duc:{2:{cu:10}, 3:{sat:10}}, trong_dong:{1:{cu:30}}, don_luy:{1:{sat:10}, 2:{sat:20, gach:40}}, van_mieu:{1:{gach:80}}, hoang_thanh:{1:{gach:120, sat:20}}, tuong_dai:{1:{xm:80}}, duong:{2:{xm:2}, 3:{xm:2}},
+};
+for (const k in MAT_COST) for (const l in MAT_COST[k]) Object.assign(B[k].cost[l - 1], MAT_COST[k][l]);
+/* ---- Tên công trình đổi theo thời kỳ ---- */
+let NAME_ERA = null;
+function curEra(){ if (NAME_ERA != null) return NAME_ERA; try { return G && G.S ? G.S.era|0 : 2; } catch (e){ return 2; } }
+const ERA_NAMES = {
+  nha_san:[[0,'Túp lều'],[1,'Nhà sàn'],[7,'Nhà ở']], ruong:[[0,'Nương rẫy'],[1,'Ruộng bậc thang'],[7,'Ruộng hợp tác xã'],[8,'Ruộng bậc thang']],
+  tieu_phu:[[0,'Lán tiều phu'],[4,'Trại khai thác gỗ'],[6,'Lâm trường'],[8,'Xưởng chế biến gỗ']], mo_da:[[0,'Bãi ghè đá'],[1,'Bãi khai đá'],[4,'Mỏ đá'],[8,'Mỏ đá cơ giới']],
+  mo_bac:[[0,'Mỏ bạc'],[7,'Mỏ khoáng sản']], kho:[[0,'Kho thóc'],[7,'Kho hợp tác xã'],[8,'Kho hàng']], cho_phien:[[0,'Chợ phiên'],[7,'Cửa hàng mậu dịch'],[8,'Chợ và siêu thị']],
+  khung_det:[[0,'Nhà dệt thổ cẩm'],[7,'Hợp tác xã dệt'],[8,'Xưởng dệt thổ cẩm']], coi_nuoc:[[0,'Cối giã gạo nước'],[7,'Máy xay xát']], muong:[[0,'Mương nước'],[7,'Kênh mương thuỷ lợi']],
+  nha_rong:[[0,'Nhà rông'],[7,'Nhà văn hoá']], cong_ban:[[0,'Cổng bản'],[5,'Cổng làng'],[8,'Cổng chào']], nuong_che:[[0,'Nương chè'],[8,'Đồi chè']],
+  truong_mn:[[0,'Nhà trẻ'],[8,'Trường mầm non']], truong_th:[[0,'Trường làng'],[4,'Trường sơ học'],[5,'Trường cấp 1'],[8,'Trường tiểu học']],
+  truong_hoc:[[0,'Trường huyện'],[4,'Trường cao đẳng tiểu học'],[5,'Trường cấp 2'],[8,'Trường THCS']], truong_thpt:[[0,'Trường phủ'],[4,'Trường trung học'],[5,'Trường cấp 3'],[8,'Trường THPT']],
+  truong_nghe:[[0,'Trường dạy nghề'],[4,'Trường bách nghệ'],[5,'Trường trung cấp nghề'],[8,'Trường cao đẳng nghề']], dai_hoc:[[0,'Học viện'],[4,'Trường đại học']],
+  homestay:[[0,'Nhà trọ'],[7,'Nhà khách'],[8,'Homestay']], tram_y_te:[[0,'Bệnh xá'],[7,'Trạm y tế']], don_luy:[[0,'Đồn luỹ'],[5,'Đồn biên phòng']], hoang_thanh:[[0,'Hoàng thành'],[4,'Di tích Hoàng thành']],
+  lo_duc:[[0,'Lò đúc đồng'],[4,'Xưởng đúc đồng']], lo_ren:[[0,'Lò rèn'],[5,'Xưởng cơ khí']], lo_gach:[[0,'Lò gạch ngói'],[8,'Nhà máy gạch tuynel']], xuong_xm:[[0,'Xưởng xi măng'],[8,'Nhà máy xi măng']], xuong_thep:[[0,'Lò luyện gang thép'],[8,'Nhà máy thép']],
+};
+function nameAt(k, e){ const L = ERA_NAMES[k]; if (!L) return B[k]._name || B[k].name; let nm = L[0][1]; for (const [x, v] of L) if (e >= x) nm = v; return nm; }
+for (const k in ERA_NAMES){ B[k]._name = B[k].name; Object.defineProperty(B[k], 'name', {configurable:true, enumerable:true, get(){ return nameAt(k, curEra()); }}); }
+/* ---- Các cấp hành chính theo thời kỳ ---- */
+const RANK_NAMES = [
+  ['Bầy người','Thị tộc','Thị tộc lớn','Bộ lạc','Bộ lạc lớn','Liên minh bộ lạc','Liên minh lớn','Vùng đất','Vùng đất lớn','Miền','Miền lớn','Xứ sở'],
+  ['Xóm nhỏ','Chạ','Chạ lớn','Chiềng','Chiềng lớn','Kẻ','Kẻ lớn','Bộ','Bộ lớn','Đô ấp','Kinh đô','Xứ sở'],
+  ['Xóm nhỏ','Bản','Bản lớn','Làng','Mường','Mường lớn','Châu','Châu lớn','Huyện','Phủ','Trấn','Xứ sở'],
+  ['Xóm nhỏ','Bản','Bản lớn','Thôn','Xã','Xã lớn','Liên xã','Thị trấn','Huyện','Huyện lớn','Thị xã','Tỉnh lỵ'],
+  ['Xóm nhỏ','Bản','Bản lớn','Thôn','Xã','Xã nông thôn mới','Thị trấn','Thị xã','Thành phố','Thành phố lớn','Đô thị loại I','Đô thị đặc biệt'],
+];
+const rankGroup = e => e <= 0 ? 0 : e === 1 ? 1 : e <= 4 ? 2 : e <= 7 ? 3 : 4;
+const rankNameAt = (r, e) => RANK_NAMES[rankGroup(e)][r];
+RANKS.forEach((R, i) => Object.defineProperty(R, 'name', {configurable:true, enumerable:true, get(){ return rankNameAt(i, curEra()); }}));
+const houseName = l => curEra() === 0 && l <= 3 ? 'Túp lều' : HOUSE_NAME[l];
+function matLock(S, cost){ if (!cost) return null; for (const r in cost) if (MAT_ERA[r] && (S.era|0) < MAT_ERA[r]) return 'Cần ' + RES_NAME[r].toLowerCase() + ' (từ thời kỳ ' + SOC[MAT_ERA[r]].short + ')'; return null; }
+/* ---- Tầng lớp xã hội ---- */
+const JOB_OF = {ruong:'nong', nuong_che:'nong', chuong_trau:'nong', trang_trai_doc:'nong', lan_san:'san', tieu_phu:'tho', khung_det:'tho', lo_duc:'tho', lo_ren:'tho', lo_gach:'tho', mo_da:'mo', mo_bac:'mo', xuong_xm:'cn', xuong_thep:'cn', nm_dien_tu:'cn', thuy_dien:'cn', cho_phien:'buon', homestay:'buon', ben_xe:'buon', truong_mn:'giao', truong_th:'giao', truong_hoc:'giao', truong_thpt:'giao', truong_nghe:'giao', dai_hoc:'giao', tram_y_te:'yte', don_luy:'linh', hoang_thanh:'quan', van_mieu:'quan', nha_rong:'quan', trung_tam_cn:'kysu'};
+const JOBS_ALL = ['nong','san','tho','mo','cn','buon','giao','yte','linh','quan','kysu','idle','stu'];
+const TRI = ['giao','yte','kysu'];
+const SOCIAL = [
+  [{n:'Tộc trưởng', fix:1, d:'Người đứng đầu thị tộc, thường là người lớn tuổi, có uy tín.'},
+   {n:'Thợ săn, người hái lượm', jobs:['san'], d:'Đi săn, bắt cá, hái rau quả trong rừng.', needK:['lan_san']},
+   {n:'Thợ ghè đá, đẽo gỗ', jobs:['tho','mo','cn'], d:'Ghè đá làm rìu, mũi lao; đẽo gỗ dựng lều.', needK:['mo_da','tieu_phu']},
+   {n:'Thành viên thị tộc', base:true, d:'Làm chung, hưởng chung; xã hội chưa phân chia giàu nghèo.'}],
+  [{n:'Vua và quý tộc (Lạc hầu, Lạc tướng)', frac:0.02, min1:true, d:'Vua Hùng, sau là An Dương Vương, đứng đầu; Lạc hầu giúp việc văn, Lạc tướng giữ việc võ.'},
+   {n:'Bồ chính', frac:0.02, min1:true, d:'Già làng đứng đầu các chiềng, chạ.'},
+   {n:'Thợ thủ công', jobs:['tho','mo','cn'], d:'Thợ đúc đồng, làm gốm, dệt vải, ghè đá.', needK:['lo_duc']},
+   {n:'Lạc dân', base:true, d:'Dân tự do, đông đảo nhất: cày ruộng, săn bắt, đánh cá.'},
+   {n:'Nô tì', frac:0.03, d:'Số ít người hầu hạ trong nhà quý tộc, tầng lớp thấp nhất.'}],
+  [{n:'Quan lại đô hộ', frac:0.01, min1:true, d:'Quan lại phương Bắc cai trị, thu thuế, bắt cống nạp.'},
+   {n:'Hào trưởng người Việt', frac:0.03, min1:true, d:'Người có uy tín, thế lực ở làng xã; nhiều người lãnh đạo các cuộc khởi nghĩa.'},
+   {n:'Dân binh giữ làng', jobs:['linh'], d:'Canh giữ đồn luỹ, sẵn sàng theo nghĩa quân.', needK:['don_luy']},
+   {n:'Thợ thủ công', jobs:['tho','mo','cn'], d:'Thợ rèn, thợ đúc, thợ gốm, thợ dệt.', needK:['lo_ren']},
+   {n:'Nông dân công xã', base:true, d:'Đông đảo nhất: cày cấy ruộng của làng, nộp thuế và cống nạp.'},
+   {n:'Nô tì', frac:0.03, d:'Tầng lớp thấp nhất, hầu hạ trong nhà quan lại, hào trưởng.'}],
+  [{n:'Vua, quan lại', jobs:['quan'], frac:0.01, min1:true, d:'Tầng lớp thống trị: vua, quan trong triều và quan ở địa phương.', needK:['hoang_thanh']},
+   {n:'Địa chủ', frac:0.03, min1:true, d:'Có nhiều ruộng đất, cho nông dân thuê cấy và thu tô.'},
+   {n:'Nho sĩ', jobs:['giao','yte','kysu'], d:'Người học chữ Hán, đi thi làm quan hoặc ở làng dạy học, bốc thuốc.', needK:['truong_th','van_mieu']},
+   {n:'Lính', jobs:['linh'], d:'Quân lính canh giữ đồn luỹ, thành trì.'},
+   {n:'Thợ thủ công', jobs:['tho','mo','cn'], d:'Thợ rèn, thợ gốm, thợ nung gạch ngói, thợ dệt.', needK:['lo_gach','lo_ren']},
+   {n:'Thương nhân', jobs:['buon'], d:'Buôn bán ở chợ, phố phường.', needK:['cho_phien']},
+   {n:'Nông dân', base:true, d:'Đông đảo nhất: cày ruộng, nộp tô thuế, đi lính, đi phu.'},
+   {n:'Nô tì', frac:0.01, d:'Số ít, phục vụ trong nhà quý tộc, quan lại.'}],
+  [{n:'Bộ máy cai trị', jobs:['quan'], frac:0.01, min1:true, d:'Quan chức thực dân Pháp và quan lại Nam triều.'},
+   {n:'Địa chủ', frac:0.03, min1:true, d:'Sở hữu nhiều ruộng đất, thu tô của nông dân.'},
+   {n:'Tư sản', frac:0.01, min1:true, d:'Chủ xưởng, chủ hãng buôn người Việt, ra đời trong thời Pháp thuộc.'},
+   {n:'Tiểu tư sản', jobs:['giao','yte','kysu','stu','buon'], d:'Trí thức, học sinh, viên chức, người buôn bán nhỏ.', needK:['truong_th','cho_phien']},
+   {n:'Công nhân', jobs:['mo','cn'], d:'Làm ở mỏ, nhà máy, đồn điền; ra đời trong cuộc khai thác thuộc địa.', needK:['xuong_xm','mo_bac','mo_da']},
+   {n:'Thợ thủ công', jobs:['tho'], d:'Thợ rèn, thợ gạch, thợ dệt.'},
+   {n:'Nông dân', base:true, d:'Chiếm số đông, chịu sưu cao thuế nặng.'}],
+  [{n:'Cán bộ chính quyền', jobs:['quan'], frac:0.02, min1:true, d:'Cán bộ uỷ ban kháng chiến hành chính ở địa phương.'},
+   {n:'Bộ đội, du kích', jobs:['linh'], frac:0.04, d:'Bảo vệ bản làng, lên đường ra mặt trận.', needK:['don_luy']},
+   {n:'Trí thức', jobs:TRI, d:'Thầy giáo, thầy thuốc, kỹ sư đi theo kháng chiến.', needK:['truong_th','tram_y_te']},
+   {n:'Công nhân', jobs:['mo','cn','tho'], d:'Thợ mỏ, công nhân các xưởng, thợ thủ công.'},
+   {n:'Học sinh, sinh viên', jobs:['stu'], d:'Đi học, tham gia Bình dân học vụ dạy chữ cho người lớn.'},
+   {n:'Tiểu thương', jobs:['buon'], d:'Buôn bán nhỏ, tiếp tế cho kháng chiến.'},
+   {n:'Nông dân', base:true, d:'Lực lượng đông đảo nhất: tăng gia sản xuất, đi dân công.'}],
+  [{n:'Cán bộ, đảng viên', jobs:['quan'], frac:0.02, min1:true, d:'Lãnh đạo chính quyền, hợp tác xã ở địa phương.'},
+   {n:'Bộ đội, dân quân', jobs:['linh'], frac:0.04, d:'Thanh niên lên đường nhập ngũ; dân quân bảo vệ làng bản.'},
+   {n:'Trí thức', jobs:TRI, d:'Thầy giáo, bác sĩ, kỹ sư.', needK:['truong_thpt','tram_y_te']},
+   {n:'Công nhân', jobs:['mo','cn'], d:'Công nhân nhà máy, mỏ, lò gang thép.', needK:['xuong_thep','xuong_xm']},
+   {n:'Học sinh, sinh viên', jobs:['stu'], d:'Học ở trường cấp 2, cấp 3, đại học.'},
+   {n:'Xã viên hợp tác xã', base:true, jobs:['tho','buon'], d:'Nông dân, thợ thủ công vào hợp tác xã, làm chung, hưởng theo công điểm.'}],
+  [{n:'Cán bộ, công chức', jobs:['quan'], frac:0.03, min1:true, d:'Làm việc ở cơ quan nhà nước, hưởng chế độ tem phiếu thời bao cấp.'},
+   {n:'Bộ đội', jobs:['linh'], frac:0.02, d:'Bảo vệ biên giới, tham gia xây dựng kinh tế.'},
+   {n:'Trí thức', jobs:TRI, d:'Thầy giáo, bác sĩ, kỹ sư.', needK:['truong_thpt']},
+   {n:'Công nhân viên chức', jobs:['mo','cn'], d:'Làm ở xí nghiệp, nhà máy quốc doanh.', needK:['xuong_thep','xuong_xm','lo_gach']},
+   {n:'Mậu dịch viên', jobs:['buon'], d:'Bán hàng ở cửa hàng mậu dịch quốc doanh.', needK:['cho_phien']},
+   {n:'Học sinh, sinh viên', jobs:['stu'], d:'Học ở trường phổ thông, đại học.'},
+   {n:'Xã viên hợp tác xã', base:true, jobs:['tho'], d:'Làm ruộng, làm nghề trong hợp tác xã, hưởng theo công điểm.'}],
+  [{n:'Cán bộ, công chức', jobs:['quan'], frac:0.02, min1:true, d:'Làm việc ở cơ quan nhà nước các cấp.'},
+   {n:'Doanh nhân', frac:0.02, min1:true, d:'Chủ doanh nghiệp, hộ kinh doanh, nhà đầu tư.'},
+   {n:'Trí thức', jobs:TRI, d:'Giáo viên, bác sĩ, kỹ sư, nhà khoa học.', needK:['dai_hoc','truong_thpt']},
+   {n:'Công nhân', jobs:['mo','cn'], d:'Làm ở nhà máy, khu công nghiệp.', needK:['nm_dien_tu','xuong_thep','xuong_xm']},
+   {n:'Tiểu thương, dịch vụ', jobs:['buon'], d:'Buôn bán, du lịch, dịch vụ.', needK:['cho_phien','homestay']},
+   {n:'Bộ đội', jobs:['linh'], frac:0.01, d:'Bảo vệ Tổ quốc.'},
+   {n:'Học sinh, sinh viên', jobs:['stu'], d:'Học phổ thông, cao đẳng, đại học.'},
+   {n:'Nông dân', base:true, jobs:['tho'], d:'Sản xuất nông nghiệp theo hộ gia đình, làm nghề thủ công.'}],
+  [{n:'Cán bộ, công chức', jobs:['quan'], frac:0.02, min1:true, d:'Quản lý thành phố thông minh, dịch vụ công trực tuyến.'},
+   {n:'Doanh nhân', frac:0.02, min1:true, d:'Chủ doanh nghiệp, công ty khởi nghiệp, nhà đầu tư.'},
+   {n:'Kỹ sư, nhà khoa học', jobs:['kysu'], d:'Nghiên cứu trí tuệ nhân tạo, robot, năng lượng sạch.', needK:['trung_tam_cn']},
+   {n:'Trí thức', jobs:['giao','yte'], d:'Giáo viên, bác sĩ.', needK:['dai_hoc']},
+   {n:'Công nhân kỹ thuật', jobs:['mo','cn'], d:'Vận hành nhà máy tự động, dây chuyền hiện đại.', needK:['nm_dien_tu']},
+   {n:'Dịch vụ, du lịch', jobs:['buon'], d:'Thương mại điện tử, du lịch, dịch vụ.', needK:['cho_phien','homestay']},
+   {n:'Học sinh, sinh viên', jobs:['stu'], d:'Học phổ thông, đại học, sau đại học.'},
+   {n:'Nông dân công nghệ cao', base:true, jobs:['tho','linh'], d:'Làm nông nghiệp thông minh, trang trại nhà kính.'}],
+];
+function socialOf(e, x){
+  const D = SOCIAL[clamp(e|0, 0, SOCIAL.length - 1)], used = new Set(); D.forEach(t => (t.jobs || []).forEach(j => used.add(j)));
+  let base = 0; for (const j of JOBS_ALL) if (!used.has(j)) base += x[j] || 0;
+  const A = (x.labor || 0) + (x.stu || 0);
+  const out = D.map(t => ({n:t.n, d:t.d, needK:t.needK, base:!!t.base, jc:(t.jobs || []).reduce((a, j) => a + (x[j] || 0), 0), c:0, t}));
+  for (const o of out){ const t = o.t; let el = 0; if (t.fix != null || t.frac != null){ el = t.fix != null ? t.fix : Math.round(A*t.frac); if (t.min1) el = Math.max(1, el); } if (!t.base){ el = Math.min(el, base); base -= el; } o.c = o.jc + el; }
+  for (const o of out) if (o.base) o.c = o.jc + Math.max(0, base);
+  const missing = out.filter(o => o.needK && o.jc <= 0);
+  return {tiers:out, full:!missing.length && A > 0, missing};
+}
+const needText = o => 'cần ' + o.needK.map(k => B[k].name).join(' hoặc ') + ' có người làm';
+const MODERN_RAW = [
   {id:'duong', era:7, name:'Đường bê tông về bản', rank:3, days:6, cost:{da:250, go:80, bac:150}, desc:'Đổ bê tông đường vào bản. Mở công trình Đường bê tông: nơi sản xuất nằm sát đường làm ra thêm 5%. Vài người dân bắt đầu đi xe máy.'},
   {id:'dien', era:7, name:'Kéo điện lưới quốc gia', rank:5, days:8, cost:{da:200, go:100, bac:400}, desc:'Cột điện, đèn đường, bóng điện trong mọi nhà. Mọi công trình làm ra thêm 10%, +5 vui. Một số nhà thay mái tôn.'},
   {id:'song', era:8, name:'Sóng điện thoại và internet', rank:6, days:6, cost:{da:150, bac:600}, desc:'Homestay nhận khách đặt phòng qua mạng (+30%), bán hàng ở chợ được giá hơn 10%, +4 vui. Mở công trình Trạm phát sóng.'},
@@ -466,9 +613,10 @@ const MODERN = [
   {id:'xanh', era:8, name:'Năng lượng sạch, đô thị xanh', rank:11, days:10, cost:{go:500, da:900, bac:4000}, desc:'Điện gió, điện mặt trời phủ khắp, cây xanh rợp phố. +8 vui. Mở công trình Tua-bin gió.'},
   {id:'thong_minh', era:8, name:'Thành phố thông minh', rank:11, days:12, cost:{da:1500, bac:8000, tc:60}, desc:'Trí tuệ nhân tạo, robot và máy bay không người lái giao hàng. Mọi công trình làm ra thêm 15%, +5 vui. Mở Trang trại thẳng đứng và Trung tâm công nghệ.'},
 ];
-function epochProj(n){ return {id:'ky_nguyen', era:ERA_FUT, name:'Kỷ nguyên mới thứ ' + (n + 1), rank:11, stars:3*(n + 1), days:Math.min(30, 10 + 2*n), cost:{da:Math.round(2000*Math.pow(1.35, n)), bac:Math.round(12000*Math.pow(1.45, n)), tc:60 + 25*n}, desc:'Khoa học và công nghệ vượt bậc đưa bản sang một kỷ nguyên mới. Mọi công trình làm ra thêm 5% (cộng dồn qua mỗi kỷ nguyên), +2 vui.'}; }
+const MODERN = MODERN_RAW.map(m => Object.assign(m, {cost:Object.assign({}, m.cost, MOD_MAT[m.id] || {})}));
+function epochProj(n){ return {id:'ky_nguyen', era:ERA_FUT, name:'Kỷ nguyên mới thứ ' + (n + 1), rank:11, stars:3*(n + 1), days:Math.min(30, 10 + 2*n), cost:{da:Math.round(2000*Math.pow(1.35, n)), bac:Math.round(12000*Math.pow(1.45, n)), tc:60 + 25*n, thep:Math.round(300*Math.pow(1.3, n)), ldt:100 + 50*n}, desc:'Khoa học và công nghệ vượt bậc đưa bản sang một kỷ nguyên mới. Mọi công trình làm ra thêm 5% (cộng dồn qua mỗi kỷ nguyên), +2 vui.'}; }
 function nextProj(S){ const md = S.modern; for (let k = 0; k < MODERN.length; k++) if (!md.done.includes(MODERN[k].id)) return MODERN[k]; return epochProj(S.epoch|0); }
-function projReady(S, m){ if (m.era && (S.era|0) < m.era) return 'Từ thời kỳ ' + SOC[m.era].short; if (rankIdx(S.best) < m.rank) return 'Cần thành ' + RANKS[m.rank].name; if (m.stars && starsOf(S) < m.stars) return 'Cần đạt ★' + m.stars; return null; }
+function projReady(S, m){ if (m.era && (S.era|0) < m.era) return 'Từ thời kỳ ' + SOC[m.era].short; { const ml = matLock(S, m.cost); if (ml) return ml; } if (rankIdx(S.best) < m.rank) return 'Cần thành ' + RANKS[m.rank].name; if (m.stars && starsOf(S) < m.stars) return 'Cần đạt ★' + m.stars; return null; }
 const SOC = [
   {name:'Thời nguyên thuỷ', short:'Nguyên thuỷ', yrs:'Trước khoảng 2000 TCN', focus:'Sinh tồn, săn bắt, hái lượm',
    desc:'Người xưa sống thành bầy trong hang đá, mái đá và lều lá, săn bắt, hái lượm, chế tác công cụ bằng đá. Dấu tích còn ở các nền văn hoá Sơn Vi, Hoà Bình, Bắc Sơn.',
@@ -480,7 +628,7 @@ const SOC = [
   {name:'Thời Bắc thuộc', short:'Bắc thuộc', yrs:'179 TCN – 938', focus:'Bảo vệ cộng đồng, đấu tranh giành độc lập',
    desc:'Hơn một nghìn năm phương Bắc đô hộ. Người Việt vẫn giữ tiếng nói, phong tục và liên tiếp đứng lên: Hai Bà Trưng (năm 40), Bà Triệu (248), Lý Bí lập nước Vạn Xuân (544), Mai Thúc Loan, Phùng Hưng, Khúc Thừa Dụ (905).',
    ev:'Năm 179 TCN, Triệu Đà đánh chiếm Âu Lạc. Từ đây đất nước bị phương Bắc đô hộ hơn một nghìn năm.',
-   goals:[{t:'pop', n:40}, {t:'b', k:'don_luy', n:1, d:'Bảo vệ bản: dựng Đồn luỹ'}, {t:'b', k:'nha_rong', n:1, d:'Đoàn kết cộng đồng: dựng Nhà rông'}, {t:'give', id:'g2', res:{lua:300, go:150}, d:'Góp lương thực, vật liệu cho nghĩa quân'}]},
+   goals:[{t:'pop', n:40}, {t:'b', k:'don_luy', n:1, d:'Bảo vệ bản: dựng Đồn luỹ'}, {t:'b', k:'nha_rong', n:1, d:'Đoàn kết cộng đồng: dựng Nhà rông'}, {t:'give', id:'g2', res:{lua:300, sat:30}, d:'Góp lương thực, vũ khí sắt cho nghĩa quân'}]},
   {name:'Thời phong kiến độc lập', short:'Phong kiến', yrs:'938 – 1858', focus:'Xây dựng kinh đô, phát triển vương quốc',
    desc:'Các triều Ngô, Đinh, Tiền Lê, Lý, Trần, Hồ, Lê, Mạc, Tây Sơn, Nguyễn nối tiếp nhau. Năm 1010 nhà Lý dời đô về Thăng Long, năm 1070 dựng Văn Miếu; nhà Trần ba lần đánh thắng quân Nguyên Mông; bờ cõi mở rộng dần về phương Nam.',
    ev:'Năm 938, Ngô Quyền đánh tan quân Nam Hán trên sông Bạch Đằng, chấm dứt hơn một nghìn năm Bắc thuộc. Năm 939, Ngô Quyền xưng vương, đóng đô ở Cổ Loa.',
@@ -488,7 +636,7 @@ const SOC = [
   {name:'Thời Pháp thuộc', short:'Pháp thuộc', yrs:'1858 – 1945', focus:'Đấu tranh chống thực dân',
    desc:'Thực dân Pháp từng bước chiếm và đặt ách đô hộ. Phong trào Cần Vương, khởi nghĩa Yên Thế, phong trào Đông Du, Đông Kinh Nghĩa Thục nối tiếp; năm 1930 Đảng Cộng sản Việt Nam ra đời, lãnh đạo cuộc đấu tranh giải phóng dân tộc.',
    ev:'Ngày 1/9/1858, liên quân Pháp – Tây Ban Nha nổ súng tấn công Đà Nẵng, mở đầu cuộc xâm lược Việt Nam. Nhân dân khắp nơi đứng lên chống giặc.',
-   goals:[{t:'pop', n:120}, {t:'b', k:'truong_th', n:1, d:'Truyền bá chữ Quốc ngữ: có Trường tiểu học'}, {t:'learn', n:20, d:'20 người đang đi học'}, {t:'give', id:'g4', res:{lua:600, bac:400}, d:'Ủng hộ phong trào yêu nước'}]},
+   goals:[{t:'pop', n:120}, {t:'b', k:'truong_th', n:1, d:'Truyền bá chữ Quốc ngữ: mở {n}'}, {t:'b', k:'xuong_xm', n:1, d:'Dựng {n}'}, {t:'learn', n:20, d:'20 người đang đi học'}, {t:'give', id:'g4', res:{lua:600, bac:400}, d:'Ủng hộ phong trào yêu nước'}]},
   {name:'Kháng chiến chống Pháp', short:'Chống Pháp', yrs:'1945 – 1954', focus:'Chống giặc đói, giặc dốt, kháng chiến chống Pháp',
    desc:'Chính quyền non trẻ vừa chống giặc đói, giặc dốt, vừa chống giặc ngoại xâm. Phong trào Bình dân học vụ xoá nạn mù chữ; Việt Bắc trở thành căn cứ địa kháng chiến.',
    ev:'Cách mạng tháng Tám năm 1945 thành công. Ngày 2/9/1945, tại Quảng trường Ba Đình, Chủ tịch Hồ Chí Minh đọc Tuyên ngôn Độc lập, khai sinh nước Việt Nam Dân chủ Cộng hoà. Ngày 19/12/1946, toàn quốc kháng chiến.',
@@ -496,15 +644,15 @@ const SOC = [
   {name:'Kháng chiến chống Mỹ', short:'Chống Mỹ', yrs:'1954 – 1975', focus:'Giải phóng và thống nhất đất nước',
    desc:'Đất nước tạm chia cắt hai miền ở vĩ tuyến 17. Miền Bắc xây dựng hậu phương, chi viện cho chiến trường miền Nam qua đường Trường Sơn.',
    ev:'Ngày 7/5/1954, chiến dịch Điện Biên Phủ toàn thắng. Hiệp định Giơ-ne-vơ được ký ngày 21/7/1954; đất nước tạm thời chia cắt ở vĩ tuyến 17.',
-   goals:[{t:'pop', n:240}, {t:'b', k:'tram_y_te', n:1, d:'Chăm sóc sức khoẻ: dựng Trạm y tế'}, {t:'b', k:'truong_thpt', n:1, d:'Đào tạo lớp trẻ: có Trường THPT'}, {t:'give', id:'g6', res:{lua:2000, bac:1500}, d:'Chi viện tiền tuyến'}]},
+   goals:[{t:'pop', n:240}, {t:'b', k:'tram_y_te', n:1, d:'Chăm sóc sức khoẻ: dựng Trạm y tế'}, {t:'b', k:'truong_thpt', n:1, d:'Đào tạo lớp trẻ: mở {n}'}, {t:'b', k:'xuong_thep', n:1, d:'Dựng {n}'}, {t:'give', id:'g6', res:{lua:2000, bac:1500}, d:'Chi viện tiền tuyến'}]},
   {name:'Thời kỳ thống nhất', short:'Thống nhất', yrs:'1975 – 1986', focus:'Khôi phục kinh tế',
    desc:'Hàn gắn vết thương chiến tranh, khôi phục sản xuất, xây dựng lại quê hương trong điều kiện kinh tế kế hoạch hoá tập trung, bao cấp còn nhiều khó khăn.',
    ev:'Ngày 30/4/1975, chiến dịch Hồ Chí Minh kết thúc thắng lợi, chiến tranh chấm dứt, đất nước thống nhất. Ngày 2/7/1976, nước Cộng hoà xã hội chủ nghĩa Việt Nam ra đời.',
-   goals:[{t:'pop', n:320}, {t:'mod', id:'duong'}, {t:'mod', id:'dien'}, {t:'b', k:'tuong_dai', n:1, d:'Dựng Đài tưởng niệm'}, {t:'give', id:'g7', res:{go:1500, da:1500}, d:'Xây dựng lại quê hương'}]},
+   goals:[{t:'pop', n:320}, {t:'mod', id:'duong'}, {t:'mod', id:'dien'}, {t:'b', k:'tuong_dai', n:1, d:'Dựng Đài tưởng niệm'}, {t:'give', id:'g7', res:{gach:800, xm:500}, d:'Gạch, xi măng xây dựng lại quê hương'}]},
   {name:'Thời kỳ đổi mới', short:'Đổi mới', yrs:'1986 – nay', focus:'Xây dựng Việt Nam hiện đại',
    desc:'Phát triển kinh tế thị trường định hướng xã hội chủ nghĩa, công nghiệp hoá, hiện đại hoá và hội nhập quốc tế: gia nhập ASEAN và bình thường hoá quan hệ với Hoa Kỳ (1995), gia nhập WTO (2007).',
    ev:'Tháng 12/1986, Đại hội VI của Đảng Cộng sản Việt Nam đề ra đường lối Đổi mới: phát triển kinh tế hàng hoá nhiều thành phần, mở cửa và hội nhập.',
-   goals:[{t:'pop', n:420}, {t:'mod', id:'kien_co'}, {t:'mod', id:'so_hoa'}, {t:'mod', id:'thong_minh'}]},
+   goals:[{t:'pop', n:420}, {t:'b', k:'nm_dien_tu', n:1, d:'Dựng {n}'}, {t:'mod', id:'kien_co'}, {t:'mod', id:'so_hoa'}, {t:'mod', id:'thong_minh'}]},
   {name:'Việt Nam phát triển hơn nữa', short:'Phát triển', yrs:'Tương lai', focus:'Xây dựng Việt Nam hiện đại và phát triển hơn nữa',
    desc:'Kinh tế số, năng lượng sạch, thành phố thông minh. Mỗi kỷ nguyên mới lại đưa bản làng phát triển hơn nữa, mãi không dừng.',
    ev:'Bản làng bước vào chặng đường mới: robot, trí tuệ nhân tạo, máy bay không người lái chở hàng, năng lượng xanh phủ khắp núi đồi.'},
@@ -522,7 +670,7 @@ function goalProg(S, g){
 }
 const goalDone = (S, g) => { const [x, y] = goalProg(S, g); return x >= y; };
 function goalText(g){
-  if (g.d) return g.d;
+  if (g.d) return g.k ? g.d.replace('{n}', B[g.k].name) : g.d;
   if (g.t === 'pop'){ const r = RANKS.findIndex(R => R.min === g.n); return 'Đạt ' + g.n + ' dân' + (r >= 0 ? ' (thành ' + RANKS[r].name + ')' : ''); }
   if (g.t === 'b') return 'Có ' + g.n + ' ' + B[g.k].name;
   if (g.t === 'mod'){ const m = MODERN.find(x => x.id === g.id); return 'Hoàn thành dự án ' + (m ? m.name : g.id); }
@@ -552,8 +700,8 @@ const hasMod = (S, id) => !!(S && S.modern && S.modern.done.includes(id));
 function modSet(S){ const m = {}; if (S && S.modern) for (const id of S.modern.done) m[id] = true; return m; }
 const houseCap = (S, l) => Math.round(B.nha_san.housing[l-1]*(hasMod(S, 'kien_co') ? 1.2 : 1));
 const ROAD_NAME = ['Đường đất','Đường bê tông','Đường nhựa'], ROAD_BONUS = [1, 1.05, 1.10, 1.15], HUB = {kho:1, cho_phien:1, nha_rong:1, ben_xe:1};
-function bLock(S, k){ const d = B[k]; if (d.era && (S.era|0) < d.era) return 'Từ thời kỳ ' + SOC[d.era].short; if (rankIdx(S.best) < d.rank) return 'Khi thành ' + RANKS[d.rank].name; if (d.req && !hasMod(S, d.req)) return 'Cần dự án ' + MODERN.find(m => m.id === d.req).name.toLowerCase(); return null; }
-function lvBlock(S, k, l){ const lr = lvRank(l); if (rankIdx(S.best) < lr) return 'Cần thành ' + RANKS[lr].name; const q = B[k].lvReq && B[k].lvReq[l]; if (q && !hasMod(S, q)) return 'Cần dự án ' + MODERN.find(m => m.id === q).name.toLowerCase(); return null; }
+function bLock(S, k){ const d = B[k]; if (d.era && (S.era|0) < d.era) return 'Từ thời kỳ ' + SOC[d.era].short; { const ml = matLock(S, d.cost[0]); if (ml) return ml; } if (rankIdx(S.best) < d.rank) return 'Khi thành ' + RANKS[d.rank].name; if (d.req && !hasMod(S, d.req)) return 'Cần dự án ' + MODERN.find(m => m.id === d.req).name.toLowerCase(); return null; }
+function lvBlock(S, k, l){ { const ml = matLock(S, B[k].cost[l - 1]); if (ml) return ml; } const lr = lvRank(l); if (rankIdx(S.best) < lr) return 'Cần thành ' + RANKS[lr].name; const q = B[k].lvReq && B[k].lvReq[l]; if (q && !hasMod(S, q)) return 'Cần dự án ' + MODERN.find(m => m.id === q).name.toLowerCase(); return null; }
 function placeCost(S, k, i, j){ const t = tileAt(S, i, j); return k === 'duong' && t && t.t === 'w' ? {go:12} : B[k].cost[0]; }
 const FOOT = {truong_mn:[1,2,3], truong_th:[2,3,4], truong_hoc:[2,3,4], truong_thpt:[2,3,4], truong_nghe:[3,4], dai_hoc:[3,4]};
 const footOf = (k, l) => FOOT[k] ? FOOT[k][clamp(l || 1, 1, FOOT[k].length) - 1] : 1;
@@ -626,7 +774,7 @@ function migrateFoot(out){
 function addNotice(msg){ if (!G.notice || !G.notice.includes(msg)) G.notice = (G.notice ? G.notice + ' ' : '') + msg; }
 const OLD_KHO_COST = [{go:30,da:5},{go:50,da:25},{go:80,da:50,bac:30},{go:120,da:80,bac:60},{go:160,da:110,bac:100},{go:220,da:150,bac:160},{go:300,da:200,bac:250}];
 const NO_CAP = 1e12;
-const BUILD_ORDER = ['nha_san','ruong','muong','duong','lan_san','tieu_phu','mo_da','lo_duc','mo_bac','kho','vuon','trong_dong','truong_mn','truong_th','chuong_trau','coi_nuoc','khung_det','cho_phien','truong_hoc','nha_rong','don_luy','cong_ban','van_mieu','truong_thpt','hoang_thanh','nuong_che','homestay','truong_nghe','cot_co','tram_y_te','dai_hoc','tuong_dai','thuy_dien','tram_song','ben_xe','tua_bin_gio','trang_trai_doc','trung_tam_cn'];
+const BUILD_ORDER = ['nha_san','ruong','muong','duong','lan_san','tieu_phu','mo_da','lo_duc','lo_ren','lo_gach','xuong_xm','xuong_thep','nm_dien_tu','mo_bac','kho','vuon','trong_dong','truong_mn','truong_th','chuong_trau','coi_nuoc','khung_det','cho_phien','truong_hoc','nha_rong','don_luy','cong_ban','van_mieu','truong_thpt','hoang_thanh','nuong_che','homestay','truong_nghe','cot_co','tram_y_te','dai_hoc','tuong_dai','thuy_dien','tram_song','ben_xe','tua_bin_gio','trang_trai_doc','trung_tam_cn'];
 
 const QUESTS = [
   {t:'Khai hoang', d:'Chạm vào một ô rừng và chọn Chặt cây để lấy gỗ.', p:S=>[S.stats.cleared,1], r:{lua:10}},
@@ -754,7 +902,9 @@ const TERRA = {
   trong_rung:{name:'Trồng rừng', k:'f', cost:{lua:4}, thumb:'sapling', done:'ô này thành rừng'},
   khoi_da:{name:'Khơi núi đá vôi', k:'r', cost:{lua:8}, thumb:'rubble', done:'ô này thành núi đá vôi'},
 };
-const MK = {lua:{lot:10,val:0.6}, go:{lot:10,val:0.9}, da:{lot:10,val:1.3}, tc:{lot:1,val:10}};
+const MK = {lua:{lot:10,val:0.6}, go:{lot:10,val:0.9}, da:{lot:10,val:1.3}, tc:{lot:1,val:10}, cu:{lot:5,val:3}, sat:{lot:5,val:4}, gach:{lot:10,val:1.5}, xm:{lot:10,val:2.5}, thep:{lot:5,val:8}, ldt:{lot:1,val:30}};
+const matOpen = (S, r) => !MAT_ERA[r] || (S.era|0) >= MAT_ERA[r];
+const mkKeys = S => ['lua','go','da','tc', ...MATS.filter(r => matOpen(S, r))];
 
 /* ================= ICONS ================= */
 const ICON = {
@@ -762,6 +912,12 @@ const ICON = {
   go:'<svg viewBox="0 0 24 24"><path d="M5 8h12a4.5 4.5 0 0 1 0 9H5z" fill="#9a6535"/><ellipse cx="5.5" cy="12.5" rx="3.2" ry="4.5" fill="#e3b77a"/><ellipse cx="5.5" cy="12.5" rx="1.7" ry="2.5" fill="none" stroke="#b5874e" stroke-width=".9"/><path d="M10 11h6M12 14.5h5" stroke="#6e4422" stroke-width="1" stroke-linecap="round"/></svg>',
   da:'<svg viewBox="0 0 24 24"><path d="M3 18l3-8 5-4 6 2 4 6-2 5z" fill="#a7aeb5"/><path d="M11 6l6 2 4 6-2 5h-7z" fill="#7f868e"/><path d="M6 10l5 2 1 7" stroke="#5f666d" stroke-width=".9" fill="none"/></svg>',
   tc:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="#26315c"/><rect x="3" y="4" width="18" height="3" fill="#c0392b"/><rect x="3" y="17" width="18" height="3" fill="#c0392b"/><path d="M12 8l4 4-4 4-4-4z" fill="#e9b434"/><path d="M12 10.2l1.8 1.8-1.8 1.8-1.8-1.8z" fill="#c0392b"/><path d="M5 12l2-2 2 2-2 2zM15 12l2-2 2 2-2 2z" fill="#f6efdf"/></svg>',
+  cu:'<svg viewBox="0 0 24 24"><ellipse cx="12" cy="7" rx="8" ry="3" fill="#e0b25a"/><path d="M4 7v8c0 1.7 3.6 3 8 3s8-1.3 8-3V7c0 1.7-3.6 3-8 3S4 8.7 4 7z" fill="#a8762a"/><circle cx="12" cy="7" r="1.5" fill="#f6dc8e"/><path d="M12 4.7v4.6M9.7 7h4.6" stroke="#f6dc8e" stroke-width=".8"/></svg>',
+  sat:'<svg viewBox="0 0 24 24"><path d="M3 8h13c0 2 2 3 5 3v1c-3 0-5 1-6 3h-1v2h3v2H7v-2h3v-2H9C8 13 5 12 3 11z" fill="#7d8790"/><path d="M3 8h13c0 1 1 2 3 2.6" stroke="#b6bec5" stroke-width="1" fill="none"/></svg>',
+  gach:'<svg viewBox="0 0 24 24"><path d="M3 9l9-4 9 4-9 4z" fill="#e07a50"/><path d="M3 9v6l9 4v-6z" fill="#b5532f"/><path d="M21 9v6l-9 4v-6z" fill="#953f22"/><path d="M7.5 7l9 4" stroke="#f3a684" stroke-width=".8"/></svg>',
+  xm:'<svg viewBox="0 0 24 24"><path d="M5 6c2-1 12-1 14 0l1 13c-3 1.4-13 1.4-16 0z" fill="#d3d5cf"/><path d="M5 6c2 1 12 1 14 0" stroke="#9fa39b" stroke-width="1" fill="none"/><rect x="8" y="10" width="8" height="5" rx="1" fill="#5f86b0"/><path d="M9.5 12.5h5" stroke="#fff" stroke-width="1"/></svg>',
+  thep:'<svg viewBox="0 0 24 24"><path d="M4 5h16v3h-6v8h6v3H4v-3h6V8H4z" fill="#5f7d96"/><path d="M4 5h16v1.2H4zM4 16h6v1H4z" fill="#a6bfd2"/></svg>',
+  ldt:'<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="#2e7d55"/><rect x="9" y="9" width="6" height="6" rx=".8" fill="#1d2b33"/><path d="M8 3v3M12 3v3M16 3v3M8 18v3M12 18v3M16 18v3M3 8h3M3 12h3M3 16h3M18 8h3M18 12h3M18 16h3" stroke="#d9b35a" stroke-width="1.3"/></svg>',
   bac:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#d5dce4"/><circle cx="12" cy="12" r="8.3" fill="none" stroke="#97a2ae" stroke-width="1.3"/><circle cx="12" cy="12" r="6" fill="none" stroke="#aab4bf" stroke-width=".8"/><rect x="9.6" y="9.6" width="4.8" height="4.8" fill="#26315c" stroke="#8a95a2" stroke-width=".8"/></svg>',
   dan:'<svg viewBox="0 0 24 24"><path d="M4.5 9.5L12 2.5l7.5 7z" fill="#e8d29a"/><circle cx="12" cy="11" r="3" fill="#e0b48a"/><path d="M6 22c0-5 2.7-8 6-8s6 3 6 8z" fill="#4a5fa8"/><rect x="6.4" y="18.5" width="11.2" height="2" fill="#c0392b"/></svg>',
   vui:'<svg viewBox="0 0 24 24"><g fill="#f4a7ba"><circle cx="12" cy="6.5" r="3.6"/><circle cx="17.2" cy="10.3" r="3.6"/><circle cx="15.2" cy="16.4" r="3.6"/><circle cx="8.8" cy="16.4" r="3.6"/><circle cx="6.8" cy="10.3" r="3.6"/></g><circle cx="12" cy="12" r="2.8" fill="#e9b434"/></svg>',
@@ -839,7 +995,7 @@ function genMap(seed){
   return T;
 }
 function newState(name, seed){
-  const S = {v:1, seed, name:name || 'Bản Mây', day:1, dayT:0, tiles:genMap(seed), res:{lua:40, go:30, da:10, tc:0, bac:15}, pop:3, best:3, growth:0, happy:55, hunger:0, quest:0, fest:null, mods:[], prices:{lua:1, go:1, da:1, tc:1}, stats:{cleared:0, sold:0, fest:0, built:0, planted:0, weddings:0, births:0, arrived:0, passed:0}, nextId:1, created:Date.now(), saved:Date.now(), playMs:0, regrowV:1, size:BASE_N, qv:2, roadV:1, famPolicy:true, modern:{done:[], cur:null}, eduV:1, eduMax:6, gradAcc:[0,0,0,0,0,0,0], footV:1, era:0, fame:0, epoch:0, starsSeen:0, vnV:1, gave:{}};
+  const S = {v:1, seed, name:name || 'Bản Mây', day:1, dayT:0, tiles:genMap(seed), res:{lua:40, go:30, da:10, tc:0, bac:15, cu:0, sat:0, gach:0, xm:0, thep:0, ldt:0}, pop:3, best:3, growth:0, happy:55, hunger:0, quest:0, fest:null, mods:[], prices:{lua:1, go:1, da:1, tc:1, cu:1, sat:1, gach:1, xm:1, thep:1, ldt:1}, stats:{cleared:0, sold:0, fest:0, built:0, planted:0, weddings:0, births:0, arrived:0, passed:0}, nextId:1, created:Date.now(), saved:Date.now(), playMs:0, regrowV:1, size:BASE_N, qv:2, roadV:1, famPolicy:true, modern:{done:[], cur:null}, eduV:1, eduMax:6, gradAcc:[0,0,0,0,0,0,0], footV:1, era:0, fame:0, epoch:0, starsSeen:0, vnV:1, gave:{}};
   let bk = -1, bd = 1e9;
   S.tiles.forEach((t,k) => { if (t.t !== 'g') return; const d = Math.hypot(k%BASE_N - 7, ((k/BASE_N)|0) - 6); if (d < bd){ bd = d; bk = k; } });
   S.tiles[bk].b = {k:'nha_san', l:1, id:S.nextId++};
@@ -999,7 +1155,7 @@ function eduStats(S){
   wait[4] = wait[5];
   return {wait};
 }
-const PRI = {lan_san:0.2, lo_duc:3.8, don_luy:4.8, van_mieu:5.3, hoang_thanh:5.35, trang_trai_doc:0.5, trung_tam_cn:5.65, ben_xe:4.5, ruong:0, chuong_trau:1, tieu_phu:2, mo_da:3, mo_bac:3.5, cho_phien:4, nha_rong:5, truong_mn:5.45, truong_th:5.5, truong_hoc:5.52, truong_thpt:5.54, truong_nghe:5.56, dai_hoc:5.58, tram_y_te:5.6, thuy_dien:5.7, khung_det:6, nuong_che:7, homestay:8};
+const PRI = {lo_ren:3.85, lo_gach:3.9, xuong_xm:3.95, xuong_thep:4.0, nm_dien_tu:4.05, lan_san:0.2, lo_duc:3.8, don_luy:4.8, van_mieu:5.3, hoang_thanh:5.35, trang_trai_doc:0.5, trung_tam_cn:5.65, ben_xe:4.5, ruong:0, chuong_trau:1, tieu_phu:2, mo_da:3, mo_bac:3.5, cho_phien:4, nha_rong:5, truong_mn:5.45, truong_th:5.5, truong_hoc:5.52, truong_thpt:5.54, truong_nghe:5.56, dai_hoc:5.58, tram_y_te:5.6, thuy_dien:5.7, khung_det:6, nuong_che:7, homestay:8};
 const WORK = {trang_trai_doc:[3,4,5], ruong:[2,3,4,5,6], tieu_phu:[2,3,4], mo_da:[2,3,4], mo_bac:[3,4,5,6], khung_det:[2,3,4], nuong_che:[2,3,4,5], homestay:[2,3,4], cho_phien:[2]};
 const slotsOf = b => WORK[b.k] ? WORK[b.k][Math.min(b.l, WORK[b.k].length) - 1] : (B[b.k].w[b.l-1] || 0);
 const workersOf = slotsOf;
@@ -1008,17 +1164,17 @@ const crewBonus = (got, slots) => got >= slots ? 1.25 : got*2 >= slots ? 1.1 : 1
 function computeEconomy(S, laborOverride){
   syncCover(S);
   if (!Array.isArray(S.people) || S.people.length !== S.pop) syncPop(S);
-  let kids = 0, elders = 0, students = 0, eduSum = 0, enrolledTotal = 0; const enrolled = [0,0,0,0,0,0,0];
+  let kids = 0, elders = 0, students = 0, eduSum = 0, enrolledTotal = 0, eduHi = 0; const enrolled = [0,0,0,0,0,0,0];
   for (const p of S.people){
     if (p.sl){ enrolledTotal++; enrolled[p.sl === 9 ? 0 : p.sl]++; }
     if (p.a < ADULT) kids++; else if (p.a >= ELDER) elders++; else if (p.sl && p.sl !== 9) students++; else eduSum += eduMulOf(p);
   }
   const adults = S.people.length - kids - elders, labor = adults - students;
-  const E = {kids, elders, adults, labor, students, enrolled, enrolledTotal, eduMul:labor > 0 ? eduSum/labor : 1, seats:[0,0,0,0,0,0,0], schoolKinds:{}, prod:{lua:0, go:0, da:0, tc:0, bac:0}, cons:adults*0.6 + kids*0.4 + elders*0.5, housing:0, caps:Object.assign({}, BASE_CAP), need:0, used:0, info:{}, decor:0, hasRong:false, hasCong:false, hasCho:false, counts:{}};
+  const E = {kids, elders, adults, labor, students, enrolled, enrolledTotal, eduMul:labor > 0 ? eduSum/labor : 1, seats:[0,0,0,0,0,0,0], schoolKinds:{}, prod:Object.fromEntries(RES_KEYS.map(r => [r, 0])), cons:adults*0.6 + kids*0.4 + elders*0.5, housing:0, caps:Object.assign({}, BASE_CAP), need:0, used:0, info:{}, decor:0, hasRong:false, hasCong:false, hasCho:false, counts:{}};
   const list = [];
   S.tiles.forEach((t,k) => { if (t.b){ list.push(k); E.counts[t.b.k] = (E.counts[t.b.k]||0) + 1; } });
   for (const k of list){ const b = S.tiles[k].b; if (b.k === 'nha_san') E.housing += houseCap(S, b.l); if (b.k === 'kho') E.unlimited = true; }
-  if (E.unlimited) for (const r of ['lua','go','da','tc']) E.caps[r] = NO_CAP;
+  if (E.unlimited) for (const r of ['lua','go','da','tc', ...MATS]) E.caps[r] = NO_CAP;
   const active = new Set();
   const wl = [];
   for (const k of list){ const b = S.tiles[k].b; if (slotsOf(b) === 0) active.add(k); else wl.push(k); }
@@ -1037,8 +1193,9 @@ function computeEconomy(S, laborOverride){
   const MD = modSet(S); E.mod = MD; E.benxe = list.some(k => S.tiles[k].b.k === 'ben_xe' && active.has(k));
   let wind = 0, tech = 0; for (const k of list){ const b = S.tiles[k].b; if (b.k === 'tua_bin_gio') wind += b.l; else if (b.k === 'trung_tam_cn' && active.has(k)) tech += b.l; }
   E.windB = Math.min(0.2, 0.02*wind); E.techB = Math.min(0.3, 0.06*tech); E.mile = 0.05*Math.floor(starsOf(S)/5); E.epochB = 0.05*(S.epoch|0);
+  { const jc = {idle:Math.max(0, avail), stu:students}; for (const k of wl){ const w = wk[k]; if (!w) continue; const j = JOB_OF[S.tiles[k].b.k]; if (j) jc[j] = (jc[j] || 0) + w; else jc.idle += w; } jc.labor = labor; E.jobs = jc; E.soc = socialOf(S.era|0, jc); }
   E.bronze = list.some(k => S.tiles[k].b.k === 'lo_duc' && active.has(k)); E.vanmieu = list.some(k => S.tiles[k].b.k === 'van_mieu' && active.has(k)); E.kinhdo = list.some(k => S.tiles[k].b.k === 'hoang_thanh' && active.has(k));
-  const hm0 = (0.8 + S.happy/250)*(E.vanmieu ? 1.05 : 1)*(E.kinhdo ? 1.05 : 1)*(hydro ? 1.1 : 1)*(MD.dien ? 1.1 : 1)*(MD.mat_troi ? 1.05 : 1)*(MD.so_hoa ? 1.1 : 1)*(MD.thong_minh ? 1.15 : 1)*(1 + E.windB + E.techB + E.mile + E.epochB), hm = hm0*E.eduMul; E.hm = hm0; E.hydro = hydro;
+  const hm0 = (0.8 + S.happy/250)*(E.soc.full ? 1.05 : 1)*(E.vanmieu ? 1.05 : 1)*(E.kinhdo ? 1.05 : 1)*(hydro ? 1.1 : 1)*(MD.dien ? 1.1 : 1)*(MD.mat_troi ? 1.05 : 1)*(MD.so_hoa ? 1.1 : 1)*(MD.thong_minh ? 1.15 : 1)*(1 + E.windB + E.techB + E.mile + E.epochB), hm = hm0*E.eduMul; E.hm = hm0; E.hydro = hydro;
   const season = SEASONS[seasonIdx(S.day)];
   let fieldMod = 1; for (const m of S.mods) if (m.k === 'field') fieldMod *= m.mult;
   const cois = list.filter(k => S.tiles[k].b.k === 'coi_nuoc');
@@ -1067,7 +1224,12 @@ function computeEconomy(S, laborOverride){
       case 'mo_bac': { const r = Math.min(4, nb(S,i,j,D8,x => x.t === 'r')); info.res = 'bac'; info.amt = (0.4 + 0.15*r)*cf*hm; info.notes.push(r + ' núi đá xung quanh (tối đa 4)'); break; }
       case 'mo_da': { const r = Math.min(4, nb(S,i,j,D8,x => x.t === 'r')); const sp = nb(S,i,j,D8,x => x.rg && x.rg.k === 'r' && !x.b); info.res = 'da'; info.amt = (0.6 + 0.25*r)*cf*hm; info.notes.push(r + ' núi đá xung quanh' + (sp ? ', ' + sp + ' ô đá đang lộ lên' : '')); break; }
       case 'lan_san': { const f = Math.min(4, nb(S,i,j,D8,x => x.t === 'f')); info.res = 'lua'; info.amt = (0.8 + 0.45*f)*cf*hm; info.notes.push(f + ' ô rừng xung quanh để săn bắt, hái lượm (tối đa 4)'); break; }
-      case 'lo_duc': info.res = 'bac'; info.amt = 0.35*cf*hm; info.notes.push('Đúc đồ đồng bán lấy bạc'); if (on) info.notes.push('Ruộng và lán tiều phu cả bản: +10%'); break;
+      case 'lo_ren': info.res = 'sat'; info.amt = 0.8*cf*hm; info.notes.push('Rèn sắt làm công cụ, vật liệu xây dựng'); break;
+      case 'lo_gach': info.res = 'gach'; info.amt = 1.5*cf*hm; info.notes.push('Nung gạch ngói'); break;
+      case 'xuong_xm': { const r = Math.min(4, nb(S,i,j,D8,x => x.t === 'r')); info.res = 'xm'; info.amt = 1.2*cf*hm*(1 + 0.15*r); info.notes.push(r + ' núi đá vôi xung quanh: +' + 15*r + '%'); break; }
+      case 'xuong_thep': info.res = 'thep'; info.amt = 0.8*cf*hm; info.notes.push('Luyện gang thép'); break;
+      case 'nm_dien_tu': info.res = 'ldt'; info.amt = 0.3*cf*hm; info.notes.push('Sản xuất chip, bảng mạch'); break;
+      case 'lo_duc': info.res = 'cu'; info.amt = 0.8*cf*hm; info.notes.push('Đúc đồng'); if (on) info.notes.push('Ruộng và lán tiều phu cả bản: +10%'); break;
       case 'trong_dong': E.drum = true; break;
       case 'don_luy': if (on) E.fort = b.l; break;
       case 'van_mieu': if (on) info.notes.push('Khuyến học: mọi công trình +5%'); break;
@@ -1093,7 +1255,7 @@ function computeEconomy(S, laborOverride){
       E.conn[k] = rl; E.prodCount++; if (rl){ E.connCount++; info.amt *= ROAD_BONUS[rl]; info.notes.push(ROAD_NAME[rl-1] + ' nối tới trung tâm: +' + Math.round((ROAD_BONUS[rl]-1)*100) + '%'); }
       else info.notes.push(adjRoad ? 'Đường cạnh đây chưa nối tới Kho, Chợ, Nhà rông hay Bến xe' : 'Chưa có đường: làm đường nối tới Kho, Chợ, Nhà rông hay Bến xe để được thêm 5–15%');
       if (MD.dien) info.notes.push('Có điện: +10%'); if (MD.mat_troi) info.notes.push('Điện mặt trời: +5%'); if (MD.so_hoa) info.notes.push('Chuyển đổi số: +10%'); if (MD.thong_minh) info.notes.push('Thành phố thông minh: +15%');
-      if (E.vanmieu) info.notes.push('Văn Miếu khuyến học: +5%'); if (E.kinhdo) info.notes.push('Kinh đô thịnh vượng: +5%');
+      if (E.soc.full) info.notes.push('Xã hội đủ các tầng lớp: +5%'); if (E.vanmieu) info.notes.push('Văn Miếu khuyến học: +5%'); if (E.kinhdo) info.notes.push('Kinh đô thịnh vượng: +5%');
       { const xb = E.windB + E.techB + E.mile + E.epochB; if (xb > 0.001) info.notes.push('Điện gió, công nghệ, cột mốc, kỷ nguyên: +' + Math.round(xb*100) + '%'); }
       if (sl > 0 && Math.abs(E.eduMul - 1) >= 0.005) info.notes.push('Trình độ người đi làm: ' + pctTxt(E.eduMul));
     }
@@ -1114,6 +1276,7 @@ function computeEconomy(S, laborOverride){
   if (E.homes) E.happyParts.push(['Homestay', 2*E.homes]);
   if (E.hasCot) E.happyParts.push(['Cột cờ', 15]);
   if (E.clinic) E.happyParts.push(['Trạm y tế', 6]);
+  if (E.soc.full) E.happyParts.push(['Xã hội đủ các tầng lớp', 4]);
   if (E.drum) E.happyParts.push(['Trống đồng', 6]); if (E.fort) E.happyParts.push(['Đồn luỹ', E.fort >= 2 ? 10 : 6]); if (E.vanmieu) E.happyParts.push(['Văn Miếu', 6]); if (E.kinhdo) E.happyParts.push(['Kinh đô', 10]); if (E.memorial) E.happyParts.push(['Đài tưởng niệm', 8]);
   if (MD.dien) E.happyParts.push(['Điện về bản', 5]); if (MD.song) E.happyParts.push(['Sóng điện thoại', 4]); if (MD.kien_co) E.happyParts.push(['Nhà kiên cố', 5]); if (MD.mat_troi) E.happyParts.push(['Điện mặt trời', 6]); if (E.tower) E.happyParts.push(['Trạm phát sóng', 4]);
   if (E.hydro) E.happyParts.push(['Điện về bản', 4]);
@@ -2665,6 +2828,102 @@ function dTuongDai(c, cx, cy, l, env){
     if (env.lights && n > 0.05) env.lights.push([q[0], q[1] - 5, 6]); }
   for (const [u, v] of [[0.4, -0.1], [0.4, 0.12], [-0.1, 0.4], [0.12, 0.4]]){ const q = p(u, v); ell(c, q[0], q[1] - 1, 3, 1.6, '#4f8a3a'); circ(c, q[0] - 1, q[1] - 2, 1, '#e9b434'); circ(c, q[0] + 1.2, q[1] - 1.6, 1, '#d84a3a'); }
 }
+function cylinder(c, p, u, v, r, z0, h, light, dark, top){
+  const q = p(u, v, z0), rx = r*HW*Math.SQRT2, ry = rx/2;
+  const g = c.createLinearGradient(q[0] - rx, 0, q[0] + rx, 0); g.addColorStop(0, light); g.addColorStop(1, dark);
+  c.beginPath(); c.moveTo(q[0] - rx, q[1]); c.lineTo(q[0] - rx, q[1] - h); c.lineTo(q[0] + rx, q[1] - h); c.lineTo(q[0] + rx, q[1]); c.ellipse(q[0], q[1], rx, ry, 0, 0, Math.PI); c.closePath(); c.fillStyle = g; c.fill();
+  ell(c, q[0], q[1] - h, rx, ry, top || light);
+  return [q[0], q[1] - h, rx, ry];
+}
+function dLoRen(c, cx, cy, l, env, ex){
+  const p = mkP(cx, cy), n = env.night || 0, t = env.t || 0;
+  shadow(c, cx, cy + 2, HW*0.7, HH*0.55, 0.18);
+  fp(c, [p(-0.44,-0.44), p(0.44,-0.44), p(0.44,0.44), p(-0.44,0.44)], 'rgba(80,72,64,.35)');
+  const su = -0.12, sv = -0.12, a = 0.22, b = 0.19, sh = 16;
+  for (const [u, v] of [[-a,-b],[a,-b]]) ln(c, p(su+u, sv+v, 0), p(su+u, sv+v, sh), '#5a3d22', 1.7);
+  box(c, p, su - 0.06, sv - 0.04, 0.11, 0.1, 0, 8, '#8a6a52', '#6e5442', '#574234');
+  const hz = p(su - 0.06, sv - 0.04, 8), gl = 0.7 + 0.3*Math.sin(t/140);
+  ell(c, hz[0], hz[1], 5.5, 2.6, n > 0.3 ? '#ffb347' : 'rgba(255,' + Math.round(110 + 40*gl) + ',40,.95)');
+  if (env.lights && n > 0.05) env.lights.push([hz[0], hz[1], 15]);
+  for (const [u, v] of [[-a,b],[a,b]]) ln(c, p(su+u, sv+v, 0), p(su+u, sv+v, sh), '#5a3d22', 1.7);
+  gableRoof(c, p, su, sv, a + 0.05, b + 0.06, sh, 9, roofFor(env, ex && ex.seed, l >= 2 ? ROOF_TILE : THATCH));
+  const ch = p(su - 0.12, sv - 0.1, 0); c.fillStyle = '#6b4f3c'; c.fillRect(ch[0] - 2.5, ch[1] - 32, 5, 24); ell(c, ch[0], ch[1] - 32, 2.5, 1.2, '#2a1c14');
+  if (env.smoke) env.smoke(ch[0], ch[1] - 33);
+  const an = p(0.22, 0.14, 0);
+  fp(c, [[an[0] - 3, an[1]], [an[0] + 3, an[1]], [an[0] + 2, an[1] - 5], [an[0] - 2, an[1] - 5]], '#5c4636');
+  fp(c, [[an[0] - 6, an[1] - 5], [an[0] + 5, an[1] - 5], [an[0] + 7, an[1] - 7.5], [an[0] - 6, an[1] - 8]], '#4d555c');
+  ln(c, [an[0] - 6, an[1] - 8], [an[0] + 7, an[1] - 7.5], '#8d969e', 1);
+  { const ph = (t/260) % 1; if (ph < 0.5){ for (let k = 0; k < 5; k++){ const a2 = -Math.PI/2 + (k - 2)*0.5, d = 3 + ph*16; circ(c, an[0] + Math.cos(a2)*d, an[1] - 9 + Math.sin(a2)*d*0.8 + ph*ph*10, 0.8, '#ffd27a'); } } }
+  const br = p(0.34, -0.12, 0); ell(c, br[0], br[1], 4, 2, '#5a3d22'); c.fillStyle = '#6e4a28'; c.fillRect(br[0] - 4, br[1] - 7, 8, 7); ell(c, br[0], br[1] - 7, 4, 2, '#3f6a82');
+  if (l >= 2){ const rq = p(-0.3, 0.3, 0); for (let k = 0; k < 4; k++) ln(c, [rq[0] - 7 + k*1.2, rq[1] - k*1.5], [rq[0] + 6 + k*1.2, rq[1] - 3 - k*1.5], '#7d8790', 1.6); }
+  if (l >= 3){ const tq = p(0.06, 0.34, 0); for (const dx of [-3, 0, 3]){ ln(c, [tq[0] + dx, tq[1]], [tq[0] + dx + 1, tq[1] - 10], '#6b4425', 1.2); fp(c, [[tq[0] + dx, tq[1] - 10], [tq[0] + dx + 3, tq[1] - 11], [tq[0] + dx + 2.5, tq[1] - 8]], '#9aa3ab'); } }
+}
+function dLoGach(c, cx, cy, l, env, ex){
+  const p = mkP(cx, cy), n = env.night || 0, t = env.t || 0;
+  shadow(c, cx, cy + 2, HW*0.78, HH*0.62, 0.18);
+  fp(c, [p(-0.45,-0.45), p(0.45,-0.45), p(0.45,0.45), p(-0.45,0.45)], 'rgba(160,110,80,.42)');
+  const stack = (u, v, rows) => { for (let r = 0; r < rows; r++) box(c, p, u, v, 0.07, 0.11, r*3.2, 3.2, '#d9734a', '#b5532f', '#9a4426'); };
+  stack(0.3, -0.3, 2 + l); stack(0.16, -0.32, 1 + l);
+  const ku = -0.1, kv = -0.06, a = 0.2, b = 0.17;
+  box(c, p, ku, kv, a, b, 0, 12, null, '#b5532f', '#93421f');
+  fp(c, [p(ku-a, kv-b, 12), p(ku+a, kv-b, 12), p(ku+a-0.06, kv-b+0.05, 19), p(ku-a+0.06, kv-b+0.05, 19)], '#a84b2a');
+  fp(c, [p(ku+a, kv-b, 12), p(ku+a, kv+b, 12), p(ku+a-0.06, kv+b-0.05, 19), p(ku+a-0.06, kv-b+0.05, 19)], '#8a3a1c');
+  fp(c, [p(ku-a, kv+b, 12), p(ku+a, kv+b, 12), p(ku+a-0.06, kv+b-0.05, 19), p(ku-a+0.06, kv+b-0.05, 19)], '#c4603a');
+  fp(c, [p(ku-a+0.06, kv-b+0.05, 19), p(ku+a-0.06, kv-b+0.05, 19), p(ku+a-0.06, kv+b-0.05, 19), p(ku-a+0.06, kv+b-0.05, 19)], '#7a3318');
+  c.beginPath(); for (let z = 3; z < 12; z += 3){ const a1 = p(ku-a, kv+b+0.002, z), a2 = p(ku+a, kv+b+0.002, z); c.moveTo(a1[0], a1[1]); c.lineTo(a2[0], a2[1]); } c.strokeStyle = 'rgba(70,25,10,.3)'; c.lineWidth = 0.6; c.stroke();
+  for (const u of [-0.08, 0.08]){ const pts = [p(ku + u - 0.04, kv + b + 0.004, 0)]; for (let k = 0; k <= 6; k++){ const an = Math.PI - k/6*Math.PI; pts.push(p(ku + u + Math.cos(an)*0.04, kv + b + 0.004, 4 + Math.sin(an)*2.2)); } pts.push(p(ku + u + 0.04, kv + b + 0.004, 0)); fp(c, pts, '#2a1006'); const m = p(ku + u, kv + b, 2); ell(c, m[0], m[1], 2, 1.2, n > 0.3 ? '#ffb347' : 'rgba(255,130,40,' + (0.6 + 0.3*Math.sin(t/150 + u*9)) + ')'); if (env.lights && n > 0.05) env.lights.push([m[0], m[1], 10]); }
+  const ch = cylinder(c, p, ku - 0.12, kv - 0.1, 0.045, 19, 18 + 4*l, '#c4603a', '#7a3318', '#3a1608');
+  if (env.smoke) env.smoke(ch[0], ch[1] - 1);
+  const dq = p(0.18, 0.24, 0); for (let r = 0; r < 3; r++) for (let k = 0; k < 4; k++){ const x = dq[0] - 9 + k*5 + r*2, y = dq[1] - r*2.6 + k*0.6; fp(c, [[x, y], [x + 4, y + 1], [x + 4, y - 1], [x, y - 2]], r % 2 ? '#c99a7a' : '#b98a6a'); }
+}
+function dXuongXM(c, cx, cy, l, env, ex){
+  const p = mkP(cx, cy), n = env.night || 0, t = env.t || 0;
+  shadow(c, cx, cy + 3, HW*0.85, HH*0.7, 0.2);
+  fp(c, [p(-0.46,-0.46), p(0.46,-0.46), p(0.46,0.46), p(-0.46,0.46)], 'rgba(200,200,195,.55)');
+  const sil = [[-0.26, -0.26], [-0.02, -0.32], [-0.32, -0.02]].slice(0, Math.min(3, l + 0));
+  if (!sil.length) sil.push([-0.26, -0.26]);
+  for (const [u, v] of sil.sort((m, q) => (m[0]+m[1]) - (q[0]+q[1]))){ const tp = cylinder(c, p, u, v, 0.1, 0, 34, '#e3e4df', '#a3a69e', '#cfd1ca'); ell(c, tp[0], tp[1], tp[2]*0.4, tp[3]*0.4, '#8e918a'); for (const z of [10, 22]){ const q = p(u, v, z); c.beginPath(); c.ellipse(q[0], q[1], tp[2], tp[3], 0, 0, Math.PI); c.strokeStyle = 'rgba(80,85,80,.35)'; c.lineWidth = 0.7; c.stroke(); } }
+  const bu = 0.16, bv = 0.08;
+  box(c, p, bu, bv, 0.22, 0.15, 0, 14, null, '#cfcfc8', '#a9aaa2');
+  gableRoof(c, p, bu, bv, 0.25, 0.18, 14, 7, ['#8a9aa6', '#5f6f7a', '#748591']);
+  for (let k = 0; k < 4; k++){ const u = bu - 0.16 + k*0.11; fp(c, [p(u - 0.03, bv + 0.152, 5), p(u + 0.03, bv + 0.152, 5), p(u + 0.03, bv + 0.152, 10), p(u - 0.03, bv + 0.152, 10)], n > 0.3 ? '#ffe7a8' : '#53606a'); if (env.lights && n > 0.05){ const m = p(u, bv + 0.15, 7.5); env.lights.push([m[0], m[1], 7]); } }
+  { const a1 = p(bu - 0.1, bv - 0.1, 20), a2 = p(-0.18, -0.2, 34); ln(c, a1, a2, '#6f757a', 3.2); ln(c, [a1[0], a1[1] - 1.4], [a2[0], a2[1] - 1.4], '#9aa1a6', 1); }
+  const kq = p(0.3, -0.2, 6); c.save(); c.translate(kq[0], kq[1]); c.rotate(-0.42); c.fillStyle = '#8a8f93'; c.fillRect(-11, -2.8, 22, 5.6); c.fillStyle = '#b3b8bb'; c.fillRect(-11, -2.8, 22, 1.6); c.restore();
+  for (const dx of [-8, 8]) ln(c, [kq[0] + dx, kq[1] + 4], [kq[0] + dx, kq[1] - 2], '#5f6468', 1.4);
+  if (env.smoke){ const ph = Math.floor(t/600) % 3; if (ph === 0) env.smoke(kq[0] + 10, kq[1] - 6); }
+  if (!env.back){ const sp = p(0.38, 0.36, 0); ln(c, sp, [sp[0], sp[1] - 10], '#5f6468', 1); fp(c, [[sp[0] - 6, sp[1] - 16], [sp[0] + 6, sp[1] - 16], [sp[0] + 6, sp[1] - 10], [sp[0] - 6, sp[1] - 10]], '#3d6e9c'); ln(c, [sp[0] - 4, sp[1] - 13], [sp[0] + 4, sp[1] - 13], '#e8eef3', 1); }
+}
+function dXuongThep(c, cx, cy, l, env, ex){
+  const p = mkP(cx, cy), n = env.night || 0, t = env.t || 0;
+  shadow(c, cx, cy + 3, HW*0.9, HH*0.75, 0.22);
+  fp(c, [p(-0.47,-0.47), p(0.47,-0.47), p(0.47,0.47), p(-0.47,0.47)], 'rgba(90,92,96,.5)');
+  const chim = l >= 2 ? [[-0.34, -0.12], [-0.12, -0.36]] : [[-0.3, -0.18]];
+  for (const [u, v] of chim){ const tp = cylinder(c, p, u, v, 0.045, 0, 64, '#c9ccd0', '#7d8288', '#55595e'); for (const z of [48, 56]){ const q = p(u, v, z); fp(c, [[q[0] - tp[2], q[1]], [q[0] + tp[2], q[1]], [q[0] + tp[2], q[1] - 4], [q[0] - tp[2], q[1] - 4]], '#c0392b'); } if (env.smoke) env.smoke(tp[0], tp[1] - 2); if (n > 0.05){ circ(c, tp[0], tp[1] - 1, 1.2, '#ff4a3a'); if (env.lights) env.lights.push([tp[0], tp[1], 6]); } }
+  const fu = -0.1, fv = -0.08;
+  const tp = cylinder(c, p, fu, fv, 0.14, 0, 40, '#8e7a6a', '#4f4038', '#3a2e28');
+  for (const z of [12, 26]){ const q = p(fu, fv, z); c.beginPath(); c.ellipse(q[0], q[1], tp[2] + 1.5, tp[3] + 0.8, 0, 0, Math.PI); c.strokeStyle = '#3a3f45'; c.lineWidth = 2.2; c.stroke(); c.beginPath(); c.ellipse(q[0], q[1] - 1, tp[2] + 1.5, tp[3] + 0.8, 0, 0, Math.PI); c.strokeStyle = '#9aa1a8'; c.lineWidth = 0.7; c.stroke(); }
+  cylinder(c, p, fu, fv, 0.07, 40, 10, '#77665a', '#3e332d', '#2a221e');
+  { const q = p(fu, fv + 0.14, 2), gl = 0.6 + 0.4*Math.sin(t/110); ell(c, q[0], q[1] - 2, 5, 2.4, 'rgba(255,' + Math.round(120 + 60*gl) + ',40,.95)'); if (env.lights && n > 0.05) env.lights.push([q[0], q[1], 20]); }
+  const bu = 0.24, bv = 0.2;
+  box(c, p, bu, bv, 0.15, 0.17, 0, 14, null, '#7f8a94', '#5d6871');
+  gableRoof(c, p, bu, bv, 0.17, 0.2, 14, 7, ['#a6382e', '#73261f', '#8c2e25']);
+  for (let k = 0; k < 3; k++){ const v = bv - 0.1 + k*0.1; fp(c, [p(bu + 0.152, v - 0.035, 5), p(bu + 0.152, v + 0.035, 5), p(bu + 0.152, v + 0.035, 10), p(bu + 0.152, v - 0.035, 10)], n > 0.3 ? '#ffc870' : '#3e4850'); }
+  { const a1 = p(fu + 0.1, fv + 0.05, 30), a2 = p(bu - 0.1, bv, 14); ln(c, a1, a2, '#5f666d', 2.6); }
+  if (!env.back){ const q = p(0.4, -0.3, 0); for (let k = 0; k < 3; k++){ const x = q[0] - 4 + k*3, y = q[1] - k*1.6; fp(c, [[x - 4, y], [x + 4, y + 2], [x + 4, y], [x - 4, y - 2]], '#9aa7b2'); } }
+}
+function dNMDienTu(c, cx, cy, l, env, ex){
+  const p = mkP(cx, cy), n = env.night || 0;
+  shadow(c, cx, cy + 3, HW*0.88, HH*0.72, 0.18);
+  fp(c, [p(-0.47,-0.47), p(0.47,-0.47), p(0.47,0.47), p(-0.47,0.47)], 'rgba(120,128,132,.5)');
+  c.beginPath(); for (let k = 0; k < 5; k++){ const u = 0.06 + k*0.08; const a1 = p(u, 0.3), a2 = p(u, 0.44); c.moveTo(a1[0], a1[1]); c.lineTo(a2[0], a2[1]); } c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 0.8; c.stroke();
+  const fl = l >= 2 ? 2 : 1, hb = 13*fl, bu = -0.06, bv = -0.08, a = 0.32, b = 0.24;
+  box(c, p, bu, bv, a, b, 0, hb, '#e9edf0', '#f4f6f7', '#cfd6db');
+  for (let f = 0; f < fl; f++){ const z = 4 + f*13; fp(c, [p(bu - a, bv + b + 0.003, z), p(bu + a, bv + b + 0.003, z), p(bu + a, bv + b + 0.003, z + 5), p(bu - a, bv + b + 0.003, z + 5)], n > 0.3 ? '#bfe3ff' : '#3a7fb8'); fp(c, [p(bu + a + 0.003, bv - b, z), p(bu + a + 0.003, bv + b, z), p(bu + a + 0.003, bv + b, z + 5), p(bu + a + 0.003, bv - b, z + 5)], n > 0.3 ? '#9fd0f5' : '#2c6a9e'); if (env.lights && n > 0.05){ for (const u of [-0.2, 0, 0.2]){ const m = p(bu + u, bv + b, z + 2.5); env.lights.push([m[0], m[1], 9]); } } }
+  for (let r = 0; r < 2; r++) for (let k = 0; k < 4; k++){ const u = bu - a + 0.08 + k*0.15, v = bv - b + 0.1 + r*0.2; fp(c, [p(u - 0.05, v - 0.06, hb + 1), p(u + 0.05, v - 0.06, hb + 1), p(u + 0.05, v + 0.06, hb + 3), p(u - 0.05, v + 0.06, hb + 3)], '#2f4f7a'); }
+  ln(c, p(bu - a, bv + b, hb + 0.4), p(bu + a, bv + b, hb + 0.4), '#2e9b8f', 1.4);
+  if (!env.back){ const q = p(bu - a + 0.08, bv + b + 0.004, hb - 1.5); fp(c, [[q[0], q[1]], [q[0] + 12, q[1] + 6], [q[0] + 12, q[1] + 2], [q[0], q[1] - 4]], '#2e9b8f'); circ(c, q[0] + 3, q[1] + 0.6, 1.1, '#fff'); }
+  for (const [u, v] of [[0.36, 0.06], [0.36, 0.2]]){ const q = p(u, v); ell(c, q[0], q[1] - 3, 3, 1.8, '#4f8a3a'); ln(c, [q[0], q[1]], [q[0], q[1] - 2], '#5a3d22', 1); }
+}
 function drawBuildingAt(c, k, cx, cy, l, env, ex, flip){
   const fr = (flip|0) & 3;
   if (FOOT[k] && footOf(k, l) > 1){ DRAW[k](c, cx, cy, l, fr ? Object.assign({}, env, {rot:fr}) : env, ex); return; }
@@ -2680,7 +2939,7 @@ function drawBuildingAt(c, k, cx, cy, l, env, ex, flip){
   DRAW[k](c, cx, cy, l, env2, ex2);
   c.restore();
 }
-const DRAW = {lan_san:dLanSan, lo_duc:dLoDuc, trong_dong:dTrongDong, don_luy:dDonLuy, van_mieu:dVanMieu, hoang_thanh:dHoangThanh, tuong_dai:dTuongDai, tua_bin_gio:dTuaBin, trang_trai_doc:dTrangTrai, trung_tam_cn:dTrungTamCN, ben_xe:dBenXe, duong:dDuong, tram_song:dTramSong, mo_bac:dMoBac, tram_y_te:dTramYTe, thuy_dien:dThuyDien, nuong_che:dNuongChe, truong_hoc:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_hoc'), truong_mn:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_mn'), truong_th:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_th'), truong_thpt:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_thpt'), truong_nghe:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_nghe'), dai_hoc:dDaiHoc, homestay:dHomestay, cot_co:dCotCo, nha_san:dNhaSan, ruong:dRuong, tieu_phu:dTieuPhu, muong:dMuong, vuon:dVuon, kho:dKho, mo_da:dMoDa, chuong_trau:dChuongTrau, coi_nuoc:dCoiNuoc, khung_det:dKhungDet, cho_phien:dChoPhien, nha_rong:dNhaRong, cong_ban:dCongBan};
+const DRAW = {lo_ren:dLoRen, lo_gach:dLoGach, xuong_xm:dXuongXM, xuong_thep:dXuongThep, nm_dien_tu:dNMDienTu, lan_san:dLanSan, lo_duc:dLoDuc, trong_dong:dTrongDong, don_luy:dDonLuy, van_mieu:dVanMieu, hoang_thanh:dHoangThanh, tuong_dai:dTuongDai, tua_bin_gio:dTuaBin, trang_trai_doc:dTrangTrai, trung_tam_cn:dTrungTamCN, ben_xe:dBenXe, duong:dDuong, tram_song:dTramSong, mo_bac:dMoBac, tram_y_te:dTramYTe, thuy_dien:dThuyDien, nuong_che:dNuongChe, truong_hoc:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_hoc'), truong_mn:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_mn'), truong_th:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_th'), truong_thpt:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_thpt'), truong_nghe:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_nghe'), dai_hoc:dDaiHoc, homestay:dHomestay, cot_co:dCotCo, nha_san:dNhaSan, ruong:dRuong, tieu_phu:dTieuPhu, muong:dMuong, vuon:dVuon, kho:dKho, mo_da:dMoDa, chuong_trau:dChuongTrau, coi_nuoc:dCoiNuoc, khung_det:dKhungDet, cho_phien:dChoPhien, nha_rong:dNhaRong, cong_ban:dCongBan};
 function tileEx(S, k){
   const i = k % N, j = (k/N)|0, t = S.tiles[k], ex = {seed:hash2(i, j, 99)};
   if (t.b && t.b.k === 'duong'){ ex.conns = D4.filter(([di,dj]) => { const n = tileAt(S, i+di, j+dj); return n && n.b && n.b.k !== 'muong' && (n.b.k === 'duong' || t.t !== 'w'); }); }
@@ -3268,6 +3527,7 @@ function placeCheck(S, k, i, j, skip){
   const fsz = FOOT[k] ? footOf(k, sk && sk.b && sk.b.k === k ? sk.b.l : 1) : 1;
   if (fsz > 1){
     if (d.era && (S.era|0) < d.era && !(sk && sk.b && sk.b.k === k)) return 'Mở ở thời kỳ ' + SOC[d.era].short;
+    { const ml = matLock(S, d.cost[0]); if (ml && !(sk && sk.b && sk.b.k === k)) return ml; }
     if (rankIdx(S.best) < d.rank) return 'Cần đạt danh hiệu ' + RANKS[d.rank].name;
     if (d.req && !hasMod(S, d.req)) return 'Cần hoàn thành dự án ' + MODERN.find(m => m.id === d.req).name;
     if (d.unique && cnt(S, k) - (sk && sk.b && sk.b.k === k ? 1 : 0) > 0) return 'Bản chỉ có một ' + d.name;
@@ -3280,6 +3540,7 @@ function placeCheck(S, k, i, j, skip){
   if (t.t === 'r') return 'Cần phá đá trước';
   if (t.t === 'w' && k !== 'duong') return 'Không xây trên suối';
   if (d.era && (S.era|0) < d.era && !(sk && sk.b && sk.b.k === k)) return 'Mở ở thời kỳ ' + SOC[d.era].short;
+  { const ml = matLock(S, d.cost[0]); if (ml && !(sk && sk.b && sk.b.k === k)) return ml; }
   if (rankIdx(S.best) < d.rank) return 'Cần đạt danh hiệu ' + RANKS[d.rank].name;
   if (d.req && !hasMod(S, d.req)) return 'Cần hoàn thành dự án ' + MODERN.find(m => m.id === d.req).name;
   if (d.unique && cnt(S, k) - (sk && sk.b && sk.b.k === k ? 1 : 0) > 0) return 'Bản chỉ có một ' + d.name;
@@ -3288,6 +3549,7 @@ function placeCheck(S, k, i, j, skip){
   if (k === 'thuy_dien' && !nb(S, i, j, D4, isWater)) return 'Thuỷ điện phải đặt sát suối';
   if (k === 'mo_da' && !nb(S, i, j, D8, x => x.t === 'r')) return 'Bãi khai đá phải ở gần núi đá';
   if (k === 'mo_bac' && !nb(S, i, j, D8, x => x.t === 'r')) return 'Mỏ bạc phải ở gần núi đá';
+  if (k === 'xuong_xm' && !nb(S, i, j, D8, x => x.t === 'r')) return 'Xưởng xi măng phải ở gần núi đá vôi';
   return null;
 }
 function missingText(S, cost){ const m = []; for (const r in cost) if (S.res[r] < cost[r]) m.push(Math.ceil(cost[r] - S.res[r]) + ' ' + RES_NAME[r].toLowerCase()); return 'Còn thiếu ' + m.join(', '); }
@@ -3417,6 +3679,10 @@ function eraUp(from, e, bac){
   if (I.goals && I.goals.length) body += '<p style="margin-bottom:2px">Mục tiêu để sang thời kỳ sau:</p><ul class="notes" style="color:inherit">' + I.goals.map(g => '<li>' + goalText(g) + '</li>').join('') + '</ul>';
   const un = BUILD_ORDER.filter(k => B[k].era > from && B[k].era <= e).map(k => B[k].name); if (un.length) body += '<p>Mở khoá: ' + un.join(', ') + '.</p>';
   const mp = MODERN.filter(m => m.era > from && m.era <= e).map(m => m.name.charAt(0).toLowerCase() + m.name.slice(1)); if (mp.length) body += '<p>Dự án mới: ' + mp.join(', ') + '.</p>';
+  const nm = MATS.filter(r => MAT_ERA[r] > from && MAT_ERA[r] <= e); if (nm.length) body += '<p>Vật liệu mới: ' + nm.map(r => '<span class="icn">' + ICON[r] + '</span><b>' + RES_NAME[r] + '</b>').join(', ') + '. Dựng nơi sản xuất hoặc mua ở chợ.</p>';
+  const rn = Object.keys(ERA_NAMES).filter(k => cnt(G.S, k) && nameAt(k, from) !== nameAt(k, e)).map(k => nameAt(k, from) + ' → ' + nameAt(k, e)); if (rn.length) body += '<p>Đổi tên: ' + rn.join(', ') + '.</p>';
+  if (rankGroup(from) !== rankGroup(e)){ const ri = rankIdx(G.S.best); body += '<p>Cấp hành chính: ' + rankNameAt(ri, from) + ' → <b>' + rankNameAt(ri, e) + '</b>.</p>'; }
+  if (e < SOCIAL.length && e !== from) body += '<p>Xã hội: ' + SOCIAL[e].map(t => t.n).join(' · ') + '.</p>';
   body += '<p>Thưởng ' + fmt(bac || eraReward(e)) + ' bạc.</p>';
   showModal(e <= ERA_FUT ? 'Lịch sử sang trang!' : 'Kỷ nguyên mới!', body, [{label:'Xem hành trình', cls:'gold', fn:() => openPanel('modern')}, {label:'Đóng', cls:'ghost'}]);
   const h = houseSpot(); if (h) spawnConfetti(h[0], h[1], 60);
@@ -3610,10 +3876,11 @@ function startBuild(k){
   }
   const S = G.S, d = B[k];
   if (d.era && (S.era|0) < d.era){ toast('Mở ở thời kỳ ' + SOC[d.era].short + ' (nút thời kỳ ở góc trên).', 'bad'); return; }
+  { const ml = matLock(S, d.cost[0]); if (ml){ toast(ml + '.', 'bad'); return; } }
   if (rankIdx(S.best) < d.rank){ toast('Cần đạt danh hiệu ' + RANKS[d.rank].name, 'bad'); return; }
   if (d.req && !hasMod(S, d.req)){ toast('Cần hoàn thành dự án «' + MODERN.find(m => m.id === d.req).name + '» (nút Hiện đại hoá).', 'bad'); return; }
   if (!canAfford(S, d.cost[0])){ toast(missingText(S, d.cost[0]), 'bad'); return; }
-  if (!anyValid(k)){ const hint = k === 'coi_nuoc' ? 'Không còn ô trống sát suối.' : (k === 'mo_da' || k === 'mo_bac') ? 'Không còn ô trống gần núi đá.' : k === 'muong' ? 'Không còn ô trống nối với suối hoặc mương.' : 'Không còn ô trống để xây.'; toast(hint, 'bad'); return; }
+  if (!anyValid(k)){ const hint = k === 'coi_nuoc' ? 'Không còn ô trống sát suối.' : (k === 'mo_da' || k === 'mo_bac' || k === 'xuong_xm') ? 'Không còn ô trống gần núi đá.' : k === 'muong' ? 'Không còn ô trống nối với suối hoặc mương.' : 'Không còn ô trống để xây.'; toast(hint, 'bad'); return; }
   G.buildK = k; G.sel = null; closeSheet();
   showBuildBar('Đặt <b>' + esc(d.name) + '</b>: chạm vào ô sáng', 'Xong', !NO_FLIP[k]);
 }
@@ -3878,6 +4145,9 @@ function renderHUD(){
     chip(ICON.tho, E.used, E.need, E.need > E.used ? 'thiếu ' + (E.need - E.used) + ' người' : 'rảnh ' + (E.labor - E.used), E.need > E.used ? 'down' : '', false, 'works'),
   ].join('');
   $('#res').innerHTML = html;
+  { const ms = MATS.filter(r => matOpen(S, r) || S.res[r] > 0), el = $('#mats');
+    el.innerHTML = ms.map(r => '<div class="mat" data-act="panel" data-p="market" title="' + RES_NAME[r] + '">' + ICON[r] + '<b>' + fmt(S.res[r]) + '</b>' + (E.prod[r] > 0 ? '<i>+' + fmt1(E.prod[r]) + '</i>' : '') + '</div>').join('');
+    const show = ms.length > 0; if (el.hidden === show){ el.hidden = !show; setTimeout(resize, 0); } }
 }
 function updateDayBar(){ if (G.S) $('#dayBar').style.width = (G.S.dayT/DAY_MS*100).toFixed(1) + '%'; }
 function checkQuest(){
@@ -3952,6 +4222,17 @@ const MOD_ICON = {
   co_gioi:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><circle cx="7" cy="17" r="3.5"/><circle cx="18" cy="18" r="2.5"/><path d="M7 13.5V8h6l2 5h4v3"/><path d="M10.5 17h5"/></svg>',
   mat_troi:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 18l3-9h12l3 9z"/><path d="M9.5 9l-1.5 9M14.5 9l1.5 9M4.5 13.5h15"/><path d="M12 2v3M5.5 4.5l1.5 2M18.5 4.5l-1.5 2" stroke-linecap="round"/></svg>',
 };
+function socialHTML(S, E){
+  const so = E.soc; if (!so) return '';
+  const T = so.tiers, n = T.length, mx = Math.max(1, ...T.map(o => o.c));
+  let h = '<div class="sec" style="margin-top:0">Tầng lớp xã hội · ' + eraInfo(S.era|0).short + '</div><div class="card soc"><div class="pyr">';
+  T.forEach((o, k) => { const w = 36 + 64*(n > 1 ? k/(n - 1) : 1), miss = o.needK && o.jc <= 0; h += '<div class="ptier' + (miss ? ' miss' : '') + '" style="width:' + w.toFixed(1) + '%;--f:' + (0.25 + 0.75*o.c/mx).toFixed(2) + '"><span>' + esc(o.n) + '</span><b>' + fmt(o.c) + '</b></div>'; });
+  h += '</div>';
+  h += so.full ? '<div class="banner gold" style="font-size:12.5px;margin:8px 0 0">Xã hội đủ các tầng lớp: mọi công trình làm ra thêm 5%, dân vui thêm 4.</div>'
+    : '<p class="hint" style="margin:8px 0 0">Còn thiếu ' + so.missing.map(o => '<b>' + esc(o.n) + '</b> (' + needText(o) + ')').join(', ') + '. Đủ các tầng lớp thì mọi công trình làm ra thêm 5%, dân vui thêm 4.</p>';
+  h += '<details class="socd"><summary>Mỗi tầng lớp là ai?</summary>' + T.map(o => '<p><b>' + esc(o.n) + '</b>: ' + esc(o.d) + '</p>').join('') + '<p style="color:var(--muted)">Ngoài ra có ' + E.kids + ' trẻ em và ' + E.elders + ' người già.</p></details></div>';
+  return h;
+}
 const PANELS = {
   modern(){
     const S = G.S, md = S.modern, ri = rankIdx(S.best), era = S.era|0, I = eraInfo(era), fut = era >= ERA_FUT;
@@ -3969,7 +4250,7 @@ const PANELS = {
         else if (y > 1) sub = (sub ? sub + ' · ' : '') + fmt(x) + '/' + fmt(y);
         h += '<li class="' + (done ? 'done' : '') + '"><span class="ck">' + (done ? '✓' : '') + '</span><span class="gtx"><b>' + goalText(g) + '</b>' + (y > 1 && !done ? '<div class="pbar"><i style="width:' + clamp(x/y, 0, 1)*100 + '%"></i></div>' : '') + (sub ? '<small>' + sub + '</small>' : '') + '</span>' + act + '</li>';
       }
-      h += '</ul><p class="hint" style="margin:0 0 4px">Xong hết mục tiêu là sang thời kỳ mới, thưởng ' + fmt(eraReward(era + 1)) + ' bạc.' + (G0.some(g => g.t === 'give') ? ' Khi góp lúa, bản luôn giữ lại đủ ăn 3 ngày.' : '') + '</p>';
+      h += '</ul><div class="btns" style="margin:2px 0 8px"><button class="btn small dark" data-act="panel" data-p="people">Tầng lớp xã hội' + (G.E && G.E.soc && G.E.soc.full ? ' ✓' : '') + '</button></div><p class="hint" style="margin:0 0 4px">Xong hết mục tiêu là sang thời kỳ mới, thưởng ' + fmt(eraReward(era + 1)) + ' bạc.' + (G0.some(g => g.t === 'give') ? ' Khi góp lúa, bản luôn giữ lại đủ ăn 3 ngày.' : '') + '</p>';
     } else {
       const m = epochProj(S.epoch|0);
       h += '<div class="sec">Chặng tiếp theo</div><p class="hint" style="margin:0 0 4px">Hoàn thành dự án <b>' + m.name + '</b> (mục Dự án bên dưới) để bước sang kỷ nguyên tiếp theo. Mỗi kỷ nguyên: mọi công trình làm ra thêm 5%, thêm niềm vui.</p>';
@@ -4066,7 +4347,8 @@ const PANELS = {
   },
   people(){
     const S = G.S, E = G.E, P = S.people, byId = new Map(P.map(p => [p.id, p])), age = p => Math.floor(p.a);
-    let h = '<div class="pstats p4">' + [['Đi làm', E.labor, '16–64 tuổi'], ['Đi học', E.enrolledTotal, 'học sinh, SV'], ['Trẻ em', E.kids, 'dưới 16 tuổi'], ['Người già', E.elders, 'từ 65 tuổi']].map(([a, b, c]) => '<div class="pst"><b>' + b + '</b><span>' + a + '</span><em>' + c + '</em></div>').join('') + '</div>';
+    let h = socialHTML(S, E);
+    h += '<div class="pstats p4">' + [['Đi làm', E.labor, '16–64 tuổi'], ['Đi học', E.enrolledTotal, 'học sinh, SV'], ['Trẻ em', E.kids, 'dưới 16 tuổi'], ['Người già', E.elders, 'từ 65 tuổi']].map(([a, b, c]) => '<div class="pst"><b>' + b + '</b><span>' + a + '</span><em>' + c + '</em></div>').join('') + '</div>';
     h += '<div class="card autobox"><div class="arow"><div><b>Giáo dục · trình độ lao động ×' + fmt2(E.eduMul) + '</b><span>' + (E.enrolledTotal ? E.enrolledTotal + ' người đang đi học. ' : 'Chưa có ai đi học. ') + 'Người đi làm học càng cao, bản làm ra càng nhiều.</span></div><button class="btn small dark" data-act="panel" data-p="edu">Xem</button></div></div>';
     const couples = P.filter(p => p.s === 'm' && p.sp && byId.has(p.sp));
     const POL = S.famPolicy !== false, kidCount = new Map(); for (const p of P) if (p.pa && p.pa[1]) kidCount.set(p.pa[1], (kidCount.get(p.pa[1]) || 0) + 1);
@@ -4145,12 +4427,12 @@ const PANELS = {
     const md = isMarketDay(S), until = 7 - (S.day % 7);
     let h = md ? '<div class="banner gold">Hôm nay chợ phiên! Bán được giá hơn 30%.</div>' : '<div class="banner">Chợ phiên tiếp theo sau ' + until + ' ngày (giá bán +30%).</div>';
     const mul = G.mkMul || 1;
-    h += '<div class="mkmul"><span>Mỗi lần mua bán:</span>' + MK_MULS.map(m => '<button data-act="mkmul" data-m="' + m + '" class="' + (m === mul ? 'on' : '') + '">' + (m === 'all' ? 'Tối đa' : num(m*10)) + '</button>').join('') + '</div><p class="hint" style="margin:-2px 0 6px;font-size:11.5px">Lúa, gỗ, đá tính theo số lượng chọn; thổ cẩm tính bằng 1/10 (tấm).</p>';
-    for (const r of ['lua','go','da','tc']){
+    h += '<div class="mkmul"><span>Mỗi lần mua bán:</span>' + MK_MULS.map(m => '<button data-act="mkmul" data-m="' + m + '" class="' + (m === mul ? 'on' : '') + '">' + (m === 'all' ? 'Tối đa' : num(m*10)) + '</button>').join('') + '</div><p class="hint" style="margin:-2px 0 6px;font-size:11.5px">Số lượng mỗi lần tính theo lô của từng hàng. Vật liệu mới (đồng, sắt, gạch ngói, xi măng, thép, linh kiện) có ở chợ từ thời kỳ mở ra chúng.</p>';
+    for (const r of mkKeys(S)){
       const lot = MK[r].lot, sp = sellPrice(S, r), bp = buyPrice(S, r), trend = S.prices[r] > 1.08 ? ' · giá cao' : S.prices[r] < 0.92 ? ' · giá thấp' : '';
       const sl = tradeLots(S, r, true, mul), bl = tradeLots(S, r, false, mul);
       const sq = mul === 'all' ? sl : mul, bq = mul === 'all' ? bl : mul;
-      h += '<div class="mrow"><div class="mres">' + ICON[r] + '<div><b>' + RES_NAME[r] + '</b><span>Có ' + fmt(S.res[r]) + trend + '</span><span>' + sp + ' bạc / ' + lot + (lot > 1 ? '' : ' tấm') + '</span></div></div>' +
+      h += '<div class="mrow"><div class="mres">' + ICON[r] + '<div><b>' + RES_NAME[r] + '</b><span>Có ' + fmt(S.res[r]) + trend + '</span><span>' + sp + ' bạc / ' + lot + (r === 'tc' ? ' tấm' : '') + '</span></div></div>' +
         '<button class="mbtn sell" data-act="sell" data-r="' + r + '"' + (sl <= 0 ? ' disabled' : '') + '>Bán ' + fmt(lot*sq) + '<small>+' + fmt(sp*sq) + ICON.bac + '</small></button>' +
         '<button class="mbtn buy" data-act="buy" data-r="' + r + '"' + (bl <= 0 ? ' disabled' : '') + '>Mua ' + fmt(lot*bq) + '<small>−' + fmt(bp*bq) + ICON.bac + '</small></button></div>';
     }
@@ -4213,7 +4495,7 @@ const PANELS = {
         if (want < w && !AW) h += '<div class="btns" style="margin:2px 0 6px"><button class="btn small gold" data-act="wk" data-ix="' + ix + '" data-d="max">Cử đủ ' + w + ' người</button></div>';
       } else if (w) h += '<div class="kv"><span>Người làm</span><span>' + (inf.on ? '<span class="tag">' + w + ' người, đang làm</span>' : '<span class="tag off">Thiếu người (cần ' + w + ')</span>') + '</span></div>';
       if (inf.res) h += '<div class="kv"><span>Sản lượng</span><b>+' + fmt1(inf.on ? inf.amt : 0) + ' ' + RES_NAME[inf.res].toLowerCase() + '/ngày</b></div>';
-      if (b.k === 'nha_san') h += '<div class="kv"><span>Kiểu nhà</span><b style="font-size:14px">' + HOUSE_NAME[b.l] + '</b></div><div class="kv"><span>Chỗ ở</span><b>' + houseCap(S, b.l) + ' người</b></div>';
+      if (b.k === 'nha_san') h += '<div class="kv"><span>Kiểu nhà</span><b style="font-size:14px">' + houseName(b.l) + '</b></div><div class="kv"><span>Chỗ ở</span><b>' + houseCap(S, b.l) + ' người</b></div>';
       if (b.k === 'kho') h += '<div class="kv"><span>Sức chứa</span><b style="font-size:14px">Không giới hạn</b></div>';
       if (b.k === 'vuon') h += '<div class="kv"><span>Vui vẻ</span><b>+3</b></div>';
       if (b.k === 'duong') h += '<div class="kv"><span>Loại</span><b style="font-size:14px">' + (t.t === 'w' ? 'Cầu · ' : '') + ROAD_NAME[b.l-1] + '</b></div><div class="kv"><span>Nối tới trung tâm</span>' + (G.E.net && G.E.net[ix] ? '<span class="tag">Đã nối</span>' : '<span class="tag off">Chưa nối</span>') + '</div>';
@@ -4237,8 +4519,8 @@ const PANELS = {
       if (!NO_FLIP[b.k]) h += '<button class="btn ghost" data-act="flip" data-ix="' + ix + '" style="flex:1">' + ICON.rotate + 'Xoay ' + ((b.f|0) & 3)*90 + '°</button>';
       h += '<button class="btn ghost" data-act="move" data-ix="' + ix + '" style="flex:1" title="Hoặc nhấn giữ công trình trên bản đồ rồi kéo">Di chuyển</button><button class="btn ghost danger" data-act="demolish" data-ix="' + ix + '" style="flex:1">Dỡ bỏ</button></div>';
       h += '<p class="hint" style="margin:8px 0 0">Mẹo: nhấn giữ công trình trên bản đồ khoảng nửa giây rồi kéo tới chỗ mới để di chuyển nhanh' + (NO_FLIP[b.k] ? '' : '; trong lúc kéo, chạm thêm một ngón tay để xoay. Mỗi lần Xoay quay 90°, đủ 4 hướng') + '.</p>';
-      if (b.l < d.max){ const nw = slotsOf({k:b.k, l:b.l + 1}); const extra = b.k === 'nha_san' ? (HOUSE_NAME[b.l + 1] !== HOUSE_NAME[b.l] ? 'thành ' + HOUSE_NAME[b.l + 1].toLowerCase() + ', c' : 'C') + 'hỗ ở lên ' + houseCap(S, b.l + 1) + ' người.' : SEATS[b.k] ? (FOOT[b.k] ? 'rộng ' + footOf(b.k, b.l + 1) + '×' + footOf(b.k, b.l + 1) + ' ô, ' : '') + Object.keys(SEATS[b.k]).map(L => SEATS[b.k][L][b.l] + ' chỗ học ' + EDU[L].name.toLowerCase()).join(', ') + ', cần ' + nw + ' thầy cô.' : WORK[b.k] ? nw + ' chỗ làm, mỗi người làm ra nhiều hơn 15%.' : (nw ? 'Cần ' + nw + ' người làm.' : 'Đẹp và bề thế hơn.'); h += '<p class="hint" style="margin-top:8px">Cấp ' + (b.l + 1) + ': ' + extra + '</p>'; }
-      return [(b.k === 'nha_san' ? HOUSE_NAME[b.l] : d.name) + (d.max > 1 ? ' · cấp ' + b.l : ''), h];
+      if (b.l < d.max){ const nw = slotsOf({k:b.k, l:b.l + 1}); const extra = b.k === 'nha_san' ? (houseName(b.l + 1) !== houseName(b.l) ? 'thành ' + houseName(b.l + 1).toLowerCase() + ', c' : 'C') + 'hỗ ở lên ' + houseCap(S, b.l + 1) + ' người.' : SEATS[b.k] ? (FOOT[b.k] ? 'rộng ' + footOf(b.k, b.l + 1) + '×' + footOf(b.k, b.l + 1) + ' ô, ' : '') + Object.keys(SEATS[b.k]).map(L => SEATS[b.k][L][b.l] + ' chỗ học ' + EDU[L].name.toLowerCase()).join(', ') + ', cần ' + nw + ' thầy cô.' : WORK[b.k] ? nw + ' chỗ làm, mỗi người làm ra nhiều hơn 15%.' : (nw ? 'Cần ' + nw + ' người làm.' : 'Đẹp và bề thế hơn.'); h += '<p class="hint" style="margin-top:8px">Cấp ' + (b.l + 1) + ': ' + extra + '</p>'; }
+      return [(b.k === 'nha_san' ? houseName(b.l) : d.name) + (d.max > 1 ? ' · cấp ' + b.l : ''), h];
     }
     if (t.t === 'f') return ['Rừng già', '<div class="bhead"><canvas data-thumb="forest"></canvas><p>Rừng cho gỗ. Chặt cây lấy gỗ ngay, rừng sẽ mọc lại sau ' + REGROW.f + ' ngày nếu để trống ô. Dựng Lán tiều phu bên cạnh thì có gỗ đều đặn mà không mất rừng.</p></div><div class="btns"><button class="btn primary" data-act="clear" data-ix="' + ix + '" style="flex:1">Chặt cây: tốn ' + costHTML({lua:5}) + ' nhận ' + costHTML({go:10}, true) + '</button></div>'];
     if (t.t === 'r') return ['Núi đá vôi', '<div class="bhead"><canvas data-thumb="rock"></canvas><p>Đá vôi tai mèo. Phá đá lấy đá ngay, đá sẽ lộ lên lại sau ' + REGROW.r + ' ngày nếu để trống ô. Bãi khai đá đặt cạnh núi đá thì có đá đều đặn. Muốn thêm núi đá, chọn Khơi núi đá vôi ở ô đất trống.</p></div><div class="btns"><button class="btn primary" data-act="clear" data-ix="' + ix + '" style="flex:1 1 100%">Phá đá: tốn ' + costHTML({lua:8}) + ' nhận ' + costHTML({da:6}, true) + '</button><button class="btn dark" data-act="build" data-k="mo_da" style="flex:1 1 100%">Xây Bãi khai đá cạnh đây <span class="costs">' + costHTML(B.mo_da.cost[0]) + '</span></button>' + (rankIdx(S.best) >= B.mo_bac.rank ? '<button class="btn gold" data-act="build" data-k="mo_bac" style="flex:1 1 100%">Xây Mỏ bạc cạnh đây <span class="costs">' + costHTML(B.mo_bac.cost[0]) + '</span></button>' : '<p class="hint" style="margin:4px 0 0">Mỏ bạc mở khi bản thành ' + RANKS[B.mo_bac.rank].name + '.</p>') + '</div>'];
@@ -4265,7 +4547,7 @@ const PANELS = {
     }
     if (!any) h += '<p class="hint">Không có công trình nào xây được ở đây.</p>';
     const cant = [];
-    for (const k of BUILD_ORDER){ const d = B[k]; if (bLock(S, k) || (d.unique && (G.E.counts[k] || 0) > 0)) continue; const why = placeCheck(S, k, arg.i, arg.j); const NEED = {muong:'phải nối với suối hoặc mương khác', coi_nuoc:'phải đặt sát suối', thuy_dien:'phải đặt sát suối', mo_da:'phải ở gần núi đá', mo_bac:'phải ở gần núi đá'}; if (why && NEED[k] && !why.startsWith('Ô này')) cant.push('<li><b>' + d.name + '</b>: ' + NEED[k] + '</li>'); }
+    for (const k of BUILD_ORDER){ const d = B[k]; if (bLock(S, k) || (d.unique && (G.E.counts[k] || 0) > 0)) continue; const why = placeCheck(S, k, arg.i, arg.j); const NEED = {muong:'phải nối với suối hoặc mương khác', coi_nuoc:'phải đặt sát suối', thuy_dien:'phải đặt sát suối', mo_da:'phải ở gần núi đá', mo_bac:'phải ở gần núi đá', xuong_xm:'phải ở gần núi đá vôi'}; if (why && NEED[k] && !why.startsWith('Ô này')) cant.push('<li><b>' + d.name + '</b>: ' + NEED[k] + '</li>'); }
     if (cant.length) h += '<div class="sec" style="font-size:13px">Không xây được ở ô này</div><ul class="notes" style="margin-top:2px">' + cant.join('') + '</ul>';
     const lockedNext = BUILD_ORDER.filter(k => B[k].rank === ri + 1 && !((B[k].era|0) > (S.era|0))).map(k => B[k].name);
     if (lockedNext.length) h += '<p class="hint" style="margin-top:8px">Khi thành ' + RANKS[ri + 1].name + ': ' + lockedNext.join(', ') + '.</p>';
@@ -4351,7 +4633,7 @@ function beginDrag(sx, sy, pid){
   G.buildK = b.k; G.moveFrom = ix; G.buildFlip = b.f|0; G.drag = true;
   G.hover = dragTarget(sx, sy);
   G.dragTick = dragEdgePan;
-  showBuildBar('Kéo <b>' + esc(b.k === 'nha_san' ? HOUSE_NAME[b.l] : B[b.k].name) + '</b> rồi thả tay' + (NO_FLIP[b.k] ? '' : '. Chạm thêm ngón khác để xoay'), 'Huỷ', false);
+  showBuildBar('Kéo <b>' + esc(b.k === 'nha_san' ? houseName(b.l) : B[b.k].name) + '</b> rồi thả tay' + (NO_FLIP[b.k] ? '' : '. Chạm thêm ngón khác để xoay'), 'Huỷ', false);
   try { navigator.vibrate && navigator.vibrate(18); } catch (err){}
   Sound.sfx('move');
 }
@@ -4502,7 +4784,8 @@ function renderStart(info){
   if (IS_APP) h += Cloud.provider === 'google' ? '<button class="link" data-act="glogout" style="margin:-4px 0 6px">Đăng xuất Google</button>' : Cloud.provider === 'google-off' ? '' : '<button class="btn gbtn" data-act="glogin">' + G_ICON + 'Đăng nhập Google để lưu tiến trình</button>';
   if (info.save){
     const s = info.save;
-    h += '<div class="st-save"><b>' + esc(s.name) + '</b><span>' + rankTitle(s.best, starsOf(s)) + ' · ' + eraInfo(s.era|0).short + ' · Năm ' + yearOf(s.day) + ', mùa ' + SEASONS[seasonIdx(s.day)].name + ' · ' + s.pop + ' dân</span></div>';
+    NAME_ERA = s.era|0; const rt = rankTitle(s.best, starsOf(s)); NAME_ERA = null;
+    h += '<div class="st-save"><b>' + esc(s.name) + '</b><span>' + rt + ' · ' + eraInfo(s.era|0).short + ' · Năm ' + yearOf(s.day) + ', mùa ' + SEASONS[seasonIdx(s.day)].name + ' · ' + s.pop + ' dân</span></div>';
     h += '<button class="btn gold" id="btnGo">Vào bản</button><button class="link" id="btnNew">Lập bản mới</button>';
   } else {
     h += (info.replacing ? '<div class="banner soft" style="font-size:12.5px">Bản cũ sẽ bị thay bằng bản mới.</div>' : '') + '<div style="font-size:13px;color:var(--muted);margin-bottom:6px">Đặt tên cho bản của bạn</div><div class="field" style="margin:0 0 10px"><input id="stName" maxlength="24" value="Bản Mây"></div><button class="btn gold" id="btnStart">Lập bản</button>';
@@ -4571,7 +4854,7 @@ requestAnimationFrame(frame);
   const alt = Cloud.uid && guest && best && best !== guest && (guest.created !== best.created || (guest.saved || 0) > (best.saved || 0) + 60000) ? guest : null;
   renderStart({save:best, cloudOk, alt, push:!!(Cloud.ref && cloudOk && best && best !== save0)});
 })();
-window.__banlang = {expandLand, doUpgradeAll, SOC, cnt, doGive, goalProg, eraOf, bLock, EDU, SEATS, eduDay, eduStats, encodePeople, decodePeople, seedEdu, getVehicles: () => vehicles, syncVehicles, autoAssign, planRelocate, applyRelocate, startModern, MODERN, getPeople: () => people, setWork, setWorkAll, slotsOf, curQuest, serial, drawPerson, doFlip, drawBuildingAt, expandLand, setN, Sound, render, normalize, doPlant, startMove, doMove, G, Cloud, B, QUESTS, FESTS, newState, computeEconomy, dayTick, doPlace, doUpgrade, doTrade, doFest, doClear, claimQuest, placeCheck, openPanel, enterGame, save, cam};
+window.__banlang = {MATS, MAT_ERA, socialOf, nameAt, rankNameAt, expandLand, doUpgradeAll, SOC, cnt, doGive, goalProg, eraOf, bLock, EDU, SEATS, eduDay, eduStats, encodePeople, decodePeople, seedEdu, getVehicles: () => vehicles, syncVehicles, autoAssign, planRelocate, applyRelocate, startModern, MODERN, getPeople: () => people, setWork, setWorkAll, slotsOf, curQuest, serial, drawPerson, doFlip, drawBuildingAt, expandLand, setN, Sound, render, normalize, doPlant, startMove, doMove, G, Cloud, B, QUESTS, FESTS, newState, computeEconomy, dayTick, doPlace, doUpgrade, doTrade, doFest, doClear, claimQuest, placeCheck, openPanel, enterGame, save, cam};
 })();
 </script>
 <script>
