@@ -28,8 +28,8 @@ Thời nguyên thuỷ chỉ có túp lều, nương rẫy, lán săn bắt hái 
 ### Tự khai thác gỗ, đá theo tuổi cây
 
 - Cây có tuổi: ô vừa chặt mọc cây con, lớn dần thành rừng non; đủ **3 năm tuổi (12 ngày)** là đến tuổi khai thác.
-- **Lán tiều phu** có người làm thì tiều phu tự đốn cây đã đến tuổi trong vòng 2 ô quanh lán, rồi để cây non mọc lại, cứ thế luân phiên. **Bãi khai đá** cũng tự phá núi đá quanh bãi; đá lộ lên lại sau 20 ngày.
-- Luôn giữ 4 ô rừng/đá sát mỗi lán tiều phu, lán săn, bãi đá, mỏ bạc, xưởng xi măng nên sản lượng hằng ngày không giảm.
+- **Lán tiều phu** có người làm thì tiều phu tự đốn mọi cây đã đến tuổi trong vòng 2 ô quanh lán (cấp 3: 3 ô), rồi để cây non mọc lại, cứ thế luân phiên. **Bãi khai đá** cũng tự phá núi đá quanh bãi; đá lộ lên lại sau 20 ngày.
+- Rừng non và đá đang lộ lên vẫn được tính vào sản lượng hằng ngày của lán tiều phu, lán săn, bãi đá, mỏ bạc, xưởng xi măng, nên khai thác không làm giảm sản lượng.
 - Dụng cụ tốt dần theo thời kỳ (rìu đá → rìu đồng → rìu sắt → cưa tay → cưa máy → máy cưa xích; búa đá → ... → mìn, máy khoan) nên mỗi lần khai thác được nhiều hơn.
 - Bật tắt tự khai thác trong bảng của từng lán. Chạm vào ô rừng để xem tuổi cây và lán nào sẽ khai thác.
 
