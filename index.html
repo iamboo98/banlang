@@ -207,6 +207,11 @@ svg{display:block}
 .tgl.on{background:var(--ok)}
 .tgl.on i{left:23px}
 .modcard{margin-bottom:8px}
+.bera{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.bera small{font-family:inherit;font-size:11.5px;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}
+.bfut{margin-top:10px}
+.bfut summary{cursor:pointer;font-weight:700;color:#8a6a2a;padding:8px 0}
+.bfut .grid{opacity:.8}
 .icn{display:inline-block;width:16px;height:16px;vertical-align:-3px;margin-right:3px}.icn svg{width:100%;height:100%;display:block}
 .soc .pyr{display:flex;flex-direction:column;align-items:center;gap:3px}
 .ptier{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:5px 9px;border-radius:7px;font-size:12.5px;background:rgba(184,50,42,calc(var(--f)*.85));color:#fff;min-width:0}
@@ -251,6 +256,23 @@ svg{display:block}
 #modBtn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #modBtn .dot{width:8px;height:8px;border-radius:50%;background:var(--nghe);display:none;flex:0 0 auto}
 #modBtn.avail .dot{display:block}
+#warBtn{position:absolute;left:8px;top:52px;z-index:2;display:flex;align-items:center;gap:6px;border:0;border-radius:12px;padding:6px 10px 6px 7px;background:rgba(150,32,26,.88);color:#fff;font-size:12px;font-weight:600;max-width:72%}
+#warBtn.ok{background:rgba(40,110,70,.9)}
+#warBtn svg{width:18px;height:18px;flex:0 0 auto}
+#warBtn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bat{display:flex;flex-direction:column;gap:8px;margin:4px 0 10px}
+.bat div{display:grid;grid-template-columns:72px 1fr 44px;align-items:center;gap:8px;font-size:13px}
+.bat i{display:block;height:14px;background:#e6dcc2;border-radius:7px;overflow:hidden}
+.bat b{display:block;height:100%;width:0;background:#2f7a52;border-radius:7px;transition:width .9s ease-out}
+.bat b.foe{background:#b8322a}
+.bat em{font-style:normal;font-family:var(--disp);font-weight:700;text-align:right}
+.tacl{list-style:none;margin:0;padding:0}
+.tacl li{display:flex;align-items:center;gap:8px;padding:8px 2px;border-bottom:1px dashed #e0d3b3}
+.tacl li div{flex:1;min-width:0}
+.tacl b{display:block;font-size:13.5px}
+.tacl small{font-size:11.5px;color:var(--muted)}
+.rcr{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.rcr .btn{min-width:46px}
 .wsum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
 .wsum div{background:var(--lanh3);border:1px solid #e3d6b8;border-radius:12px;padding:7px 4px;text-align:center}
 .wsum b{font-family:var(--disp);font-size:19px;display:block;line-height:1.05}
@@ -381,6 +403,7 @@ svg{display:block}
     <div id="buildBar" hidden><canvas id="bbThumb"></canvas><span id="buildTxt"></span><button data-act="flipbuild" id="flipBtn" class="ghostb" aria-label="Xoay hướng"></button><button data-act="endbuild" id="endBtn">Xong</button></div>
     <button id="questPill" data-act="panel" data-p="quest" hidden></button>
     <button id="modBtn" data-act="panel" data-p="modern" hidden></button>
+    <button id="warBtn" data-act="panel" data-p="army" hidden></button>
     <div id="netBar" hidden><span><i style="background:#3caa50"></i>Đã nối</span><span><i style="background:#d23c32"></i>Chưa nối</span><span><i style="background:#e9b434"></i>Trung tâm</span><span><i style="background:#f09628"></i>Đường lẻ</span><button data-act="shownet">Tắt</button></div>
     <div class="zoom"><button data-act="zin" aria-label="Phóng to">+</button><button data-act="zout" aria-label="Thu nhỏ">−</button><button data-act="zfit" aria-label="Xem toàn bản" style="font-size:15px">⤢</button></div>
     <div id="toasts"></div>
@@ -467,6 +490,7 @@ const B = {
   van_mieu:{name:'Văn Miếu', desc:'Năm 1070 vua Lý Thánh Tông cho dựng Văn Miếu ở Thăng Long; năm 1076 lập Quốc Tử Giám, trường đại học đầu tiên của nước ta. Khuyến học: mọi công trình làm ra thêm 5%, +6 vui.', rank:4, max:1, unique:true, w:[2], cost:[{go:180,da:120,bac:200,tc:8}], h:62},
   hoang_thanh:{name:'Hoàng thành', desc:'Cổng thành kinh đô với ba cửa vòm, lầu gỗ lợp ngói vàng. Năm 1010 nhà Lý dời đô về Thăng Long. Kinh đô thịnh vượng: mọi công trình làm ra thêm 5%, +10 vui.', rank:5, max:1, unique:true, w:[3], cost:[{go:250,da:250,bac:400,tc:12}], h:52},
   tuong_dai:{name:'Đài tưởng niệm', desc:'Đài tưởng niệm các anh hùng liệt sĩ đã hy sinh vì độc lập, thống nhất. Hầu hết các xã, phường ở Việt Nam đều có đài tưởng niệm. +8 vui.', rank:8, max:1, unique:true, w:[0], cost:[{da:300,bac:500}], h:66},
+  thao_truong:{name:'Bãi tập võ', desc:'Nơi tuyển và rèn luyện quân lính. Mỗi cấp huấn luyện được 15 người; người làm ở đây là thầy võ, người chỉ huy. Năm 1253, nhà Trần lập Giảng Võ đường để luyện võ nghệ cho tướng sĩ.', rank:1, max:3, w:[1,2,3], cost:[{go:40,da:20},{go:80,da:50,sat:10},{da:120,gach:60,xm:20}], h:40},
   lo_ren:{name:'Lò rèn', desc:'Nung sắt, rèn lưỡi cày, dao, rìu, cuốc. Làm ra sắt để xây dựng và làm công cụ. Thời Bắc thuộc, đồ sắt ngày càng phổ biến ở làng xã.', rank:2, max:3, w:[1,2,3], cost:[{go:40,da:30,cu:10},{go:70,da:50,cu:20},{go:110,da:80,bac:60}], h:40},
   lo_gach:{name:'Lò gạch ngói', desc:'Nhào đất sét, đóng khuôn, nung gạch và ngói để xây nhà, lợp mái, dựng trường học, đền đài.', rank:3, max:3, w:[2,3,4], cost:[{go:70,da:40,sat:5},{go:100,da:60,sat:15},{go:140,da:90,sat:25}], h:40},
   xuong_xm:{name:'Xưởng xi măng', desc:'Nung đá vôi với đất sét thành xi măng. Đặt gần núi đá; mỗi núi đá xung quanh thêm 15% (tối đa 4). Năm 1899, nhà máy xi măng Hải Phòng ra đời, một trong những nhà máy xi măng đầu tiên ở nước ta.', rank:5, max:3, w:[3,4,5], cost:[{go:80,da:120,gach:40,sat:20},{da:200,gach:80,sat:40},{da:300,gach:120,sat:60,bac:300}], h:44},
@@ -475,7 +499,12 @@ const B = {
   cot_co:{name:'Cột cờ', desc:'Cột cờ trên đỉnh núi, niềm tự hào của cả châu. +15 vui.', rank:7, max:1, unique:true, w:[0], cost:[{go:150,da:200,bac:300,tc:20}], h:112},
 };
 const MOD_MAT = {duong:{xm:120}, dien:{xm:80, thep:20}, song:{thep:40, ldt:5}, kien_co:{xm:300, gach:200}, co_gioi:{thep:120, sat:100}, mat_troi:{ldt:20, thep:60}, so_hoa:{ldt:60}, xanh:{thep:200, ldt:40}, thong_minh:{ldt:150, thep:200}};
-const B_ERA = {lo_ren:2, lo_gach:3, xuong_xm:4, xuong_thep:6, nm_dien_tu:8, lan_san:0, lo_duc:1, trong_dong:1, don_luy:2, van_mieu:3, hoang_thanh:3, dai_hoc:3, truong_nghe:4, cot_co:5, tram_y_te:5, thuy_dien:6, tuong_dai:7};
+const B_ERA = {nha_san:0, ruong:0, duong:0, lan_san:0, tieu_phu:0, mo_da:0, vuon:0,
+  muong:1, kho:1, lo_duc:1, chuong_trau:1, khung_det:1, nha_rong:1, thao_truong:1, trong_dong:1,
+  lo_ren:2, mo_bac:2, coi_nuoc:2, cho_phien:2, don_luy:2,
+  truong_th:3, truong_hoc:3, truong_thpt:3, dai_hoc:3, van_mieu:3, hoang_thanh:3, lo_gach:3, cong_ban:3, nuong_che:3, homestay:3,
+  truong_nghe:4, xuong_xm:4, truong_mn:5, cot_co:5, tram_y_te:5, thuy_dien:6, xuong_thep:6, tuong_dai:7, ben_xe:7,
+  nm_dien_tu:8, tram_song:8, tua_bin_gio:8, trang_trai_doc:8, trung_tam_cn:8};
 for (const k in B_ERA) if (B_ERA[k]) B[k].era = B_ERA[k];
 B.lo_duc.desc = 'Nấu đồng, đúc rìu, lưỡi cày, mũi giáo như người Đông Sơn. Làm ra đồng để đúc trống, cồng chiêng, nông cụ; có lò đúc đồng hoạt động thì ruộng và lán tiều phu làm ra thêm 10%.';
 const MAT_COST = {
@@ -502,7 +531,7 @@ const ERA_NAMES = {
   truong_hoc:[[0,'Trường huyện'],[4,'Trường cao đẳng tiểu học'],[5,'Trường cấp 2'],[8,'Trường THCS']], truong_thpt:[[0,'Trường phủ'],[4,'Trường trung học'],[5,'Trường cấp 3'],[8,'Trường THPT']],
   truong_nghe:[[0,'Trường dạy nghề'],[4,'Trường bách nghệ'],[5,'Trường trung cấp nghề'],[8,'Trường cao đẳng nghề']], dai_hoc:[[0,'Học viện'],[4,'Trường đại học']],
   homestay:[[0,'Nhà trọ'],[7,'Nhà khách'],[8,'Homestay']], tram_y_te:[[0,'Bệnh xá'],[7,'Trạm y tế']], don_luy:[[0,'Đồn luỹ'],[5,'Đồn biên phòng']], hoang_thanh:[[0,'Hoàng thành'],[4,'Di tích Hoàng thành']],
-  lo_duc:[[0,'Lò đúc đồng'],[4,'Xưởng đúc đồng']], lo_ren:[[0,'Lò rèn'],[5,'Xưởng cơ khí']], lo_gach:[[0,'Lò gạch ngói'],[8,'Nhà máy gạch tuynel']], xuong_xm:[[0,'Xưởng xi măng'],[8,'Nhà máy xi măng']], xuong_thep:[[0,'Lò luyện gang thép'],[8,'Nhà máy thép']],
+  lo_duc:[[0,'Lò đúc đồng'],[4,'Xưởng đúc đồng']], thao_truong:[[0,'Bãi tập võ'],[2,'Trại luyện quân'],[3,'Giảng Võ đường'],[4,'Bãi tập nghĩa quân'],[5,'Trại huấn luyện'],[6,'Thao trường'],[8,'Thao trường huấn luyện']], lo_ren:[[0,'Lò rèn'],[5,'Xưởng cơ khí']], lo_gach:[[0,'Lò gạch ngói'],[8,'Nhà máy gạch tuynel']], xuong_xm:[[0,'Xưởng xi măng'],[8,'Nhà máy xi măng']], xuong_thep:[[0,'Lò luyện gang thép'],[8,'Nhà máy thép']],
 };
 function nameAt(k, e){ const L = ERA_NAMES[k]; if (!L) return B[k]._name || B[k].name; let nm = L[0][1]; for (const [x, v] of L) if (e >= x) nm = v; return nm; }
 for (const k in ERA_NAMES){ B[k]._name = B[k].name; Object.defineProperty(B[k], 'name', {configurable:true, enumerable:true, get(){ return nameAt(k, curEra()); }}); }
@@ -520,7 +549,7 @@ RANKS.forEach((R, i) => Object.defineProperty(R, 'name', {configurable:true, enu
 const houseName = l => curEra() === 0 && l <= 3 ? 'Túp lều' : HOUSE_NAME[l];
 function matLock(S, cost){ if (!cost) return null; for (const r in cost) if (MAT_ERA[r] && (S.era|0) < MAT_ERA[r]) return 'Cần ' + RES_NAME[r].toLowerCase() + ' (từ thời kỳ ' + SOC[MAT_ERA[r]].short + ')'; return null; }
 /* ---- Tầng lớp xã hội ---- */
-const JOB_OF = {ruong:'nong', nuong_che:'nong', chuong_trau:'nong', trang_trai_doc:'nong', lan_san:'san', tieu_phu:'tho', khung_det:'tho', lo_duc:'tho', lo_ren:'tho', lo_gach:'tho', mo_da:'mo', mo_bac:'mo', xuong_xm:'cn', xuong_thep:'cn', nm_dien_tu:'cn', thuy_dien:'cn', cho_phien:'buon', homestay:'buon', ben_xe:'buon', truong_mn:'giao', truong_th:'giao', truong_hoc:'giao', truong_thpt:'giao', truong_nghe:'giao', dai_hoc:'giao', tram_y_te:'yte', don_luy:'linh', hoang_thanh:'quan', van_mieu:'quan', nha_rong:'quan', trung_tam_cn:'kysu'};
+const JOB_OF = {thao_truong:'linh', ruong:'nong', nuong_che:'nong', chuong_trau:'nong', trang_trai_doc:'nong', lan_san:'san', tieu_phu:'tho', khung_det:'tho', lo_duc:'tho', lo_ren:'tho', lo_gach:'tho', mo_da:'mo', mo_bac:'mo', xuong_xm:'cn', xuong_thep:'cn', nm_dien_tu:'cn', thuy_dien:'cn', cho_phien:'buon', homestay:'buon', ben_xe:'buon', truong_mn:'giao', truong_th:'giao', truong_hoc:'giao', truong_thpt:'giao', truong_nghe:'giao', dai_hoc:'giao', tram_y_te:'yte', don_luy:'linh', hoang_thanh:'quan', van_mieu:'quan', nha_rong:'quan', trung_tam_cn:'kysu'};
 const JOBS_ALL = ['nong','san','tho','mo','cn','buon','giao','yte','linh','quan','kysu','idle','stu'];
 const TRI = ['giao','yte','kysu'];
 const SOCIAL = [
@@ -591,6 +620,103 @@ const SOCIAL = [
    {n:'Học sinh, sinh viên', jobs:['stu'], d:'Học phổ thông, đại học, sau đại học.'},
    {n:'Nông dân công nghệ cao', base:true, jobs:['tho','linh'], d:'Làm nông nghiệp thông minh, trang trại nhà kính.'}],
 ];
+/* ---- Quân đội và chiến tranh ---- */
+const SOLDIER = [
+  {n:'Trai tráng thị tộc', w:'giáo đá, cung tên'},
+  {n:'Lính Văn Lang – Âu Lạc', w:'giáo, rìu đồng, cung nỏ'},
+  {n:'Nghĩa quân', w:'giáo mác, gươm sắt, cung nỏ'},
+  {n:'Quân triều đình', w:'giáo, gươm, cung nỏ, voi chiến, thuyền chiến'},
+  {n:'Nghĩa quân Cần Vương', w:'súng hoả mai, gươm, giáo'},
+  {n:'Bộ đội, du kích', w:'súng trường, lựu đạn, chông tre'},
+  {n:'Bộ đội, dân quân', w:'súng trường, pháo cao xạ, tên lửa phòng không'},
+  {n:'Bộ đội', w:'súng, xe tăng, pháo'},
+  {n:'Quân đội nhân dân', w:'trang bị hiện đại; diễn tập, cứu hộ thiên tai'},
+  {n:'Lực lượng hiện đại', w:'thiết bị bay không người lái, robot cứu hộ, liên lạc số'},
+];
+const ARM = [{go:1}, {cu:1}, {sat:1}, {sat:1}, {sat:1, bac:2}, {sat:2, bac:2}, {thep:1, bac:3}, {thep:1, bac:4}, {thep:1, ldt:0.2, bac:5}];
+const armCost = e => ARM[clamp(e|0, 0, ARM.length - 1)];
+const WARS = [
+  {id:'tan', era:1, name:'Kháng chiến chống quân Tần', yrs:'Khoảng 214 – 208 TCN', need:6,
+   desc:'Quân Tần tràn xuống phương Nam. Người Âu Việt và Lạc Việt rút vào rừng, bầu người tài giỏi làm tướng, ngày ẩn đêm ra đánh giặc.',
+   tac:[{n:'Rút vào rừng, đánh du kích', d:'Ngày ẩn đêm ra tập kích.', cost:{lua:60}, b:0.3}, {n:'Rèn giáo, nỏ đồng', d:'Trang bị thêm vũ khí bằng đồng.', cost:{cu:20}, b:0.3}],
+   win:'Quân Tần thua to, chủ tướng Đồ Thư bị giết. Không lâu sau, Thục Phán lập nước Âu Lạc, xưng An Dương Vương.'},
+  {id:'trung', era:2, name:'Khởi nghĩa Hai Bà Trưng', yrs:'Năm 40', need:9,
+   desc:'Mùa xuân năm 40, Trưng Trắc và Trưng Nhị dựng cờ khởi nghĩa ở Hát Môn, nhân dân khắp nơi hưởng ứng, đánh đuổi thái thú Tô Định.',
+   tac:[{n:'Hội quân ở Hát Môn', d:'Tập hợp nghĩa quân từ khắp các quận.', cost:{lua:120}, b:0.3}, {n:'Rèn vũ khí sắt', d:'Giáo mác, gươm sắt cho nghĩa quân.', cost:{sat:20}, b:0.3}],
+   win:'Nghĩa quân làm chủ 65 thành trì; Trưng Trắc lên ngôi vua, đóng đô ở Mê Linh.'},
+  {id:'bachdang938', era:2, name:'Chiến thắng Bạch Đằng', yrs:'Năm 938', need:13,
+   desc:'Quân Nam Hán theo đường biển kéo vào nước ta. Ngô Quyền cho cắm cọc gỗ đầu bịt sắt dưới lòng sông Bạch Đằng, chờ nước triều lên dụ địch vào bãi cọc.',
+   tac:[{n:'Cắm cọc trên sông Bạch Đằng', d:'Cọc gỗ lớn đầu bịt sắt cắm khắp lòng sông.', cost:{go:200, sat:20}, b:0.45}, {n:'Mai phục hai bên bờ', d:'Quân bộ và thuyền nhẹ chờ sẵn.', cost:{lua:150}, b:0.25}],
+   win:'Thuỷ triều rút, thuyền giặc va vào bãi cọc, quân Nam Hán thua to. Chiến thắng Bạch Đằng chấm dứt hơn một nghìn năm Bắc thuộc.'},
+  {id:'nhunguyet', era:3, name:'Kháng chiến chống Tống', yrs:'1075 – 1077', need:18,
+   desc:'Nhà Tống chuẩn bị đánh Đại Việt. Lý Thường Kiệt chủ động đánh trước rồi lập phòng tuyến trên sông Như Nguyệt chặn quân Tống.',
+   tac:[{n:'Phòng tuyến sông Như Nguyệt', d:'Đắp luỹ, đóng cọc dọc bờ sông.', cost:{go:200, da:150}, b:0.4}, {n:'Tiến công trước để tự vệ', d:'Đánh vào nơi tập kết lương thảo của giặc.', cost:{lua:200, sat:20}, b:0.25}],
+   win:'Quân Tống không vượt được sông Như Nguyệt, phải rút về nước. Bài thơ "Nam quốc sơn hà" gắn với trận chiến này.'},
+  {id:'nguyenmong', era:3, name:'Kháng chiến chống quân Nguyên Mông', yrs:'1258, 1285, 1288', need:24,
+   desc:'Ba lần quân Nguyên Mông kéo sang. Vua tôi nhà Trần đồng lòng, thực hiện "vườn không nhà trống"; Trần Hưng Đạo chỉ huy quân dân chiến đấu.',
+   tac:[{n:'Vườn không nhà trống', d:'Cất giấu lương thực, để giặc không có gì ăn.', cost:{lua:300}, b:0.35}, {n:'Bãi cọc Bạch Đằng năm 1288', d:'Một lần nữa cắm cọc trên sông Bạch Đằng.', cost:{go:250, sat:30}, b:0.35}],
+   win:'Năm 1288, quân Nguyên thua to trên sông Bạch Đằng. Nhà Trần ba lần đánh thắng quân Nguyên Mông.'},
+  {id:'dongda', era:3, name:'Quang Trung đại phá quân Thanh', yrs:'Xuân Kỷ Dậu 1789', need:30,
+   desc:'Quân Thanh kéo vào Thăng Long. Nguyễn Huệ lên ngôi hoàng đế, lấy niên hiệu Quang Trung, thần tốc tiến quân ra Bắc ngay trong dịp Tết.',
+   tac:[{n:'Hành quân thần tốc', d:'Tương truyền ba người một võng thay nhau khiêng, đi suốt ngày đêm.', cost:{lua:300}, b:0.3}, {n:'Tấn công dịp Tết', d:'Đánh vào lúc giặc chủ quan ăn Tết.', cost:{bac:300}, b:0.3}],
+   win:'Mùng 5 Tết Kỷ Dậu (1789), quân Tây Sơn thắng lớn ở Ngọc Hồi – Đống Đa, giải phóng Thăng Long.'},
+  {id:'cmt8', era:4, name:'Tổng khởi nghĩa tháng Tám', yrs:'Tháng 8/1945', need:36,
+   desc:'Nhật đầu hàng Đồng minh. Mặt trận Việt Minh phát động tổng khởi nghĩa giành chính quyền trong cả nước.',
+   tac:[{n:'Mít tinh, biểu tình', d:'Quần chúng xuống đường giành chính quyền.', cost:{lua:300}, b:0.35}, {n:'Phát triển lực lượng vũ trang', d:'Đội Việt Nam Tuyên truyền Giải phóng quân thành lập ngày 22/12/1944.', cost:{sat:40, bac:300}, b:0.3}],
+   win:'Chỉ trong khoảng nửa tháng, tổng khởi nghĩa giành thắng lợi trong cả nước.'},
+  {id:'vietbac', era:5, name:'Chiến dịch Việt Bắc', yrs:'Thu – đông 1947', need:42,
+   desc:'Quân Pháp mở cuộc tiến công lên căn cứ địa Việt Bắc hòng tiêu diệt cơ quan đầu não kháng chiến.',
+   tac:[{n:'Chặn đánh trên sông Lô', d:'Phục kích đoàn tàu chiến của địch.', cost:{sat:40}, b:0.3}, {n:'Sơ tán, giữ căn cứ', d:'Chuyển lương thực, kho tàng vào rừng sâu.', cost:{lua:400}, b:0.3}],
+   win:'Sau hơn hai tháng, quân Pháp phải rút khỏi Việt Bắc; cơ quan đầu não kháng chiến được bảo vệ an toàn.'},
+  {id:'dbp', era:5, name:'Chiến dịch Điện Biên Phủ', yrs:'13/3 – 7/5/1954', need:52,
+   desc:'Pháp xây tập đoàn cứ điểm mạnh ở Điện Biên Phủ. Bộ đội kéo pháo lên núi cao, đào hào bao vây, dân công gánh gạo tiếp tế.',
+   tac:[{n:'Kéo pháo vào trận địa', d:'Đưa pháo lên các điểm cao bao quanh lòng chảo.', cost:{sat:60, go:200}, b:0.35}, {n:'Dân công hoả tuyến', d:'Hàng vạn dân công gánh gạo, đẩy xe đạp thồ tiếp tế.', cost:{lua:600}, b:0.35}],
+   win:'Ngày 7/5/1954, chiến dịch Điện Biên Phủ toàn thắng, buộc Pháp ký Hiệp định Giơ-ne-vơ.'},
+  {id:'dbptk', era:6, name:'Trận "Điện Biên Phủ trên không"', yrs:'12/1972', need:60,
+   desc:'Cuối năm 1972, Mỹ dùng máy bay B-52 ném bom ồ ạt Hà Nội, Hải Phòng trong 12 ngày đêm. Bộ đội phòng không và dân quân đánh trả.',
+   tac:[{n:'Tên lửa, pháo phòng không', d:'Bố trí trận địa phòng không bảo vệ thành phố.', cost:{thep:60}, b:0.35}, {n:'Sơ tán, hầm trú ẩn', d:'Đào hầm, sơ tán người già, trẻ em.', cost:{xm:80, lua:300}, b:0.3}],
+   win:'Sau 12 ngày đêm, cuộc tập kích đường không bị đánh bại; tháng 1/1973, Hiệp định Pa-ri được ký kết.'},
+  {id:'hcm75', era:6, name:'Chiến dịch Hồ Chí Minh', yrs:'26/4 – 30/4/1975', need:72,
+   desc:'Mùa xuân năm 1975, sau các chiến dịch Tây Nguyên, Huế – Đà Nẵng, các cánh quân tiến về Sài Gòn.',
+   tac:[{n:'Thần tốc, táo bạo', d:'Hành quân nhanh trên đường Trường Sơn.', cost:{lua:600, thep:40}, b:0.35}, {n:'Chi viện từ hậu phương', d:'Xe chở lương thực, vũ khí vào Nam.', cost:{bac:800}, b:0.3}],
+   win:'Ngày 30/4/1975, chiến dịch toàn thắng, chiến tranh kết thúc, đất nước thống nhất.'},
+  {id:'biengioi', era:7, name:'Bảo vệ biên giới Tổ quốc', yrs:'1979', need:70,
+   desc:'Năm 1979, quân và dân ta chiến đấu bảo vệ biên giới Tây Nam và biên giới phía Bắc.',
+   tac:[{n:'Dân quân, du kích biên giới', d:'Lực lượng tại chỗ bám trụ.', cost:{sat:60, lua:400}, b:0.3}, {n:'Củng cố đồn biên phòng', d:'Xây công sự kiên cố dọc biên giới.', cost:{xm:120, thep:40}, b:0.35}],
+   win:'Biên giới được giữ vững; quân dân ta tiếp tục khôi phục và xây dựng đất nước.'},
+  {id:'cuuho', era:8, name:'Cứu hộ lũ lụt', yrs:'Thời bình', need:60, peace:true,
+   desc:'Mưa lớn gây lũ quét ở vùng núi. Bộ đội cùng dân quân sơ tán dân, cứu người, khắc phục hậu quả.',
+   tac:[{n:'Xuồng cứu hộ, thiết bị', d:'Trang bị xuồng máy, áo phao.', cost:{thep:40, bac:500}, b:0.35}, {n:'Lương thực cứu trợ', d:'Chuẩn bị gạo, nước sạch cho bà con.', cost:{lua:600}, b:0.3}],
+   win:'Bà con được sơ tán an toàn, nhà cửa được dựng lại.'},
+  {id:'dientap', era:8, name:'Diễn tập phòng thủ khu vực', yrs:'Thời bình', need:80, peace:true,
+   desc:'Diễn tập phối hợp bộ đội, dân quân tự vệ và người dân, sẵn sàng bảo vệ Tổ quốc.',
+   tac:[{n:'Trang bị hiện đại', d:'Máy bay không người lái, thiết bị liên lạc số.', cost:{ldt:30, thep:60}, b:0.35}, {n:'Huy động dân quân tự vệ', d:'Mọi người cùng tham gia.', cost:{lua:500, bac:600}, b:0.3}],
+   win:'Diễn tập thành công, khu vực phòng thủ vững chắc.'},
+];
+const WAR_BY = Object.fromEntries(WARS.map(w => [w.id, w]));
+function warDef(id){
+  if (WAR_BY[id]) return WAR_BY[id];
+  const m = /^gghb(\d+)$/.exec(id || ''); if (!m) return null; const k = +m[1];
+  return {id, era:ERA_FUT, name:'Gìn giữ hoà bình Liên Hợp Quốc', yrs:'Lần thứ ' + k, need:90 + 20*k, peace:true,
+    desc:'Từ năm 2014, Việt Nam cử lực lượng tham gia gìn giữ hoà bình của Liên Hợp Quốc: bệnh viện dã chiến, đội công binh làm đường, giúp người dân vùng xung đột.',
+    tac:[{n:'Bệnh viện dã chiến', d:'Bác sĩ quân y, thiết bị y tế hiện đại.', cost:{ldt:20 + 5*k, bac:800}, b:0.35}, {n:'Đội công binh', d:'Làm đường, khoan giếng, dựng trường học.', cost:{thep:60 + 10*k, xm:80}, b:0.3}],
+    win:'Hoàn thành nhiệm vụ, được bạn bè quốc tế ghi nhận.'};
+}
+const warsOf = e => WARS.filter(w => w.era === e);
+function nextWarId(S){
+  const e = S.era|0, A = S.army; if (!A || e < 1) return null;
+  if (e >= ERA_FUT) return 'gghb' + (A.won.filter(x => /^gghb/.test(x)).length + 1);
+  const w = warsOf(e).find(x => !A.won.includes(x.id)); return w ? w.id : null;
+}
+const raidName = e => e >= 8 ? (e % 2 ? 'Sạt lở đất' : 'Lũ quét') : e >= 4 ? 'Thổ phỉ' : 'Giặc cướp';
+const trLabel = tr => tr < 30 ? 'tân binh' : tr < 60 ? 'thành thạo' : tr < 90 ? 'tinh nhuệ' : 'thiện chiến';
+function armyLaborOf(S, laborAll){ const A = S.army; if (!A || !A.n) return 0; const n = Math.min(A.n, Math.floor(laborAll*0.4)); return (S.era|0) === 3 ? Math.ceil(n/2) : n; }
+const maxArmy = E => Math.floor((E.laborAll || 0)*0.4);
+function armyPower(S, E, war){
+  const A = S.army; if (!A) return 0; const fl = (E && E.fort) | 0;
+  let tb = 0; if (war){ const D = warDef(war.id); if (D) for (const i of war.tac || []) tb += (D.tac[i] && D.tac[i].b) || 0; }
+  return (A.n*(0.5 + A.tr/100) + fl*4)*(1 + 0.15*fl)*(1 + tb);
+}
 function socialOf(e, x){
   const D = SOCIAL[clamp(e|0, 0, SOCIAL.length - 1)], used = new Set(); D.forEach(t => (t.jobs || []).forEach(j => used.add(j)));
   let base = 0; for (const j of JOBS_ALL) if (!used.has(j)) base += x[j] || 0;
@@ -624,35 +750,35 @@ const SOC = [
   {name:'Thời dựng nước Văn Lang – Âu Lạc', short:'Dựng nước', yrs:'Khoảng 2000 TCN – 179 TCN', focus:'Xây dựng làng, trồng lúa, chế tác đồng',
    desc:'Từ các nền văn hoá Phùng Nguyên, Đồng Đậu, Gò Mun tới văn hoá Đông Sơn rực rỡ. Các Vua Hùng dựng nước Văn Lang; sau đó An Dương Vương lập nước Âu Lạc, xây thành Cổ Loa. Cư dân trồng lúa nước, đúc trống đồng.',
    ev:'Cư dân rời hang đá xuống ven sông, trồng lúa nước và biết đúc đồng. Theo truyền thuyết, các Vua Hùng dựng nước Văn Lang, nhà nước đầu tiên của người Việt.',
-   goals:[{t:'pop', n:26}, {t:'b', k:'ruong', n:4, d:'Trồng lúa nước: có 4 Ruộng bậc thang'}, {t:'b', k:'kho', n:1, d:'Dựng Kho thóc'}, {t:'b', k:'lo_duc', n:1, d:'Chế tác đồng: dựng Lò đúc đồng'}, {t:'b', k:'trong_dong', n:1, d:'Đúc Trống đồng Đông Sơn'}]},
+   goals:[{t:'pop', n:26}, {t:'b', k:'ruong', n:4, d:'Trồng lúa nước: có 4 Ruộng bậc thang'}, {t:'b', k:'kho', n:1, d:'Dựng Kho thóc'}, {t:'b', k:'lo_duc', n:1, d:'Chế tác đồng: dựng Lò đúc đồng'}, {t:'b', k:'trong_dong', n:1, d:'Đúc Trống đồng Đông Sơn'}, {t:'wars', e:1}]},
   {name:'Thời Bắc thuộc', short:'Bắc thuộc', yrs:'179 TCN – 938', focus:'Bảo vệ cộng đồng, đấu tranh giành độc lập',
    desc:'Hơn một nghìn năm phương Bắc đô hộ. Người Việt vẫn giữ tiếng nói, phong tục và liên tiếp đứng lên: Hai Bà Trưng (năm 40), Bà Triệu (248), Lý Bí lập nước Vạn Xuân (544), Mai Thúc Loan, Phùng Hưng, Khúc Thừa Dụ (905).',
    ev:'Năm 179 TCN, Triệu Đà đánh chiếm Âu Lạc. Từ đây đất nước bị phương Bắc đô hộ hơn một nghìn năm.',
-   goals:[{t:'pop', n:40}, {t:'b', k:'don_luy', n:1, d:'Bảo vệ bản: dựng Đồn luỹ'}, {t:'b', k:'nha_rong', n:1, d:'Đoàn kết cộng đồng: dựng Nhà rông'}, {t:'give', id:'g2', res:{lua:300, sat:30}, d:'Góp lương thực, vũ khí sắt cho nghĩa quân'}]},
+   goals:[{t:'pop', n:40}, {t:'b', k:'don_luy', n:1, d:'Bảo vệ bản: dựng Đồn luỹ'}, {t:'b', k:'nha_rong', n:1, d:'Đoàn kết cộng đồng: dựng Nhà rông'}, {t:'give', id:'g2', res:{lua:300, sat:30}, d:'Góp lương thực, vũ khí sắt cho nghĩa quân'}, {t:'wars', e:2}]},
   {name:'Thời phong kiến độc lập', short:'Phong kiến', yrs:'938 – 1858', focus:'Xây dựng kinh đô, phát triển vương quốc',
    desc:'Các triều Ngô, Đinh, Tiền Lê, Lý, Trần, Hồ, Lê, Mạc, Tây Sơn, Nguyễn nối tiếp nhau. Năm 1010 nhà Lý dời đô về Thăng Long, năm 1070 dựng Văn Miếu; nhà Trần ba lần đánh thắng quân Nguyên Mông; bờ cõi mở rộng dần về phương Nam.',
    ev:'Năm 938, Ngô Quyền đánh tan quân Nam Hán trên sông Bạch Đằng, chấm dứt hơn một nghìn năm Bắc thuộc. Năm 939, Ngô Quyền xưng vương, đóng đô ở Cổ Loa.',
-   goals:[{t:'pop', n:85}, {t:'b', k:'hoang_thanh', n:1, d:'Xây dựng kinh đô: dựng Hoàng thành'}, {t:'b', k:'van_mieu', n:1, d:'Mở mang học hành: dựng Văn Miếu'}, {t:'b', k:'cho_phien', n:1, d:'Buôn bán: mở Chợ phiên'}]},
+   goals:[{t:'pop', n:85}, {t:'b', k:'hoang_thanh', n:1, d:'Xây dựng kinh đô: dựng Hoàng thành'}, {t:'b', k:'van_mieu', n:1, d:'Mở mang học hành: dựng Văn Miếu'}, {t:'b', k:'cho_phien', n:1, d:'Buôn bán: mở Chợ phiên'}, {t:'wars', e:3}]},
   {name:'Thời Pháp thuộc', short:'Pháp thuộc', yrs:'1858 – 1945', focus:'Đấu tranh chống thực dân',
    desc:'Thực dân Pháp từng bước chiếm và đặt ách đô hộ. Phong trào Cần Vương, khởi nghĩa Yên Thế, phong trào Đông Du, Đông Kinh Nghĩa Thục nối tiếp; năm 1930 Đảng Cộng sản Việt Nam ra đời, lãnh đạo cuộc đấu tranh giải phóng dân tộc.',
    ev:'Ngày 1/9/1858, liên quân Pháp – Tây Ban Nha nổ súng tấn công Đà Nẵng, mở đầu cuộc xâm lược Việt Nam. Nhân dân khắp nơi đứng lên chống giặc.',
-   goals:[{t:'pop', n:120}, {t:'b', k:'truong_th', n:1, d:'Truyền bá chữ Quốc ngữ: mở {n}'}, {t:'b', k:'xuong_xm', n:1, d:'Dựng {n}'}, {t:'learn', n:20, d:'20 người đang đi học'}, {t:'give', id:'g4', res:{lua:600, bac:400}, d:'Ủng hộ phong trào yêu nước'}]},
+   goals:[{t:'pop', n:120}, {t:'b', k:'truong_th', n:1, d:'Truyền bá chữ Quốc ngữ: mở {n}'}, {t:'b', k:'xuong_xm', n:1, d:'Dựng {n}'}, {t:'learn', n:20, d:'20 người đang đi học'}, {t:'give', id:'g4', res:{lua:600, bac:400}, d:'Ủng hộ phong trào yêu nước'}, {t:'wars', e:4}]},
   {name:'Kháng chiến chống Pháp', short:'Chống Pháp', yrs:'1945 – 1954', focus:'Chống giặc đói, giặc dốt, kháng chiến chống Pháp',
    desc:'Chính quyền non trẻ vừa chống giặc đói, giặc dốt, vừa chống giặc ngoại xâm. Phong trào Bình dân học vụ xoá nạn mù chữ; Việt Bắc trở thành căn cứ địa kháng chiến.',
    ev:'Cách mạng tháng Tám năm 1945 thành công. Ngày 2/9/1945, tại Quảng trường Ba Đình, Chủ tịch Hồ Chí Minh đọc Tuyên ngôn Độc lập, khai sinh nước Việt Nam Dân chủ Cộng hoà. Ngày 19/12/1946, toàn quốc kháng chiến.',
-   goals:[{t:'pop', n:170}, {t:'b', k:'cot_co', n:1, d:'Dựng Cột cờ'}, {t:'learn', n:40, d:'Bình dân học vụ: 40 người đang đi học'}, {t:'give', id:'g5', res:{lua:1200, go:400}, d:'Lương thực cho chiến dịch Điện Biên Phủ'}]},
+   goals:[{t:'pop', n:170}, {t:'b', k:'cot_co', n:1, d:'Dựng Cột cờ'}, {t:'learn', n:40, d:'Bình dân học vụ: 40 người đang đi học'}, {t:'give', id:'g5', res:{lua:1200, go:400}, d:'Lương thực cho chiến dịch Điện Biên Phủ'}, {t:'wars', e:5}]},
   {name:'Kháng chiến chống Mỹ', short:'Chống Mỹ', yrs:'1954 – 1975', focus:'Giải phóng và thống nhất đất nước',
    desc:'Đất nước tạm chia cắt hai miền ở vĩ tuyến 17. Miền Bắc xây dựng hậu phương, chi viện cho chiến trường miền Nam qua đường Trường Sơn.',
    ev:'Ngày 7/5/1954, chiến dịch Điện Biên Phủ toàn thắng. Hiệp định Giơ-ne-vơ được ký ngày 21/7/1954; đất nước tạm thời chia cắt ở vĩ tuyến 17.',
-   goals:[{t:'pop', n:240}, {t:'b', k:'tram_y_te', n:1, d:'Chăm sóc sức khoẻ: dựng Trạm y tế'}, {t:'b', k:'truong_thpt', n:1, d:'Đào tạo lớp trẻ: mở {n}'}, {t:'b', k:'xuong_thep', n:1, d:'Dựng {n}'}, {t:'give', id:'g6', res:{lua:2000, bac:1500}, d:'Chi viện tiền tuyến'}]},
+   goals:[{t:'pop', n:240}, {t:'b', k:'tram_y_te', n:1, d:'Chăm sóc sức khoẻ: dựng Trạm y tế'}, {t:'b', k:'truong_thpt', n:1, d:'Đào tạo lớp trẻ: mở {n}'}, {t:'b', k:'xuong_thep', n:1, d:'Dựng {n}'}, {t:'give', id:'g6', res:{lua:2000, bac:1500}, d:'Chi viện tiền tuyến'}, {t:'wars', e:6}]},
   {name:'Thời kỳ thống nhất', short:'Thống nhất', yrs:'1975 – 1986', focus:'Khôi phục kinh tế',
    desc:'Hàn gắn vết thương chiến tranh, khôi phục sản xuất, xây dựng lại quê hương trong điều kiện kinh tế kế hoạch hoá tập trung, bao cấp còn nhiều khó khăn.',
    ev:'Ngày 30/4/1975, chiến dịch Hồ Chí Minh kết thúc thắng lợi, chiến tranh chấm dứt, đất nước thống nhất. Ngày 2/7/1976, nước Cộng hoà xã hội chủ nghĩa Việt Nam ra đời.',
-   goals:[{t:'pop', n:320}, {t:'mod', id:'duong'}, {t:'mod', id:'dien'}, {t:'b', k:'tuong_dai', n:1, d:'Dựng Đài tưởng niệm'}, {t:'give', id:'g7', res:{gach:800, xm:500}, d:'Gạch, xi măng xây dựng lại quê hương'}]},
+   goals:[{t:'pop', n:320}, {t:'mod', id:'duong'}, {t:'mod', id:'dien'}, {t:'b', k:'tuong_dai', n:1, d:'Dựng Đài tưởng niệm'}, {t:'give', id:'g7', res:{gach:800, xm:500}, d:'Gạch, xi măng xây dựng lại quê hương'}, {t:'wars', e:7}]},
   {name:'Thời kỳ đổi mới', short:'Đổi mới', yrs:'1986 – nay', focus:'Xây dựng Việt Nam hiện đại',
    desc:'Phát triển kinh tế thị trường định hướng xã hội chủ nghĩa, công nghiệp hoá, hiện đại hoá và hội nhập quốc tế: gia nhập ASEAN và bình thường hoá quan hệ với Hoa Kỳ (1995), gia nhập WTO (2007).',
    ev:'Tháng 12/1986, Đại hội VI của Đảng Cộng sản Việt Nam đề ra đường lối Đổi mới: phát triển kinh tế hàng hoá nhiều thành phần, mở cửa và hội nhập.',
-   goals:[{t:'pop', n:420}, {t:'b', k:'nm_dien_tu', n:1, d:'Dựng {n}'}, {t:'mod', id:'kien_co'}, {t:'mod', id:'so_hoa'}, {t:'mod', id:'thong_minh'}]},
+   goals:[{t:'pop', n:420}, {t:'b', k:'nm_dien_tu', n:1, d:'Dựng {n}'}, {t:'mod', id:'kien_co'}, {t:'mod', id:'so_hoa'}, {t:'mod', id:'thong_minh'}, {t:'wars', e:8}]},
   {name:'Việt Nam phát triển hơn nữa', short:'Phát triển', yrs:'Tương lai', focus:'Xây dựng Việt Nam hiện đại và phát triển hơn nữa',
    desc:'Kinh tế số, năng lượng sạch, thành phố thông minh. Mỗi kỷ nguyên mới lại đưa bản làng phát triển hơn nữa, mãi không dừng.',
    ev:'Bản làng bước vào chặng đường mới: robot, trí tuệ nhân tạo, máy bay không người lái chở hàng, năng lượng xanh phủ khắp núi đồi.'},
@@ -664,6 +790,7 @@ function goalProg(S, g){
   if (g.t === 'pop') return [Math.min(S.best, g.n), g.n];
   if (g.t === 'b') return [Math.min(cnt(S, g.k), g.n), g.n];
   if (g.t === 'mod') return [hasMod(S, g.id) ? 1 : 0, 1];
+  if (g.t === 'wars'){ const W = warsOf(g.e), won = S.army ? W.filter(w => S.army.won.includes(w.id)).length : 0; return [won, W.length]; }
   if (g.t === 'learn'){ let c = 0; for (const p of S.people || []) if (p.sl) c++; return [Math.min(c, g.n), g.n]; }
   if (g.t === 'give'){ const gv = (S.gave && S.gave[g.id]) || {}; let x = 0, y = 0; for (const r in g.res){ x += Math.min(gv[r] || 0, g.res[r]); y += g.res[r]; } return [Math.floor(x), y]; }
   return [0, 1];
@@ -673,6 +800,7 @@ function goalText(g){
   if (g.d) return g.k ? g.d.replace('{n}', B[g.k].name) : g.d;
   if (g.t === 'pop'){ const r = RANKS.findIndex(R => R.min === g.n); return 'Đạt ' + g.n + ' dân' + (r >= 0 ? ' (thành ' + RANKS[r].name + ')' : ''); }
   if (g.t === 'b') return 'Có ' + g.n + ' ' + B[g.k].name;
+  if (g.t === 'wars'){ const W = warsOf(g.e); return (W.some(w => w.peace) ? 'Nhiệm vụ quân đội: ' : 'Chiến thắng: ') + W.map(w => w.name).join('; '); }
   if (g.t === 'mod'){ const m = MODERN.find(x => x.id === g.id); return 'Hoàn thành dự án ' + (m ? m.name : g.id); }
   return '';
 }
@@ -774,66 +902,74 @@ function migrateFoot(out){
 function addNotice(msg){ if (!G.notice || !G.notice.includes(msg)) G.notice = (G.notice ? G.notice + ' ' : '') + msg; }
 const OLD_KHO_COST = [{go:30,da:5},{go:50,da:25},{go:80,da:50,bac:30},{go:120,da:80,bac:60},{go:160,da:110,bac:100},{go:220,da:150,bac:160},{go:300,da:200,bac:250}];
 const NO_CAP = 1e12;
-const BUILD_ORDER = ['nha_san','ruong','muong','duong','lan_san','tieu_phu','mo_da','lo_duc','lo_ren','lo_gach','xuong_xm','xuong_thep','nm_dien_tu','mo_bac','kho','vuon','trong_dong','truong_mn','truong_th','chuong_trau','coi_nuoc','khung_det','cho_phien','truong_hoc','nha_rong','don_luy','cong_ban','van_mieu','truong_thpt','hoang_thanh','nuong_che','homestay','truong_nghe','cot_co','tram_y_te','dai_hoc','tuong_dai','thuy_dien','tram_song','ben_xe','tua_bin_gio','trang_trai_doc','trung_tam_cn'];
+const BUILD_ORDER0 = ['nha_san','ruong','muong','duong','lan_san','tieu_phu','mo_da','lo_duc','lo_ren','lo_gach','xuong_xm','xuong_thep','nm_dien_tu','mo_bac','kho','thao_truong','vuon','trong_dong','truong_mn','truong_th','chuong_trau','coi_nuoc','khung_det','cho_phien','truong_hoc','nha_rong','don_luy','cong_ban','van_mieu','truong_thpt','hoang_thanh','nuong_che','homestay','truong_nghe','cot_co','tram_y_te','dai_hoc','tuong_dai','thuy_dien','tram_song','ben_xe','tua_bin_gio','trang_trai_doc','trung_tam_cn'];
+const BUILD_ORDER = BUILD_ORDER0.slice().sort((x, y) => ((B[x].era|0) - (B[y].era|0)) || (BUILD_ORDER0.indexOf(x) - BUILD_ORDER0.indexOf(y)));
 
 const QUESTS = [
   {t:'Khai hoang', d:'Chạm vào một ô rừng và chọn Chặt cây để lấy gỗ.', p:S=>[S.stats.cleared,1], r:{lua:10}},
-  {t:'Ruộng đầu tiên', d:'Xây 2 Ruộng bậc thang. Đặt sát suối để được thêm 50% lúa.', p:S=>[cnt(S,'ruong'),2], r:{go:15}},
-  {t:'Dẫn nước vào ruộng', d:'Xây 1 Mương nước nối từ suối tới chỗ định làm ruộng.', p:S=>[cnt(S,'muong'),1], r:{da:5,lua:10}},
-  {t:'Thêm mái nhà', d:'Dựng thêm Nhà sàn để có 2 nóc nhà, đón người mới về bản.', p:S=>[cnt(S,'nha_san'),2], r:{lua:20}},
-  {t:'Tiếng rìu trong rừng', d:'Xây 1 Lán tiều phu sát rừng để có gỗ đều đặn.', p:S=>[cnt(S,'tieu_phu'),1], r:{bac:10}},
-  {t:'Kho đầy thóc', d:'Xây 1 Kho thóc để chứa được nhiều hơn.', p:S=>[cnt(S,'kho'),1], r:{da:10}},
-  {t:'Thành bản', d:'Đạt 8 dân để xóm nhỏ thành Bản.', p:S=>[S.pop,8], r:{bac:20,go:20}},
+  {t:'Ruộng đầu tiên', d:'Khai 2 {ruong}. Đặt sát suối để được thêm 50% lúa.', p:S=>[cnt(S,'ruong'),2], r:{go:15}},
+  {t:'Thêm mái nhà', d:'Dựng thêm {nha_san} để có 2 nóc nhà, đón người mới về.', p:S=>[cnt(S,'nha_san'),2], r:{lua:20}},
+  {t:'Săn bắt, hái lượm', d:'Dựng {lan_san} gần rừng để có thêm cái ăn.', p:S=>[cnt(S,'lan_san'),1], r:{go:15}},
+  {t:'Tiếng rìu trong rừng', d:'Dựng 1 {tieu_phu} sát rừng để có gỗ đều đặn.', p:S=>[cnt(S,'tieu_phu'),1], r:{bac:10}},
+  {t:'Công cụ đá', d:'Dựng {mo_da} gần núi đá vôi để ghè đá làm công cụ.', p:S=>[cnt(S,'mo_da'),1], r:{go:30}},
+  {t:'Hoa mận trắng', d:'Trồng 2 {vuon}.', p:S=>[cnt(S,'vuon'),2], r:{bac:15}},
+  {t:'Thành {R1}', d:'Đạt 8 dân.', p:S=>[S.pop,8], r:{bac:20,go:20}},
   {t:'Đám cưới đầu tiên', d:'Trai gái độc thân từ 18 tuổi sẽ tự nên duyên khi dân vui. Chờ một đám cưới trong bản.', p:S=>[S.stats.weddings || 0, 1], r:{lua:30,bac:10}},
   {t:'Tiếng trẻ thơ', d:'Vợ chồng sinh con khi nhà còn chỗ ở và dân no đủ. Đón 2 em bé chào đời.', p:S=>[S.stats.births || 0, 2], r:{bac:20}},
-  {t:'Tiếng cối giã gạo', d:'Xây Cối giã gạo nước sát suối.', p:S=>[cnt(S,'coi_nuoc'),1], r:{bac:15}},
-  {t:'Đá xây bản', d:'Xây Bãi khai đá gần núi đá vôi.', p:S=>[cnt(S,'mo_da'),1], r:{go:30}},
-  {t:'Con trâu đầu cơ nghiệp', d:'Xây Chuồng trâu sát ruộng.', p:S=>[cnt(S,'chuong_trau'),1], r:{lua:30}},
-  {t:'Hoa mận trắng', d:'Trồng 2 Vườn mận.', p:S=>[cnt(S,'vuon'),2], r:{bac:15}},
-  {t:'Bản lớn', d:'Đạt 16 dân.', p:S=>[S.pop,16], r:{bac:30}},
-  {t:'Ngày chợ phiên', d:'Dựng Chợ phiên.', p:S=>[cnt(S,'cho_phien'),1], r:{tc:2}},
-  {t:'Mua bán', d:'Bán hàng ở chợ một lần.', p:S=>[S.stats.sold,1], r:{bac:10}},
-  {t:'Khung cửi', d:'Xây Nhà dệt thổ cẩm.', p:S=>[cnt(S,'khung_det'),1], r:{bac:20}},
-  {t:'Sắc màu thổ cẩm', d:'Tích được 6 tấm thổ cẩm trong kho.', p:S=>[Math.floor(S.res.tc),6], r:{bac:30}},
-  {t:'Làng', d:'Đạt 26 dân.', p:S=>[S.pop,26], r:{bac:40}},
-  {t:'Nhà rông giữa bản', d:'Dựng Nhà rông.', p:S=>[cnt(S,'nha_rong'),1], r:{bac:50}},
-  {t:'Mở hội', d:'Tổ chức một lễ hội ở Nhà rông.', p:S=>[S.stats.fest,1], r:{tc:3}},
-  {t:'Thành Mường', d:'Đạt 40 dân.', p:S=>[S.pop,40], r:{bac:100}},
-  {t:'Cổng chào', d:'Dựng Cổng bản.', p:S=>[cnt(S,'cong_ban'),1], r:{bac:100}},
-  {t:'Đất mới', d:'Mở rộng đất lần đầu (tab Xây dựng, mục Đất đai).', p:S=>[S.size > BASE_N ? 1 : 0, 1], r:{go:80,da:40}},
-  {t:'Mường lớn', d:'Đạt 60 dân để thành Mường lớn.', p:S=>[S.pop,60], r:{bac:120}},
-  {t:'Đồi chè xanh', d:'Trồng 3 Nương chè.', p:S=>[cnt(S,'nuong_che'),3], r:{bac:80}},
-  {t:'Tiếng trống trường', d:'Xây Trường tiểu học cho trẻ em trong bản.', p:S=>[cnt(S,'truong_th'),1], r:{tc:5}},
-  {t:'Nhà sàn khang trang', d:'Nâng 3 Nhà sàn lên cấp 4 trở lên.', p:S=>[S.tiles.filter(t => t.b && t.b.k === 'nha_san' && t.b.l >= 4).length,3], r:{bac:100}},
-  {t:'Đất rộng người đông', d:'Mở rộng đất thành 16×16 ô.', p:S=>[S.size >= 16 ? 1 : 0, 1], r:{bac:150}},
-  {t:'Châu', d:'Đạt 85 dân để thành Châu.', p:S=>[S.pop,85], r:{bac:200}},
-  {t:'Khách phương xa', d:'Mở 2 Homestay đón khách du lịch.', p:S=>[cnt(S,'homestay'),2], r:{tc:8}},
-  {t:'Hội làng rộn ràng', d:'Tổ chức tổng cộng 5 lễ hội.', p:S=>[S.stats.fest,5], r:{bac:150}},
-  {t:'Châu lớn', d:'Đạt 120 dân để thành Châu lớn.', p:S=>[S.pop,120], r:{bac:300}},
-  {t:'Núi rừng bạt ngàn', d:'Mở rộng đất thành 20×20 ô.', p:S=>[S.size >= 20 ? 1 : 0, 1], r:{bac:300}},
-  {t:'Cột cờ trên đỉnh núi', d:'Dựng Cột cờ.', p:S=>[cnt(S,'cot_co'),1], r:{bac:500}},
-  {t:'Huyện', d:'Đạt 170 dân để thành Huyện.', p:S=>[S.pop,170], r:{bac:400}},
-  {t:'Trạm y tế', d:'Dựng Trạm y tế chăm sóc dân bản.', p:S=>[cnt(S,'tram_y_te'),1], r:{tc:10}},
-  {t:'Nhà sàn bề thế', d:'Nâng 5 Nhà sàn lên cấp 6 trở lên.', p:S=>[S.tiles.filter(t => t.b && t.b.k === 'nha_san' && t.b.l >= 6).length,5], r:{bac:400}},
-  {t:'Đất rộng 26×26', d:'Mở rộng đất thành 26×26 ô.', p:S=>[S.size >= 26 ? 1 : 0, 1], r:{bac:500}},
-  {t:'Phủ', d:'Đạt 240 dân để thành Phủ.', p:S=>[S.pop,240], r:{bac:600}},
-  {t:'Ánh điện về bản', d:'Xây Thuỷ điện nhỏ sát suối.', p:S=>[cnt(S,'thuy_dien'),1], r:{bac:500}},
-  {t:'Trấn', d:'Đạt 320 dân để thành Trấn.', p:S=>[S.pop,320], r:{bac:800}},
-  {t:'Bát ngát 32×32', d:'Mở rộng đất thành 32×32 ô.', p:S=>[S.size >= MAX_N ? 1 : 0, 1], r:{bac:1000}},
-  {t:'Xứ sở', d:'Đạt 420 dân để thành Xứ sở.', p:S=>[S.pop,420], r:{bac:1000}},
-  {t:'Bản đổi mới', d:'Hoàn thành 3 dự án hiện đại hoá (nút Tiến hoá xã hội ở góc trên bản đồ).', p:S=>[S.modern ? S.modern.done.length : 0, 3], r:{bac:800}},
-  {t:'Bản xanh hiện đại', d:'Hoàn thành cả 6 dự án hiện đại hoá.', p:S=>[S.modern ? S.modern.done.length : 0, 6], r:{bac:2000}},
-  {t:'Đường về muôn nơi', d:'Nối 10 nơi sản xuất vào mạng đường dẫn tới Kho thóc, Chợ, Nhà rông hoặc Bến xe.', p:S=>[G.E ? G.E.connCount || 0 : 0, 10], r:{bac:300}},
-  {t:'Mạch bạc trong núi', d:'Xây Mỏ bạc cạnh núi đá vôi và cử đủ thợ mỏ.', p:S=>[S.tiles.some((t, k) => t.b && t.b.k === 'mo_bac' && G.E && G.E.info[k] && G.E.info[k].got >= G.E.info[k].slots) ? 1 : 0, 1], r:{tc:6}},
-  {t:'Mầm non và tiểu học', d:'Xây Trường mầm non và Trường tiểu học để trẻ em được đến trường.', p:S=>[(cnt(S,'truong_mn') ? 1 : 0) + (cnt(S,'truong_th') ? 1 : 0), 2], r:{bac:60}},
-  {t:'Đủ các cấp phổ thông', d:'Có đủ Trường tiểu học, Trường THCS và Trường THPT.', p:S=>[['truong_th','truong_hoc','truong_thpt'].filter(k => cnt(S, k)).length, 3], r:{bac:250}},
-  {t:'Kỹ sư đầu tiên', d:'Có người trong bản tốt nghiệp đại học. Trường đại học mở khi thành Huyện.', p:S=>[S.stats.firstUni ? 1 : 0, 1], r:{bac:400}},
-  {t:'Bản tri thức', d:'Nâng trình độ lao động của bản lên ×1,20.', p:S=>[G.E && G.E.eduMul >= 1.2 ? 1 : 0, 1], r:{bac:800}},
-  {t:'Nhà kiên cố', d:'Nâng 3 nhà lên cấp 8 (nhà sàn kiên cố) trở lên. Cần dự án Kiên cố hoá nhà ở.', p:S=>[S.tiles.filter(t => t.b && t.b.k === 'nha_san' && t.b.l >= 8).length, 3], r:{bac:600}},
-  {t:'Phố mới trên núi', d:'Có 5 nhà từ cấp 10 (nhà 3 tầng) trở lên.', p:S=>[S.tiles.filter(t => t.b && t.b.k === 'nha_san' && t.b.l >= 10).length, 5], r:{bac:1200}},
-  {t:'Chung cư đầu tiên', d:'Nâng một nhà lên cấp 12 thành chung cư 5 tầng.', p:S=>[S.tiles.some(t => t.b && t.b.k === 'nha_san' && t.b.l >= 12) ? 1 : 0, 1], r:{bac:2000}},
-  {t:'Toà tháp xanh', d:'Nâng một nhà lên cấp 15 thành toà tháp xanh 20 tầng.', p:S=>[S.tiles.some(t => t.b && t.b.k === 'nha_san' && t.b.l >= 15) ? 1 : 0, 1], r:{bac:5000}},
+  {t:'Dẫn nước vào ruộng', era:1, d:'Xây 1 {muong} nối từ suối tới ruộng.', p:S=>[cnt(S,'muong'),1], r:{da:5,lua:10}},
+  {t:'Kho đầy thóc', era:1, d:'Xây 1 {kho} để chứa được nhiều hơn.', p:S=>[cnt(S,'kho'),1], r:{da:10}},
+  {t:'Con trâu đầu cơ nghiệp', era:1, d:'Xây {chuong_trau} sát ruộng.', p:S=>[cnt(S,'chuong_trau'),1], r:{lua:30}},
+  {t:'Lửa lò đúc đồng', era:1, d:'Dựng {lo_duc} để có đồng làm nông cụ, vũ khí.', p:S=>[cnt(S,'lo_duc'),1], r:{bac:20}},
+  {t:'Khung cửi', era:1, d:'Xây {khung_det}.', p:S=>[cnt(S,'khung_det'),1], r:{bac:20}},
+  {t:'Sắc màu thổ cẩm', era:1, d:'Tích được 6 tấm thổ cẩm trong kho.', p:S=>[Math.floor(S.res.tc),6], r:{bac:30}},
+  {t:'Thành {R2}', era:1, d:'Đạt 16 dân.', p:S=>[S.pop,16], r:{bac:30}},
+  {t:'Rèn quân giữ bản', era:1, d:'Dựng {thao_truong} và tuyển 3 người lính (nút Quân đội).', p:S=>[Math.min(3, S.army ? S.army.n : 0), 3], r:{bac:30}},
+  {t:'Thành {R3}', era:1, d:'Đạt 26 dân.', p:S=>[S.pop,26], r:{bac:40}},
+  {t:'Nhà rông giữa bản', era:1, d:'Dựng {nha_rong}.', p:S=>[cnt(S,'nha_rong'),1], r:{bac:50}},
+  {t:'Mở hội', era:1, d:'Tổ chức một lễ hội ở {nha_rong}.', p:S=>[S.stats.fest,1], r:{tc:3}},
+  {t:'Tiếng cối giã gạo', era:2, d:'Xây {coi_nuoc} sát suối.', p:S=>[cnt(S,'coi_nuoc'),1], r:{bac:15}},
+  {t:'Ngày chợ phiên', era:2, d:'Dựng {cho_phien}.', p:S=>[cnt(S,'cho_phien'),1], r:{tc:2}},
+  {t:'Mua bán', era:2, d:'Bán hàng ở chợ một lần.', p:S=>[S.stats.sold,1], r:{bac:10}},
+  {t:'Mạch bạc trong núi', era:2, d:'Xây {mo_bac} cạnh núi đá vôi và cử đủ thợ mỏ.', p:S=>[S.tiles.some((t, k) => t.b && t.b.k === 'mo_bac' && G.E && G.E.info[k] && G.E.info[k].got >= G.E.info[k].slots) ? 1 : 0, 1], r:{bac:80}},
+  {t:'Thành {R4}', era:2, d:'Đạt 40 dân.', p:S=>[S.pop,40], r:{bac:100}},
+  {t:'Đất mới', era:2, d:'Mở rộng đất lần đầu (tab Xây dựng, mục Đất đai).', p:S=>[S.size > BASE_N ? 1 : 0, 1], r:{go:80,da:40}},
+  {t:'Cổng chào', era:3, d:'Dựng {cong_ban}.', p:S=>[cnt(S,'cong_ban'),1], r:{bac:100}},
+  {t:'Tiếng trống trường', era:3, d:'Mở {truong_th} cho trẻ em trong bản.', p:S=>[cnt(S,'truong_th'),1], r:{tc:5}},
+  {t:'Thành {R5}', era:3, d:'Đạt 60 dân.', p:S=>[S.pop,60], r:{bac:120}},
+  {t:'Đồi chè xanh', era:3, d:'Trồng 3 {nuong_che}.', p:S=>[cnt(S,'nuong_che'),3], r:{bac:80}},
+  {t:'Nhà cửa khang trang', era:3, d:'Nâng 3 nhà lên cấp 4 trở lên.', p:S=>[S.tiles.filter(t => t.b && t.b.k === 'nha_san' && t.b.l >= 4).length,3], r:{bac:100}},
+  {t:'Đất rộng người đông', era:3, d:'Mở rộng đất thành 16×16 ô.', p:S=>[S.size >= 16 ? 1 : 0, 1], r:{bac:150}},
+  {t:'Thành {R6}', era:3, d:'Đạt 85 dân.', p:S=>[S.pop,85], r:{bac:200}},
+  {t:'Khách phương xa', era:3, d:'Mở 2 {homestay} đón khách phương xa.', p:S=>[cnt(S,'homestay'),2], r:{tc:8}},
+  {t:'Hội làng rộn ràng', era:3, d:'Tổ chức tổng cộng 5 lễ hội.', p:S=>[S.stats.fest,5], r:{bac:150}},
+  {t:'Đủ các cấp học', era:3, d:'Có đủ {truong_th}, {truong_hoc} và {truong_thpt}.', p:S=>[['truong_th','truong_hoc','truong_thpt'].filter(k => cnt(S, k)).length, 3], r:{bac:250}},
+  {t:'Thành {R7}', era:4, d:'Đạt 120 dân.', p:S=>[S.pop,120], r:{bac:300}},
+  {t:'Núi rừng bạt ngàn', era:4, d:'Mở rộng đất thành 20×20 ô.', p:S=>[S.size >= 20 ? 1 : 0, 1], r:{bac:300}},
+  {t:'Cột cờ trên đỉnh núi', era:5, d:'Dựng {cot_co}.', p:S=>[cnt(S,'cot_co'),1], r:{bac:500}},
+  {t:'Thành {R8}', era:5, d:'Đạt 170 dân.', p:S=>[S.pop,170], r:{bac:400}},
+  {t:'Chăm sóc sức khoẻ', era:5, d:'Dựng {tram_y_te} chăm sóc dân bản.', p:S=>[cnt(S,'tram_y_te'),1], r:{tc:10}},
+  {t:'Măng non', era:5, d:'Mở {truong_mn} cho các cháu nhỏ.', p:S=>[cnt(S,'truong_mn'),1], r:{bac:60}},
+  {t:'Nhà cửa bề thế', era:5, d:'Nâng 5 nhà lên cấp 6 trở lên.', p:S=>[S.tiles.filter(t => t.b && t.b.k === 'nha_san' && t.b.l >= 6).length,5], r:{bac:400}},
+  {t:'Đất rộng 26×26', era:5, d:'Mở rộng đất thành 26×26 ô.', p:S=>[S.size >= 26 ? 1 : 0, 1], r:{bac:500}},
+  {t:'Thành {R9}', era:6, d:'Đạt 240 dân.', p:S=>[S.pop,240], r:{bac:600}},
+  {t:'Ánh điện về bản', era:6, d:'Xây {thuy_dien} sát suối.', p:S=>[cnt(S,'thuy_dien'),1], r:{bac:500}},
+  {t:'Kỹ sư đầu tiên', era:6, d:'Có người trong bản tốt nghiệp {dai_hoc}.', p:S=>[S.stats.firstUni ? 1 : 0, 1], r:{bac:400}},
+  {t:'Thành {R10}', era:7, d:'Đạt 320 dân.', p:S=>[S.pop,320], r:{bac:800}},
+  {t:'Bát ngát 32×32', era:7, d:'Mở rộng đất thành 32×32 ô.', p:S=>[S.size >= MAX_N ? 1 : 0, 1], r:{bac:1000}},
+  {t:'Đường về muôn nơi', era:7, d:'Nối 10 nơi sản xuất vào mạng đường dẫn tới {kho}, Chợ, Nhà văn hoá hoặc Bến xe.', p:S=>[G.E ? G.E.connCount || 0 : 0, 10], r:{bac:300}},
+  {t:'Thành {R11}', era:8, d:'Đạt 420 dân.', p:S=>[S.pop,420], r:{bac:1000}},
+  {t:'Bản đổi mới', era:8, d:'Hoàn thành 3 dự án hiện đại hoá (nút Màn ở góc trên bản đồ, mục Dự án).', p:S=>[S.modern ? S.modern.done.length : 0, 3], r:{bac:800}},
+  {t:'Bản tri thức', era:8, d:'Nâng trình độ lao động của bản lên ×1,20.', p:S=>[G.E && G.E.eduMul >= 1.2 ? 1 : 0, 1], r:{bac:800}},
+  {t:'Nhà kiên cố', era:8, d:'Nâng 3 nhà lên cấp 8 trở lên. Cần dự án Kiên cố hoá nhà ở.', p:S=>[S.tiles.filter(t => t.b && t.b.k === 'nha_san' && t.b.l >= 8).length, 3], r:{bac:600}},
+  {t:'Bản xanh hiện đại', era:8, d:'Hoàn thành 6 dự án hiện đại hoá.', p:S=>[S.modern ? S.modern.done.length : 0, 6], r:{bac:2000}},
+  {t:'Phố mới trên núi', era:8, d:'Có 5 nhà từ cấp 10 (nhà 3 tầng) trở lên.', p:S=>[S.tiles.filter(t => t.b && t.b.k === 'nha_san' && t.b.l >= 10).length, 5], r:{bac:1200}},
+  {t:'Chung cư đầu tiên', era:8, d:'Nâng một nhà lên cấp 12 thành chung cư 5 tầng.', p:S=>[S.tiles.some(t => t.b && t.b.k === 'nha_san' && t.b.l >= 12) ? 1 : 0, 1], r:{bac:2000}},
+  {t:'Toà tháp xanh', era:8, d:'Nâng một nhà lên cấp 15 thành toà tháp xanh 20 tầng.', p:S=>[S.tiles.some(t => t.b && t.b.k === 'nha_san' && t.b.l >= 15) ? 1 : 0, 1], r:{bac:5000}},
 ];
+const QUEST_V2 = ['Khai hoang','Ruộng đầu tiên','Dẫn nước vào ruộng','Thêm mái nhà','Tiếng rìu trong rừng','Kho đầy thóc','Thành bản','Đám cưới đầu tiên','Tiếng trẻ thơ','Tiếng cối giã gạo','Đá xây bản','Con trâu đầu cơ nghiệp','Hoa mận trắng','Bản lớn','Ngày chợ phiên','Mua bán','Khung cửi','Sắc màu thổ cẩm','Làng','Nhà rông giữa bản','Mở hội','Thành Mường','Cổng chào','Đất mới','Mường lớn','Đồi chè xanh','Tiếng trống trường','Nhà sàn khang trang','Đất rộng người đông','Châu','Khách phương xa','Hội làng rộn ràng','Châu lớn','Núi rừng bạt ngàn','Cột cờ trên đỉnh núi','Huyện','Trạm y tế','Nhà sàn bề thế','Đất rộng 26×26','Phủ','Ánh điện về bản','Trấn','Bát ngát 32×32','Xứ sở','Bản đổi mới','Bản xanh hiện đại','Đường về muôn nơi','Mạch bạc trong núi','Mầm non và tiểu học','Đủ các cấp phổ thông','Kỹ sư đầu tiên','Bản tri thức','Nhà kiên cố','Phố mới trên núi','Chung cư đầu tiên','Toà tháp xanh'];
+const QUEST_ALIAS = {'Thành bản':'Thành {R1}', 'Bản lớn':'Thành {R2}', 'Làng':'Thành {R3}', 'Thành Mường':'Thành {R4}', 'Mường lớn':'Thành {R5}', 'Châu':'Thành {R6}', 'Châu lớn':'Thành {R7}', 'Huyện':'Thành {R8}', 'Phủ':'Thành {R9}', 'Trấn':'Thành {R10}', 'Xứ sở':'Thành {R11}', 'Đá xây bản':'Công cụ đá', 'Nhà sàn khang trang':'Nhà cửa khang trang', 'Nhà sàn bề thế':'Nhà cửa bề thế', 'Trạm y tế':'Chăm sóc sức khoẻ', 'Mầm non và tiểu học':'Măng non', 'Đủ các cấp phổ thông':'Đủ các cấp học'};
+function questRemap(old){ const done = new Set(QUEST_V2.slice(0, old).map(t => QUEST_ALIAS[t] || t)); for (const [q, anc] of [['Săn bắt, hái lượm','Tiếng rìu trong rừng'], ['Lửa lò đúc đồng','Con trâu đầu cơ nghiệp'], ['Rèn quân giữ bản','Thành {R3}']]) if (done.has(anc)) done.add(q); let k = 0; while (k < QUESTS.length && done.has(QUESTS[k].t)) k++; return k; }
+const qText = s => String(s).replace(/\{R(\d+)\}/g, (m, i) => RANKS[+i] ? RANKS[+i].name : m).replace(/\{([a-z_]+)\}/g, (m, k) => B[k] ? B[k].name : m);
 function genDQ(S){
   const n = S.dqn || 0, st = S.stats, up = (x, m) => Math.ceil(x/m)*m;
   const types = ['pop','bac','births','fest','weddings','plant','fame','grad'];
@@ -854,7 +990,9 @@ function genDQ(S){
 const DQ_PROG = {fame:S => Math.floor(S.fame || 0), grad:S => S.stats.gradHi || 0, pop:S => S.pop, bac:S => Math.floor(S.res.bac), births:S => S.stats.births || 0, fest:S => S.stats.fest || 0, weddings:S => S.stats.weddings || 0, plant:S => S.stats.planted || 0, expand:S => S.size || BASE_N};
 const E0mile = S => 5*Math.floor(starsOf(S)/5);
 function curQuest(S){
-  const q = QUESTS[S.quest]; if (q) return q;
+  const q = QUESTS[S.quest];
+  if (q && (q.era|0) > (S.era|0)){ const e = S.era|0, G0 = (SOC[e] && SOC[e].goals) || []; return {t:'Sang thời kỳ ' + SOC[Math.min(q.era, e + 1)].short, d:'Nhiệm vụ tiếp theo mở ở thời kỳ ' + SOC[q.era].short + '. Hoàn thành các mục tiêu của thời kỳ ' + SOC[e].short + ' (nút Màn ở góc trên bản đồ).', r:{}, wait:true, p:S2 => [G0.filter(g => goalDone(S2, g)).length, G0.length]}; }
+  if (q) return Object.assign({}, q, {t:qText(q.t), d:qText(q.d)});
   if (!S.dq || !DQ_PROG[S.dq.ty]) S.dq = genDQ(S);
   const dq = S.dq;
   return {t:dq.t, d:dq.d, r:dq.r, dyn:true, n:dq.n, p:S2 => [Math.min(DQ_PROG[dq.ty](S2), dq.tg), dq.tg]};
@@ -995,7 +1133,7 @@ function genMap(seed){
   return T;
 }
 function newState(name, seed){
-  const S = {v:1, seed, name:name || 'Bản Mây', day:1, dayT:0, tiles:genMap(seed), res:{lua:40, go:30, da:10, tc:0, bac:15, cu:0, sat:0, gach:0, xm:0, thep:0, ldt:0}, pop:3, best:3, growth:0, happy:55, hunger:0, quest:0, fest:null, mods:[], prices:{lua:1, go:1, da:1, tc:1, cu:1, sat:1, gach:1, xm:1, thep:1, ldt:1}, stats:{cleared:0, sold:0, fest:0, built:0, planted:0, weddings:0, births:0, arrived:0, passed:0}, nextId:1, created:Date.now(), saved:Date.now(), playMs:0, regrowV:1, size:BASE_N, qv:2, roadV:1, famPolicy:true, modern:{done:[], cur:null}, eduV:1, eduMax:6, gradAcc:[0,0,0,0,0,0,0], footV:1, era:0, fame:0, epoch:0, starsSeen:0, vnV:1, gave:{}};
+  const S = {v:1, seed, name:name || 'Bản Mây', day:1, dayT:0, tiles:genMap(seed), res:{lua:40, go:30, da:10, tc:0, bac:15, cu:0, sat:0, gach:0, xm:0, thep:0, ldt:0}, pop:3, best:3, growth:0, happy:55, hunger:0, quest:0, fest:null, mods:[], prices:{lua:1, go:1, da:1, tc:1, cu:1, sat:1, gach:1, xm:1, thep:1, ldt:1}, stats:{cleared:0, sold:0, fest:0, built:0, planted:0, weddings:0, births:0, arrived:0, passed:0}, nextId:1, created:Date.now(), saved:Date.now(), playMs:0, regrowV:1, size:BASE_N, qv:3, roadV:1, famPolicy:true, modern:{done:[], cur:null}, eduV:1, eduMax:6, gradAcc:[0,0,0,0,0,0,0], footV:1, era:0, fame:0, epoch:0, starsSeen:0, vnV:1, gave:{}, armyV:1, army:{n:0, want:0, tr:0, won:[], war:null, raid:null, wait:6, nextRaid:40}};
   let bk = -1, bd = 1e9;
   S.tiles.forEach((t,k) => { if (t.t !== 'g') return; const d = Math.hypot(k%BASE_N - 7, ((k/BASE_N)|0) - 6); if (d < bd){ bd = d; bk = k; } });
   S.tiles[bk].b = {k:'nha_san', l:1, id:S.nextId++};
@@ -1042,7 +1180,8 @@ function normalize(s){
     out.pop = out.people.length;
   } else { out.people = []; out.nextPid = 1; out.pop = Math.max(1, s.pop|0); syncPop(out); }
   if (!s.qv){ if ((out.quest|0) >= 7) out.quest = (out.quest|0) + 2; }
-  out.qv = 2;
+  if ((s.qv|0) < 3) out.quest = questRemap(Math.min(out.quest|0, QUEST_V2.length));
+  out.qv = 3;
   out.eduMax = [2,3,5,6].includes(s.eduMax) ? s.eduMax : 6;
   out.gradAcc = Array.isArray(s.gradAcc) && s.gradAcc.length === 7 ? s.gradAcc.map(x => Math.max(0, x|0)) : [0,0,0,0,0,0,0];
   if (!s.eduV){
@@ -1061,8 +1200,13 @@ function normalize(s){
   out.gave = {}; if (s.gave && typeof s.gave === 'object') for (const id in s.gave){ const v = s.gave[id]; if (!v || typeof v !== 'object') continue; const o = {}; for (const r of RES_KEYS) if (+v[r] > 0) o[r] = Math.floor(+v[r]); out.gave[String(id).slice(0, 8)] = o; }
   { let e0 = Math.max(0, s.era|0);
     if (!s.vnV){ const old = Math.max(e0, oldEraGuess(out)); e0 = old < 7 ? OLD2NEW[old] : old + 2; addNotice('Bản làng nay đi theo 9 thời kỳ lịch sử Việt Nam, từ thời nguyên thuỷ tới thời kỳ đổi mới. Bản của bạn đang ở ' + manLabel(e0).toLowerCase() + ': ' + eraInfo(e0).name + '. Bấm nút thời kỳ ở góc trên để xem mục tiêu.'); }
-    out.era = e0; out.era = eraOf(out); }
-  out.vnV = 1;
+    { const a0 = s.army && typeof s.army === 'object' ? s.army : {};
+      out.army = {n:Math.max(0, a0.n|0), want:Math.max(0, a0.want|0), tr:clamp(+a0.tr || 0, 0, 100), won:Array.isArray(a0.won) ? a0.won.filter(id => warDef(id)).slice(0, 300) : [], war:null, raid:null, wait:Math.max(0, a0.wait == null ? 6 : a0.wait|0), nextRaid:a0.nextRaid == null ? (out.day|0) + 40 : a0.nextRaid|0};
+      if (a0.war && warDef(a0.war.id)) out.army.war = {id:a0.war.id, d:Math.max(1, a0.war.d|0), tac:Array.isArray(a0.war.tac) ? a0.war.tac.filter(i => i === 0 || i === 1) : []};
+      if (a0.raid && +a0.raid.need > 0) out.army.raid = {d:Math.max(1, a0.raid.d|0), need:+a0.raid.need}; }
+    out.era = e0; out.era = eraOf(out);
+    if (!s.armyV){ for (const w of WARS) if (w.era < out.era && !out.army.won.includes(w.id)) out.army.won.push(w.id); } }
+  out.vnV = 1; out.armyV = 1;
   out.starsSeen = s.starsSeen == null ? starsOf(out) : Math.max(0, s.starsSeen|0);
   out.best = Math.max(out.best || 0, out.pop || 0);
   return out;
@@ -1155,7 +1299,7 @@ function eduStats(S){
   wait[4] = wait[5];
   return {wait};
 }
-const PRI = {lo_ren:3.85, lo_gach:3.9, xuong_xm:3.95, xuong_thep:4.0, nm_dien_tu:4.05, lan_san:0.2, lo_duc:3.8, don_luy:4.8, van_mieu:5.3, hoang_thanh:5.35, trang_trai_doc:0.5, trung_tam_cn:5.65, ben_xe:4.5, ruong:0, chuong_trau:1, tieu_phu:2, mo_da:3, mo_bac:3.5, cho_phien:4, nha_rong:5, truong_mn:5.45, truong_th:5.5, truong_hoc:5.52, truong_thpt:5.54, truong_nghe:5.56, dai_hoc:5.58, tram_y_te:5.6, thuy_dien:5.7, khung_det:6, nuong_che:7, homestay:8};
+const PRI = {thao_truong:4.7, lo_ren:3.85, lo_gach:3.9, xuong_xm:3.95, xuong_thep:4.0, nm_dien_tu:4.05, lan_san:0.2, lo_duc:3.8, don_luy:4.8, van_mieu:5.3, hoang_thanh:5.35, trang_trai_doc:0.5, trung_tam_cn:5.65, ben_xe:4.5, ruong:0, chuong_trau:1, tieu_phu:2, mo_da:3, mo_bac:3.5, cho_phien:4, nha_rong:5, truong_mn:5.45, truong_th:5.5, truong_hoc:5.52, truong_thpt:5.54, truong_nghe:5.56, dai_hoc:5.58, tram_y_te:5.6, thuy_dien:5.7, khung_det:6, nuong_che:7, homestay:8};
 const WORK = {trang_trai_doc:[3,4,5], ruong:[2,3,4,5,6], tieu_phu:[2,3,4], mo_da:[2,3,4], mo_bac:[3,4,5,6], khung_det:[2,3,4], nuong_che:[2,3,4,5], homestay:[2,3,4], cho_phien:[2]};
 const slotsOf = b => WORK[b.k] ? WORK[b.k][Math.min(b.l, WORK[b.k].length) - 1] : (B[b.k].w[b.l-1] || 0);
 const workersOf = slotsOf;
@@ -1169,8 +1313,8 @@ function computeEconomy(S, laborOverride){
     if (p.sl){ enrolledTotal++; enrolled[p.sl === 9 ? 0 : p.sl]++; }
     if (p.a < ADULT) kids++; else if (p.a >= ELDER) elders++; else if (p.sl && p.sl !== 9) students++; else eduSum += eduMulOf(p);
   }
-  const adults = S.people.length - kids - elders, labor = adults - students;
-  const E = {kids, elders, adults, labor, students, enrolled, enrolledTotal, eduMul:labor > 0 ? eduSum/labor : 1, seats:[0,0,0,0,0,0,0], schoolKinds:{}, prod:Object.fromEntries(RES_KEYS.map(r => [r, 0])), cons:adults*0.6 + kids*0.4 + elders*0.5, housing:0, caps:Object.assign({}, BASE_CAP), need:0, used:0, info:{}, decor:0, hasRong:false, hasCong:false, hasCho:false, counts:{}};
+  const adults = S.people.length - kids - elders, laborAll = adults - students, armyL = armyLaborOf(S, laborAll), labor = laborAll - armyL;
+  const E = {kids, elders, adults, labor, laborAll, armyL, students, enrolled, enrolledTotal, eduMul:labor > 0 ? eduSum/labor : 1, seats:[0,0,0,0,0,0,0], schoolKinds:{}, prod:Object.fromEntries(RES_KEYS.map(r => [r, 0])), cons:adults*0.6 + kids*0.4 + elders*0.5, housing:0, caps:Object.assign({}, BASE_CAP), need:0, used:0, info:{}, decor:0, hasRong:false, hasCong:false, hasCho:false, counts:{}};
   const list = [];
   S.tiles.forEach((t,k) => { if (t.b){ list.push(k); E.counts[t.b.k] = (E.counts[t.b.k]||0) + 1; } });
   for (const k of list){ const b = S.tiles[k].b; if (b.k === 'nha_san') E.housing += houseCap(S, b.l); if (b.k === 'kho') E.unlimited = true; }
@@ -1193,7 +1337,7 @@ function computeEconomy(S, laborOverride){
   const MD = modSet(S); E.mod = MD; E.benxe = list.some(k => S.tiles[k].b.k === 'ben_xe' && active.has(k));
   let wind = 0, tech = 0; for (const k of list){ const b = S.tiles[k].b; if (b.k === 'tua_bin_gio') wind += b.l; else if (b.k === 'trung_tam_cn' && active.has(k)) tech += b.l; }
   E.windB = Math.min(0.2, 0.02*wind); E.techB = Math.min(0.3, 0.06*tech); E.mile = 0.05*Math.floor(starsOf(S)/5); E.epochB = 0.05*(S.epoch|0);
-  { const jc = {idle:Math.max(0, avail), stu:students}; for (const k of wl){ const w = wk[k]; if (!w) continue; const j = JOB_OF[S.tiles[k].b.k]; if (j) jc[j] = (jc[j] || 0) + w; else jc.idle += w; } jc.labor = labor; E.jobs = jc; E.soc = socialOf(S.era|0, jc); }
+  { const jc = {idle:Math.max(0, avail), stu:students}; for (const k of wl){ const w = wk[k]; if (!w) continue; const j = JOB_OF[S.tiles[k].b.k]; if (j) jc[j] = (jc[j] || 0) + w; else jc.idle += w; } jc.linh = (jc.linh || 0) + armyL; jc.labor = labor + armyL; E.jobs = jc; E.soc = socialOf(S.era|0, jc); }
   E.bronze = list.some(k => S.tiles[k].b.k === 'lo_duc' && active.has(k)); E.vanmieu = list.some(k => S.tiles[k].b.k === 'van_mieu' && active.has(k)); E.kinhdo = list.some(k => S.tiles[k].b.k === 'hoang_thanh' && active.has(k));
   const hm0 = (0.8 + S.happy/250)*(E.soc.full ? 1.05 : 1)*(E.vanmieu ? 1.05 : 1)*(E.kinhdo ? 1.05 : 1)*(hydro ? 1.1 : 1)*(MD.dien ? 1.1 : 1)*(MD.mat_troi ? 1.05 : 1)*(MD.so_hoa ? 1.1 : 1)*(MD.thong_minh ? 1.15 : 1)*(1 + E.windB + E.techB + E.mile + E.epochB), hm = hm0*E.eduMul; E.hm = hm0; E.hydro = hydro;
   const season = SEASONS[seasonIdx(S.day)];
@@ -1232,6 +1376,7 @@ function computeEconomy(S, laborOverride){
       case 'lo_duc': info.res = 'cu'; info.amt = 0.8*cf*hm; info.notes.push('Đúc đồng'); if (on) info.notes.push('Ruộng và lán tiều phu cả bản: +10%'); break;
       case 'trong_dong': E.drum = true; break;
       case 'don_luy': if (on) E.fort = b.l; break;
+      case 'thao_truong': if (on) E.trainCap = (E.trainCap || 0) + 15*b.l; info.notes.push('Huấn luyện được ' + 15*b.l + ' quân'); break;
       case 'van_mieu': if (on) info.notes.push('Khuyến học: mọi công trình +5%'); break;
       case 'hoang_thanh': if (on) info.notes.push('Kinh đô thịnh vượng: mọi công trình +5%'); break;
       case 'tuong_dai': E.memorial = true; break;
@@ -1317,6 +1462,7 @@ function dayTick(S, live){
   if (S.modern && S.modern.cur){ const cu = S.modern.cur; if (--cu.d <= 0){ let m; if (cu.id === 'ky_nguyen'){ m = epochProj(S.epoch|0); S.epoch = (S.epoch|0) + 1; } else { S.modern.done.push(cu.id); m = MODERN.find(x => x.id === cu.id); } S.modern.cur = null; if (live) setTimeout(() => modernDone(m), 50); } }
   S.fame = (S.fame || 0) + S.pop*E.eduMul*(0.5 + S.happy/100)*(1 + 0.1*(S.era|0))/10;
   progressCheck(S, live);
+  armyDay(S, E, live);
   if (S.fest){ S.fest.days--; if (S.fest.days <= 0){ S.fest = null; if (live) toast('Lễ hội đã kết thúc. Bản lại vào mùa làm ăn.'); } }
   for (const r in S.prices) S.prices[r] = clamp(S.prices[r]*(1 + (Math.random()-0.5)*0.14) + (1 - S.prices[r])*0.12, 0.7, 1.35);
   S.day++;
@@ -2924,6 +3070,35 @@ function dNMDienTu(c, cx, cy, l, env, ex){
   if (!env.back){ const q = p(bu - a + 0.08, bv + b + 0.004, hb - 1.5); fp(c, [[q[0], q[1]], [q[0] + 12, q[1] + 6], [q[0] + 12, q[1] + 2], [q[0], q[1] - 4]], '#2e9b8f'); circ(c, q[0] + 3, q[1] + 0.6, 1.1, '#fff'); }
   for (const [u, v] of [[0.36, 0.06], [0.36, 0.2]]){ const q = p(u, v); ell(c, q[0], q[1] - 3, 3, 1.8, '#4f8a3a'); ln(c, [q[0], q[1]], [q[0], q[1] - 2], '#5a3d22', 1); }
 }
+function soldierFig(c, x, y, e, ph, s){
+  const uni = e <= 0 ? '#8a6a44' : e <= 3 ? '#6b4a2a' : e === 4 ? '#3b3a36' : e <= 7 ? '#5c6e3a' : '#3f6038';
+  ln(c, [x - 0.9*s, y], [x - 1.1*s, y - 4*s], '#2a2a2a', 1.2*s); ln(c, [x + 0.9*s, y], [x + 1.1*s, y - 4*s], '#2a2a2a', 1.2*s);
+  c.fillStyle = uni; c.fillRect(x - 2*s, y - 9*s, 4*s, 5.4*s);
+  circ(c, x, y - 10.6*s, 1.7*s, '#e0b48a');
+  if (e >= 1 && e <= 4) fp(c, [[x - 3*s, y - 11*s], [x + 3*s, y - 11*s], [x, y - 13.8*s]], '#d8c690');
+  else if (e >= 5 && e <= 7){ ell(c, x, y - 11.5*s, 2.7*s, 1*s, '#7d8a4a'); ell(c, x, y - 12.2*s, 1.8*s, 1.3*s, '#6f7c40'); }
+  else if (e >= 8) ell(c, x, y - 11.9*s, 2*s, 1.5*s, '#2f4a2c');
+  const th = Math.sin(ph)*1.6*s;
+  if (e <= 4){ ln(c, [x + 2*s + th, y - 5.5*s], [x + 5*s + th*1.6, y - 16*s], '#6b4425', 0.9*s); fp(c, [[x + 5*s + th*1.6, y - 16.4*s], [x + 4.3*s + th*1.6, y - 14*s], [x + 5.9*s + th*1.6, y - 14.3*s]], e === 0 ? '#9a948a' : e === 1 ? '#c99a3e' : '#b9c0c6'); }
+  else ln(c, [x + 1.6*s, y - 5*s + th*0.3], [x + 4*s, y - 13.5*s + th*0.3], '#33302c', 1.1*s);
+}
+function dThaoTruong(c, cx, cy, l, env){
+  const p = mkP(cx, cy), t = env.t || 0, e = env.era|0, n = env.night || 0;
+  shadow(c, cx, cy + 2, HW*0.86, HH*0.72, 0.1);
+  fp(c, [p(-0.46,-0.46), p(0.46,-0.46), p(0.46,0.46), p(-0.46,0.46)], e >= 7 ? '#b9b2a2' : '#cdb28a');
+  rail(c, p, [[-0.46, 0.46], [-0.46, -0.46], [0.46, -0.46]], 'rgba(110,80,50,.8)');
+  { const rq = (u, v, z) => p(-0.28 + u, -0.38 + v, z); ln(c, rq(-0.12, 0, 9), rq(0.13, 0, 9), '#5a3d22', 1.4); ln(c, rq(-0.12, 0, 4), rq(0.13, 0, 4), '#5a3d22', 1.2); for (let k = 0; k < 5; k++){ const a1 = rq(-0.09 + k*0.05, 0, 0), a2 = rq(-0.085 + k*0.05, 0, e >= 5 ? 12 : 17); ln(c, a1, a2, e >= 5 ? '#3a3a3a' : '#6b4425', 1); if (e < 5) fp(c, [[a2[0] - 0.9, a2[1] + 2.5], [a2[0] + 0.9, a2[1] + 2.5], [a2[0], a2[1] - 1]], e <= 1 ? '#c99a3e' : '#b9c0c6'); } }
+  for (let k = 0; k < 3; k++){ const u = -0.02 + k*0.16, v = -0.36, q = p(u, v, 0);
+    if (e < 5){ ln(c, q, [q[0], q[1] - 15], '#5a3d22', 1.3); ln(c, [q[0] - 4, q[1] - 11], [q[0] + 4, q[1] - 11], '#5a3d22', 1.1); ell(c, q[0], q[1] - 9, 2.4, 4, '#d6b45e'); circ(c, q[0], q[1] - 15, 2, '#c9a24e'); }
+    else { ln(c, [q[0] - 2, q[1]], [q[0], q[1] - 9], '#5a3d22', 1); ln(c, [q[0] + 2, q[1]], [q[0], q[1] - 9], '#5a3d22', 1); circ(c, q[0], q[1] - 12, 4.2, '#f4efe4'); circ(c, q[0], q[1] - 12, 2.9, '#c0392b'); circ(c, q[0], q[1] - 12, 1.6, '#f4efe4'); circ(c, q[0], q[1] - 12, 0.7, '#c0392b'); } }
+  { const fq = p(0.38, -0.38, 0); ln(c, fq, [fq[0], fq[1] - 34], '#4a3422', 1.1); if (e >= 5) flag(c, fq[0], fq[1] - 34, 12, 8, t, 0.7); else { const fl = Math.sin(t/260)*1.4; fp(c, [[fq[0], fq[1] - 34], [fq[0] + 11 + fl, fq[1] - 31 + fl*0.3], [fq[0], fq[1] - 27]], e === 2 || e === 4 ? '#b8322a' : '#e9b434'); } }
+  const cols = Math.min(4, l + 1), ph = t/280, pos = [];
+  for (let r = 0; r < 2; r++) for (let k = 0; k < cols; k++) pos.push([-0.22 + k*0.15, 0.02 + r*0.17]);
+  if (l >= 3) pos.push([0.32, 0.3]);
+  pos.sort((m, q) => (m[0] + m[1]) - (q[0] + q[1]));
+  for (const [u, v] of pos){ const q = p(u, v, 0); ell(c, q[0], q[1], 2.6, 1.2, 'rgba(0,0,0,.18)'); soldierFig(c, q[0], q[1], e, ph, 0.95); }
+  if (n > 0.05){ const q = p(-0.38, 0.38, 0); ell(c, q[0], q[1] - 3, 2, 1, '#5a4636'); circ(c, q[0], q[1] - 5, 1.8, '#ffb347'); if (env.lights) env.lights.push([q[0], q[1] - 5, 14]); }
+}
 function drawBuildingAt(c, k, cx, cy, l, env, ex, flip){
   const fr = (flip|0) & 3;
   if (FOOT[k] && footOf(k, l) > 1){ DRAW[k](c, cx, cy, l, fr ? Object.assign({}, env, {rot:fr}) : env, ex); return; }
@@ -2939,7 +3114,7 @@ function drawBuildingAt(c, k, cx, cy, l, env, ex, flip){
   DRAW[k](c, cx, cy, l, env2, ex2);
   c.restore();
 }
-const DRAW = {lo_ren:dLoRen, lo_gach:dLoGach, xuong_xm:dXuongXM, xuong_thep:dXuongThep, nm_dien_tu:dNMDienTu, lan_san:dLanSan, lo_duc:dLoDuc, trong_dong:dTrongDong, don_luy:dDonLuy, van_mieu:dVanMieu, hoang_thanh:dHoangThanh, tuong_dai:dTuongDai, tua_bin_gio:dTuaBin, trang_trai_doc:dTrangTrai, trung_tam_cn:dTrungTamCN, ben_xe:dBenXe, duong:dDuong, tram_song:dTramSong, mo_bac:dMoBac, tram_y_te:dTramYTe, thuy_dien:dThuyDien, nuong_che:dNuongChe, truong_hoc:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_hoc'), truong_mn:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_mn'), truong_th:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_th'), truong_thpt:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_thpt'), truong_nghe:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_nghe'), dai_hoc:dDaiHoc, homestay:dHomestay, cot_co:dCotCo, nha_san:dNhaSan, ruong:dRuong, tieu_phu:dTieuPhu, muong:dMuong, vuon:dVuon, kho:dKho, mo_da:dMoDa, chuong_trau:dChuongTrau, coi_nuoc:dCoiNuoc, khung_det:dKhungDet, cho_phien:dChoPhien, nha_rong:dNhaRong, cong_ban:dCongBan};
+const DRAW = {thao_truong:dThaoTruong, lo_ren:dLoRen, lo_gach:dLoGach, xuong_xm:dXuongXM, xuong_thep:dXuongThep, nm_dien_tu:dNMDienTu, lan_san:dLanSan, lo_duc:dLoDuc, trong_dong:dTrongDong, don_luy:dDonLuy, van_mieu:dVanMieu, hoang_thanh:dHoangThanh, tuong_dai:dTuongDai, tua_bin_gio:dTuaBin, trang_trai_doc:dTrangTrai, trung_tam_cn:dTrungTamCN, ben_xe:dBenXe, duong:dDuong, tram_song:dTramSong, mo_bac:dMoBac, tram_y_te:dTramYTe, thuy_dien:dThuyDien, nuong_che:dNuongChe, truong_hoc:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_hoc'), truong_mn:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_mn'), truong_th:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_th'), truong_thpt:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_thpt'), truong_nghe:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_nghe'), dai_hoc:dDaiHoc, homestay:dHomestay, cot_co:dCotCo, nha_san:dNhaSan, ruong:dRuong, tieu_phu:dTieuPhu, muong:dMuong, vuon:dVuon, kho:dKho, mo_da:dMoDa, chuong_trau:dChuongTrau, coi_nuoc:dCoiNuoc, khung_det:dKhungDet, cho_phien:dChoPhien, nha_rong:dNhaRong, cong_ban:dCongBan};
 function tileEx(S, k){
   const i = k % N, j = (k/N)|0, t = S.tiles[k], ex = {seed:hash2(i, j, 99)};
   if (t.b && t.b.k === 'duong'){ ex.conns = D4.filter(([di,dj]) => { const n = tileAt(S, i+di, j+dj); return n && n.b && n.b.k !== 'muong' && (n.b.k === 'duong' || t.t !== 'w'); }); }
@@ -3660,7 +3835,7 @@ function setWorkAll(k, d){
 }
 function progressCheck(S, live){
   const e = eraOf(S);
-  if (e > (S.era|0)){ const from = S.era|0; S.era = e; let bac = 0; for (let x = from + 1; x <= e; x++) bac += eraReward(x); S.res.bac += bac; if (live) setTimeout(() => eraUp(from, e, bac), 400); }
+  if (e > (S.era|0)){ const from = S.era|0; S.era = e; let bac = 0; for (let x = from + 1; x <= e; x++) bac += eraReward(x); S.res.bac += bac; if (S.army){ S.army.war = null; S.army.wait = 6; } if (live) setTimeout(() => eraUp(from, e, bac), 400); }
   const st = starsOf(S), seen = S.starsSeen|0;
   if (st > seen){
     let bac = 0, big = 0; for (let n = seen + 1; n <= st; n++){ bac += 400 + 150*n; if (n % 5 === 0) big = n; }
@@ -3688,6 +3863,56 @@ function eraUp(from, e, bac){
   const h = houseSpot(); if (h) spawnConfetti(h[0], h[1], 60);
   changed(true);
 }
+function armyDay(S, E, live){
+  const A = S.army, e = S.era|0; if (!A) return;
+  const cap = E.trainCap || 0, mx = maxArmy(E);
+  if (A.n > mx) A.n = mx;
+  if (A.n > A.want) A.n = A.want;
+  if (A.n < Math.min(A.want, mx) && cap > 0){
+    const cost = armCost(e); let k = Math.min(Math.min(A.want, mx) - A.n, Math.max(2, Math.ceil(cap*0.25))), got = 0;
+    while (k > 0 && canAfford(S, cost)){ payCost(S, cost); A.tr = A.tr*A.n/(A.n + 1); A.n++; k--; got++; }
+    if (k > 0 && !got && live && S.day % 4 === 0) toast('Thiếu vũ khí cho tân binh: ' + missingText(S, cost).charAt(0).toLowerCase() + missingText(S, cost).slice(1), 'bad');
+  }
+  if (A.n > 0) A.tr = cap > 0 ? Math.min(100, A.tr + 2.5*Math.min(1, cap/A.n)) : Math.max(0, A.tr - 0.5);
+  if (A.war){ if (--A.war.d <= 0) resolveWar(S, E, live); }
+  else { const id = nextWarId(S); if (id){ if (A.wait > 0) A.wait--; else warStart(S, E, id, live); } }
+  if (A.raid){ if (--A.raid.d <= 0) resolveRaid(S, E, live); }
+  else if (!A.war && e >= 1 && S.pop >= 20 && S.day >= (A.nextRaid|0) && (e >= 2 || cnt(S, 'thao_truong'))){
+    A.raid = {d:4, need:Math.max(3, Math.round(S.pop*(e >= 8 ? 0.03 : 0.04)))};
+    if (live) toast(raidName(e) + (e >= 8 ? ' sắp xảy ra' : ' sắp kéo đến') + ' (còn 4 ngày): cần sức mạnh ' + A.raid.need + ', bản đang có ' + fmt(armyPower(S, E, null)) + '.', 'bad');
+  }
+}
+function warStart(S, E, id, live){
+  const A = S.army, D = warDef(id); if (!D) return; A.war = {id, d:16, tac:[]};
+  if (live){ Sound.sfx('gong'); showModal(D.peace ? 'Nhiệm vụ mới: ' + D.name : 'Chiến sự: ' + D.name, '<p class="ev">' + D.desc + '</p><p>' + (D.peace ? 'Cần lực lượng' : 'Cần sức mạnh') + ' <b>' + D.need + '</b>, ta đang có <b>' + fmt(armyPower(S, E, null)) + '</b>. Còn <b>16 ngày</b> để chuẩn bị: tuyển quân, rèn luyện ở ' + B.thao_truong.name + ', chọn mưu kế. Sẵn sàng thì có thể xuất quân sớm.</p>', [{label:'Chuẩn bị', cls:'gold', fn:() => openPanel('army')}, {label:'Để sau', cls:'ghost'}]); }
+}
+function resolveWar(S, E, live){
+  const A = S.army, w = A.war, D = w && warDef(w.id); if (!D){ A.war = null; return; }
+  const pw = armyPower(S, E, w), roll = pw*(0.9 + Math.random()*0.2), win = roll >= D.need, info = {};
+  if (win){ A.won.push(D.id); A.war = null; A.wait = D.era >= ERA_FUT ? 25 : 8; info.bac = Math.round(D.need*25); S.res.bac += info.bac; S.fame = (S.fame || 0) + D.need*3; A.tr = Math.min(100, A.tr + 10); S.happy = Math.min(100, S.happy + 8); }
+  else { info.lua = Math.floor(S.res.lua*0.1); info.bacL = Math.floor(S.res.bac*0.1); S.res.lua -= info.lua; S.res.bac -= info.bacL; if (!D.peace){ info.lost = A.n - Math.floor(A.n*0.8); A.n -= info.lost; } A.tr = Math.max(0, A.tr - 5); S.happy = Math.max(0, S.happy - 8); w.d = 12; w.tac = []; }
+  if (live) battleModal(D, roll, win, info);
+  changed(true);
+}
+function resolveRaid(S, E, live){
+  const A = S.army, e = S.era|0, need = A.raid.need, pw = armyPower(S, E, null)*(0.9 + Math.random()*0.2), nm = raidName(e);
+  A.raid = null; A.nextRaid = S.day + 45 + Math.floor(Math.random()*30);
+  if (pw >= need){ const bac = need*6; S.res.bac += bac; S.happy = Math.min(100, S.happy + 2); if (live) toast(e >= 8 ? nm + ': bộ đội, dân quân cứu hộ kịp thời. Dân yên lòng, thưởng ' + bac + ' bạc.' : 'Đánh lui ' + nm.toLowerCase() + '! Thu được ' + bac + ' bạc.', 'good'); }
+  else if (e >= 8){ const l1 = Math.floor(S.res.lua*0.08), l2 = Math.floor(S.res.go*0.08); S.res.lua -= l1; S.res.go -= l2; S.happy = Math.max(0, S.happy - 4); if (live) toast(nm + ' gây thiệt hại: mất ' + fmt(l1) + ' lúa, ' + fmt(l2) + ' gỗ. Cần thêm quân để cứu hộ.', 'bad'); }
+  else { const l1 = Math.floor(S.res.lua*0.12), l2 = Math.floor(S.res.bac*0.12); S.res.lua -= l1; S.res.bac -= l2; S.happy = Math.max(0, S.happy - 4); if (live) toast(nm + ' cướp mất ' + fmt(l1) + ' lúa, ' + fmt(l2) + ' bạc. Cần thêm quân giữ bản.', 'bad'); }
+  if (live) changed(true);
+}
+function battleModal(D, roll, win, info){
+  const mx = Math.max(roll, D.need)*1.12;
+  const res = win ? '<b>' + (D.peace ? 'Hoàn thành!' : 'Chiến thắng!') + '</b> ' + D.win + ' Thưởng ' + fmt(info.bac) + ' bạc; quân lính dày dạn thêm.'
+    : '<b>Chưa thành công.</b> ' + (D.peace ? '' : 'Quân ta phải rút lui củng cố lực lượng' + (info.lost ? ', mất ' + info.lost + ' người' : '') + '. ') + 'Bản mất ' + fmt(info.lua) + ' lúa, ' + fmt(info.bacL) + ' bạc. Còn 12 ngày để chuẩn bị lại: thêm quân, rèn luyện, dùng mưu kế.';
+  showModal(D.name + ' (' + D.yrs + ')', '<div class="bat"><div><span>' + (D.peace ? 'Lực lượng' : 'Quân ta') + '</span><i><b id="batA"></b></i><em>' + fmt(roll) + '</em></div><div><span>' + (D.peace ? 'Yêu cầu' : 'Đối phương') + '</span><i><b id="batB" class="foe"></b></i><em>' + fmt(D.need) + '</em></div></div><p id="batR" style="opacity:0;transition:opacity .5s 1s">' + res + '</p>', [win ? {label:'Tuyệt vời', cls:'gold'} : {label:'Chuẩn bị lại', cls:'gold', fn:() => openPanel('army')}]);
+  setTimeout(() => { const a = $('#batA'), b = $('#batB'), r = $('#batR'); if (a) a.style.width = (roll/mx*100) + '%'; if (b) b.style.width = (D.need/mx*100) + '%'; if (r) r.style.opacity = 1; }, 60);
+  Sound.sfx(win ? 'rank' : 'error'); if (win){ const h = houseSpot(); if (h) spawnConfetti(h[0], h[1], 50); }
+}
+function setArmy(d){ const S = G.S, A = S.army, mx = maxArmy(G.E); if (!cnt(S, 'thao_truong') && d > 0){ toast('Cần dựng ' + B.thao_truong.name + ' để tuyển và rèn luyện quân.', 'bad'); return; } A.want = clamp(A.want + d, 0, mx); if (A.n > A.want) A.n = A.want; Sound.sfx('tap'); changed(true); }
+function useTactic(i){ const S = G.S, w = S.army.war, D = w && warDef(w.id), T = D && D.tac[i]; if (!T || w.tac.includes(i)) return; if (!canAfford(S, T.cost)){ toast(missingText(S, T.cost), 'bad'); return; } payCost(S, T.cost); w.tac.push(i); Sound.sfx('reward'); toast('Đã dùng mưu kế: ' + T.n + ' (+' + Math.round(T.b*100) + '% sức mạnh).', 'good'); changed(true); }
+function fightNow(){ const S = G.S; if (!S.army.war) return; resolveWar(S, G.E || computeEconomy(S), true); }
 function giveReserve(S){ return {lua:Math.ceil(((G.E && G.E.cons) || S.pop*0.6)*3)}; }
 function canGive(S, g){ const gv = (S.gave && S.gave[g.id]) || {}, rs = giveReserve(S); for (const r in g.res){ const need = g.res[r] - (gv[r] || 0); if (need > 0 && (S.res[r] || 0) - (rs[r] || 0) < need) return false; } return true; }
 function doGive(id){
@@ -3850,7 +4075,7 @@ function doFest(k){
 }
 function claimQuest(){
   const S = G.S, q = curQuest(S); if (!q) return;
-  const [c0, t0] = q.p(S); if (c0 < t0) return;
+  const [c0, t0] = q.p(S); if (c0 < t0 || q.wait) return;
   for (const r in q.r) S.res[r] += q.r[r];
   if (q.dyn){ S.dq = null; S.dqn = (S.dqn || 0) + 1; } else S.quest++;
   G.questNotified = false; Sound.sfx('reward');
@@ -4111,7 +4336,18 @@ function renderCloudIcon(){
   const st = Cloud.status, el = $('#cloudIco');
   el.innerHTML = st === 'ok' ? ICON.cloudOk : st === 'saving' ? ICON.cloudSync : st === 'error' || st === 'offline' ? ICON.cloudErr : ICON.device;
 }
+const SWORD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6M16 16l4 4M19 21l2-2"/><path d="M9.5 17.5L21 6V3h-3L6.5 14.5"/><path d="M11 19l-6-6M8 16l-4 4M5 21l-2-2"/></svg>';
+function updateWarBtn(){
+  const el = $('#warBtn'), S = G.S; if (!el) return;
+  if (!S || !G.playing || !S.army || G.buildK || G.showNet || !(S.army.war || S.army.raid)){ el.hidden = true; return; }
+  const A = S.army, E = G.E, w = A.war;
+  let txt, ok;
+  if (w){ const D = warDef(w.id), pw = armyPower(S, E, w); ok = pw >= D.need; txt = D.name + ' · còn ' + w.d + ' ngày · ' + fmt(pw) + '/' + D.need; }
+  else { const pw = armyPower(S, E, null); ok = pw >= A.raid.need; txt = raidName(S.era|0) + ' · còn ' + A.raid.d + ' ngày · ' + fmt(pw) + '/' + A.raid.need; }
+  el.hidden = false; el.classList.toggle('ok', ok); el.innerHTML = SWORD + '<span>' + txt + '</span>';
+}
 function updateModBtn(){
+  updateWarBtn();
   const el = $('#modBtn'), S = G.S;
   if (!S || !G.playing || !S.modern || G.buildK || G.showNet){ el.hidden = true; return; }
   const md = S.modern, nx = nextProj(S), e = S.era|0, I = eraInfo(e), lab = e < ERA_FUT ? manLabel(e) + ' · ' + I.short : I.short;
@@ -4155,7 +4391,7 @@ function checkQuest(){
   if (!S || !G.playing){ el.hidden = true; return; }
   const q = curQuest(S);
   if (!q){ el.hidden = true; $('#dot-quest') && $('#dot-quest').classList.remove('show'); return; }
-  const [c0, t0] = q.p(S), ready = c0 >= t0, pct = clamp(c0/t0, 0, 1)*100;
+  const [c0, t0] = q.p(S), ready = c0 >= t0 && !q.wait, pct = clamp(c0/t0, 0, 1)*100;
   el.hidden = false; el.classList.toggle('ready', ready);
   el.innerHTML = '<span class="qi">' + ICON.quest.replace('currentColor', '#e9b434') + '</span><span class="qt"><b>' + esc(q.t) + '</b><span>' + (ready ? 'Xong rồi, chạm để nhận thưởng!' : Math.min(c0, t0) + '/' + t0 + ' · ' + esc(q.d)) + '</span>' + (ready ? '' : '<div class="bar"><i style="width:' + pct + '%"></i></div>') + '</span>';
   const dot = $('#dot-quest'); if (dot) dot.classList.toggle('show', ready);
@@ -4233,7 +4469,42 @@ function socialHTML(S, E){
   h += '<details class="socd"><summary>Mỗi tầng lớp là ai?</summary>' + T.map(o => '<p><b>' + esc(o.n) + '</b>: ' + esc(o.d) + '</p>').join('') + '<p style="color:var(--muted)">Ngoài ra có ' + E.kids + ' trẻ em và ' + E.elders + ' người già.</p></details></div>';
   return h;
 }
+function armyHTML(S, E){
+  const A = S.army, e = S.era|0, U = SOLDIER[clamp(e, 0, SOLDIER.length - 1)], cap = E.trainCap || 0, mx = maxArmy(E), w = A.war, D = w && warDef(w.id);
+  let h = '<div class="card hist" style="margin-bottom:10px"><div class="row" style="gap:6px;flex-wrap:wrap"><span class="tag gold">' + manLabel(e) + '</span><span class="tag">' + eraInfo(e).short + '</span></div><h3>' + U.n + '</h3><p>Vũ khí, trang bị: ' + U.w + '.' + (e === 3 ? ' Thời phong kiến theo phép "ngụ binh ư nông": lính luân phiên về làm ruộng, nên chỉ một nửa quân số nghỉ việc đồng áng.' : '') + '</p></div>';
+  h += '<div class="pstats p4">' + [['Quân số', fmt(A.n) + (A.want !== A.n ? '<small style="font-size:12px">/' + A.want + '</small>' : ''), 'tối đa ' + mx], ['Rèn luyện', Math.round(A.tr) + '%', trLabel(A.tr)], ['Sức mạnh', fmt(armyPower(S, E, null)), E.fort ? 'đồn luỹ +' + 15*E.fort + '%' : 'chưa có đồn luỹ'], ['Chỗ tập', cap, cnt(S, 'thao_truong') ? 'mỗi cấp 15' : 'chưa có']].map(([a, b, c]) => '<div class="pst"><b>' + b + '</b><span>' + a + '</span><em>' + c + '</em></div>').join('') + '</div>';
+  if (e < 1) h += '<p class="hint">Thời nguyên thuỷ chưa có quân đội. Từ thời dựng nước Văn Lang – Âu Lạc, bản dựng ' + B.thao_truong.name + ' để tuyển và rèn luyện quân lính.</p>';
+  else if (!cnt(S, 'thao_truong')) h += '<div class="banner soft" style="flex-wrap:wrap"><span style="flex:1">Cần dựng ' + B.thao_truong.name + ' để tuyển và rèn luyện quân lính.</span>' + (bLock(S, 'thao_truong') ? '<small>' + bLock(S, 'thao_truong') + '</small>' : '<button class="btn small dark" data-act="build" data-k="thao_truong">Xây</button>') + '</div>';
+  if (e >= 1){
+    h += '<div class="card" style="margin:8px 0"><b>Tuyển quân</b><div class="hint" style="margin:2px 0 0">Mỗi tân binh cần <span class="costs">' + costHTML(armCost(e)) + '</span>. Lính không đi làm (trừ thời phong kiến). Mỗi ngày ' + B.thao_truong.name.toLowerCase() + ' rèn luyện thêm cho quân; quân đông hơn chỗ tập thì tiến bộ chậm.</div>' +
+      '<div class="rcr"><button class="btn small ghost" data-act="army" data-d="-10">−10</button><button class="btn small ghost" data-act="army" data-d="-1">−1</button><b style="font-family:var(--disp);font-size:18px;min-width:56px;text-align:center">' + A.want + '</b><button class="btn small dark" data-act="army" data-d="1">+1</button><button class="btn small dark" data-act="army" data-d="10">+10</button></div></div>';
+  }
+  if (w && D){
+    const pw = armyPower(S, E, w), pct = clamp(pw/D.need, 0, 1);
+    h += '<div class="sec">' + (D.peace ? 'Nhiệm vụ' : 'Chiến sự') + '</div><div class="card hist"><div class="row" style="gap:6px;flex-wrap:wrap"><span class="tag ' + (pw >= D.need ? 'gold' : 'off') + '">Còn ' + w.d + ' ngày</span><span class="tag">' + D.yrs + '</span></div><h3>' + D.name + '</h3><p>' + D.desc + '</p>' +
+      '<div class="kv"><span>Sức mạnh</span><b style="color:' + (pw >= D.need ? 'var(--ok)' : '#b8322a') + '">' + fmt(pw) + ' / ' + D.need + '</b></div><div class="pbar"><i style="width:' + pct*100 + '%"></i></div>' +
+      '<div class="sec" style="margin-top:8px">Mưu kế</div><ul class="tacl">' + D.tac.map((T, i) => '<li><div><b>' + T.n + ' <span style="color:var(--ok);font-weight:600">+' + Math.round(T.b*100) + '%</span></b><small>' + T.d + '</small><div class="costs">' + costHTML(T.cost) + '</div></div>' + (w.tac.includes(i) ? '<span class="tag gold">Đã dùng</span>' : '<button class="btn small ' + (canAfford(S, T.cost) ? 'primary' : 'ghost') + '" data-act="tactic" data-i="' + i + '">Dùng</button>') + '</li>').join('') + '</ul>' +
+      '<div class="btns" style="margin-top:10px"><button class="btn ' + (pw >= D.need ? 'gold' : 'dark') + '" data-act="fight" style="flex:1">' + (D.peace ? 'Bắt đầu nhiệm vụ' : 'Xuất quân ngay') + '</button></div><p class="hint" style="margin:6px 0 0">Kết quả dao động ±10%. Hết ngày chuẩn bị, trận đánh tự diễn ra.</p></div>';
+  } else if (e >= 1){
+    const id = nextWarId(S), N = id && warDef(id);
+    h += '<div class="sec">Trận tiếp theo</div><p class="hint" style="margin:0 0 6px">' + (N ? '<b>' + N.name + '</b> (' + N.yrs + ') sẽ bắt đầu sau khoảng ' + A.wait + ' ngày.' : 'Thời kỳ này không còn trận chiến nào. Giữ một ít quân để chống ' + raidName(e).toLowerCase() + '.') + '</p>';
+  }
+  if (A.raid) h += '<div class="banner soft" style="margin:6px 0">' + raidName(e) + ' còn ' + A.raid.d + ' ngày: cần sức mạnh ' + A.raid.need + ', ta có ' + fmt(armyPower(S, E, null)) + '.</div>';
+  const won = A.won.map(warDef).filter(Boolean);
+  h += '<div class="sec">Chiến công (' + won.length + ')</div>' + (won.length ? '<ul class="qlist tl">' + won.slice().reverse().map(D2 => '<li class="done"><span class="ck">✓</span><span style="flex:1;min-width:0"><b style="font-weight:600">' + D2.name + '</b><br><small>' + D2.yrs + ' · ' + D2.win + '</small></span></li>').join('') + '</ul>' : '<p class="hint">Chưa có chiến công nào.</p>');
+  return h;
+}
+document.addEventListener('toggle', e => { const d = e.target; if (d && d.classList && d.classList.contains('bfut') && d.open) d.querySelectorAll('canvas[data-thumb]').forEach(cv => drawThumb(cv, cv.dataset.thumb, 1, 0)); }, true);
+function bcardHTML(k){
+  const S = G.S; let h = '';
+  const d = B[k], lockTxt = bLock(S, k), locked = !!lockTxt, built = d.unique && (G.E.counts[k] || 0) > 0;
+  h += '<button class="card bcard ' + (locked ? 'locked' : '') + '" data-act="build" data-k="' + k + '"' + (locked || built ? ' disabled' : '') + '><canvas data-thumb="' + k + '"></canvas><div class="bname">' + d.name + '</div>' +
+        (locked ? '<div class="lock">' + ICON.lock + lockTxt + '</div>' : built ? '<div class="lock">Đã dựng</div>' : '<div class="costs">' + costHTML(d.cost[0]) + '</div>') +
+        (slotsOf({k, l:1}) && !locked ? '<div class="wk">' + ICON.dan + slotsOf({k, l:1}) + (WORK[k] ? ' chỗ làm' : ' người làm') + '</div>' : '') + (FOOT[k] && footOf(k, 1) > 1 ? '<div class="wk">Rộng ' + footOf(k, 1) + '×' + footOf(k, 1) + ' ô</div>' : '') + (d.housing ? '<div class="wk">' + ICON.dan + 'Ở được ' + d.housing[0] + '–' + d.housing[d.housing.length - 1] + ' người</div>' : '') + '</button>';
+  return h;
+}
 const PANELS = {
+  army(){ return ['Quân đội', armyHTML(G.S, G.E)]; },
   modern(){
     const S = G.S, md = S.modern, ri = rankIdx(S.best), era = S.era|0, I = eraInfo(era), fut = era >= ERA_FUT;
     let h = '<div class="card hist" style="margin-bottom:10px"><div class="row" style="gap:6px;flex-wrap:wrap"><span class="tag gold">' + manLabel(era) + (era < ERA_FUT ? '/9' : '') + '</span><span class="tag">' + I.yrs + '</span></div><h3>' + I.name + '</h3><p>' + I.desc + '</p>' + (I.focus ? '<div class="kv"><span>Lối chơi</span><b style="font-size:12.5px;text-align:right;max-width:62%">' + I.focus + '</b></div>' : '') + '</div>';
@@ -4250,7 +4521,7 @@ const PANELS = {
         else if (y > 1) sub = (sub ? sub + ' · ' : '') + fmt(x) + '/' + fmt(y);
         h += '<li class="' + (done ? 'done' : '') + '"><span class="ck">' + (done ? '✓' : '') + '</span><span class="gtx"><b>' + goalText(g) + '</b>' + (y > 1 && !done ? '<div class="pbar"><i style="width:' + clamp(x/y, 0, 1)*100 + '%"></i></div>' : '') + (sub ? '<small>' + sub + '</small>' : '') + '</span>' + act + '</li>';
       }
-      h += '</ul><div class="btns" style="margin:2px 0 8px"><button class="btn small dark" data-act="panel" data-p="people">Tầng lớp xã hội' + (G.E && G.E.soc && G.E.soc.full ? ' ✓' : '') + '</button></div><p class="hint" style="margin:0 0 4px">Xong hết mục tiêu là sang thời kỳ mới, thưởng ' + fmt(eraReward(era + 1)) + ' bạc.' + (G0.some(g => g.t === 'give') ? ' Khi góp lúa, bản luôn giữ lại đủ ăn 3 ngày.' : '') + '</p>';
+      h += '</ul><div class="btns" style="margin:2px 0 8px"><button class="btn small dark" data-act="panel" data-p="people">Tầng lớp xã hội' + (G.E && G.E.soc && G.E.soc.full ? ' ✓' : '') + '</button><button class="btn small dark" data-act="panel" data-p="army">Quân đội</button></div><p class="hint" style="margin:0 0 4px">Xong hết mục tiêu là sang thời kỳ mới, thưởng ' + fmt(eraReward(era + 1)) + ' bạc.' + (G0.some(g => g.t === 'give') ? ' Khi góp lúa, bản luôn giữ lại đủ ăn 3 ngày.' : '') + '</p>';
     } else {
       const m = epochProj(S.epoch|0);
       h += '<div class="sec">Chặng tiếp theo</div><p class="hint" style="margin:0 0 4px">Hoàn thành dự án <b>' + m.name + '</b> (mục Dự án bên dưới) để bước sang kỷ nguyên tiếp theo. Mỗi kỷ nguyên: mọi công trình làm ra thêm 5%, thêm niềm vui.</p>';
@@ -4382,12 +4653,14 @@ const PANELS = {
   },
   build(){
     const S = G.S, ri = rankIdx(S.best);
-    let h = '<p class="hint">Chọn công trình rồi chạm vào ô sáng trên bản đồ. Mẹo: chạm thẳng vào một ô đất trống cũng xây được.</p><div class="grid">';
-    for (const k of BUILD_ORDER){
-      const d = B[k], lockTxt = bLock(S, k), locked = !!lockTxt, built = d.unique && (G.E.counts[k] || 0) > 0;
-      h += '<button class="card bcard ' + (locked ? 'locked' : '') + '" data-act="build" data-k="' + k + '"' + (locked || built ? ' disabled' : '') + '><canvas data-thumb="' + k + '"></canvas><div class="bname">' + d.name + '</div>' +
-        (locked ? '<div class="lock">' + ICON.lock + lockTxt + '</div>' : built ? '<div class="lock">Đã dựng</div>' : '<div class="costs">' + costHTML(d.cost[0]) + '</div>') +
-        (slotsOf({k, l:1}) && !locked ? '<div class="wk">' + ICON.dan + slotsOf({k, l:1}) + (WORK[k] ? ' chỗ làm' : ' người làm') + '</div>' : '') + (FOOT[k] && footOf(k, 1) > 1 ? '<div class="wk">Rộng ' + footOf(k, 1) + '×' + footOf(k, 1) + ' ô</div>' : '') + (d.housing ? '<div class="wk">' + ICON.dan + 'Ở được ' + d.housing[0] + '–' + d.housing[d.housing.length - 1] + ' người</div>' : '') + '</button>';
+    let h = '<p class="hint">Chọn công trình rồi chạm vào ô sáng trên bản đồ. Mẹo: chạm thẳng vào một ô đất trống cũng xây được. Công trình mở dần theo các thời kỳ lịch sử.</p>';
+    const era = S.era|0, groups = [];
+    for (const k of BUILD_ORDER){ const e = Math.min(B[k].era|0, ERA_FUT - 1); (groups[e] = groups[e] || []).push(k); }
+    let fut = '';
+    groups.forEach((ks, e) => { if (!ks) return; const head = '<div class="sec bera"><span>' + manLabel(e) + ' · ' + SOC[e].short + '</span><small>' + SOC[e].yrs + '</small></div><div class="grid">' + ks.map(bcardHTML).join('') + '</div>'; if (e <= era) h += head; else fut += head; });
+    if (fut) h += '<details class="bfut"><summary>Công trình của các thời kỳ sau</summary>' + fut + '</details>';
+    h += '<div style="display:none">';
+    for (const k of []){
     }
     const n0 = S.size || BASE_N;
     h += '</div><div class="sec">Đất đai</div><div class="card" style="margin-bottom:4px"><div class="row" style="justify-content:space-between;align-items:flex-start"><div><b style="font-size:15px">Mở rộng đất</b><div style="font-size:12.5px;color:var(--muted);margin-top:2px">Hiện tại ' + n0 + '×' + n0 + ' ô' + (n0 < MAX_N ? ' → ' + (n0 + 2) + '×' + (n0 + 2) + ' ô, thêm rừng, núi đá và đất trống' : '') + '</div></div><span class="tag gold">Tối đa ' + MAX_N + '×' + MAX_N + '</span></div>';
@@ -4402,8 +4675,8 @@ const PANELS = {
     const S = G.S, q = curQuest(S);
     let h = '';
     if (q){
-      const [c0, t0] = q.p(S), ready = c0 >= t0;
-      h += '<div class="card qcard"><span class="tag gold">' + (q.dyn ? 'Thử thách ' + (q.n + 1) : 'Nhiệm vụ ' + (S.quest + 1) + '/' + QUESTS.length) + '</span><h3>' + esc(q.t) + '</h3><p>' + esc(q.d) + '</p><div class="pbar"><i style="width:' + clamp(c0/t0, 0, 1)*100 + '%"></i></div><div class="row" style="justify-content:space-between"><span style="font-size:13px;color:var(--muted)">Tiến độ ' + Math.min(c0, t0) + '/' + t0 + '</span><span class="costs">Thưởng: ' + costHTML(q.r, true) + '</span></div>' +
+      const [c0, t0] = q.p(S), ready = c0 >= t0 && !q.wait;
+      h += '<div class="card qcard"><span class="tag gold">' + (q.dyn ? 'Thử thách ' + (q.n + 1) : 'Nhiệm vụ ' + (S.quest + 1) + '/' + QUESTS.length) + '</span><h3>' + esc(q.t) + '</h3><p>' + esc(q.d) + '</p><div class="pbar"><i style="width:' + clamp(c0/t0, 0, 1)*100 + '%"></i></div><div class="row" style="justify-content:space-between"><span style="font-size:13px;color:var(--muted)">Tiến độ ' + Math.min(c0, t0) + '/' + t0 + '</span>' + (q.wait ? '' : '<span class="costs">Thưởng: ' + costHTML(q.r, true) + '</span>') + '</div>' +
         '<div class="btns"><button class="btn ' + (ready ? 'gold' : 'dark') + '" data-act="claim" style="flex:1"' + (ready ? '' : ' disabled') + '>' + (ready ? 'Nhận thưởng' : 'Chưa hoàn thành') + '</button></div></div>';
     } else h += '<div class="banner gold">Bạn đã hoàn thành mọi nhiệm vụ!</div>';
     { const era = S.era|0, I = eraInfo(era), nxE = eraInfo(era + 1), ri = rankIdx(S.best), last = RANKS.length - 1, st = starsOf(S);
@@ -4416,7 +4689,7 @@ const PANELS = {
     h += '<div class="sec">Hành trình</div><ul class="qlist">';
     const q0 = Math.max(0, Math.min(S.quest, QUESTS.length) - 3);
     if (q0 > 0) h += '<li class="done"><span class="ck">✓</span>' + q0 + ' nhiệm vụ đầu đã xong</li>';
-    QUESTS.forEach((x, n) => { if (n < q0 || n > S.quest + 2) return; const done = n < S.quest; h += '<li class="' + (done ? 'done' : '') + '"><span class="ck">' + (done ? '✓' : n + 1) + '</span>' + esc(x.t) + '</li>'; });
+    QUESTS.forEach((x, n) => { if (n < q0 || n > S.quest + 2) return; const done = n < S.quest; h += '<li class="' + (done ? 'done' : '') + '"><span class="ck">' + (done ? '✓' : n + 1) + '</span>' + esc(qText(x.t)) + ((x.era|0) > (S.era|0) ? ' <small style="color:var(--muted)">(' + SOC[x.era].short + ')</small>' : '') + '</li>'; });
     if (S.quest + 3 < QUESTS.length) h += '<li><span class="ck">…</span>Còn ' + (QUESTS.length - S.quest - 3) + ' nhiệm vụ nữa, sau đó là thử thách không giới hạn</li>';
     else if (S.quest >= QUESTS.length) h += '<li class="done"><span class="ck">✓</span>Đã xong ' + QUESTS.length + ' nhiệm vụ lớn · ' + (S.dqn || 0) + ' thử thách</li>';
     return ['Nhiệm vụ', h + '</ul>'];
@@ -4514,6 +4787,7 @@ const PANELS = {
       else if (b.l < d.max){ const cost = d.cost[b.l]; h += '<button class="btn primary" data-act="upgrade" data-ix="' + ix + '" style="flex:1 1 100%">Lên cấp ' + (b.l + 1) + ' <span class="costs">' + costHTML(cost) + '</span></button>'; }
       if (b.k === 'cho_phien') h += '<button class="btn dark" data-act="panel" data-p="market" style="flex:1">Vào chợ</button>';
       if (b.k === 'nha_rong') h += '<button class="btn gold" data-act="panel" data-p="fest" style="flex:1">Mở hội</button>';
+      if (b.k === 'thao_truong' || b.k === 'don_luy') h += '<button class="btn gold" data-act="panel" data-p="army" style="flex:1 1 100%">Quân đội</button>';
       if (SEATS[b.k]) h += '<button class="btn dark" data-act="panel" data-p="edu" style="flex:1 1 100%">Xem giáo dục cả bản</button>';
       if (cnt(S, b.k) > 1) h += '<button class="btn ghost" data-act="locate" data-k="' + b.k + '" style="flex:1 1 100%">Sang ' + d.name.toLowerCase() + ' khác (' + cnt(S, b.k) + ' cái)</button>';
       if (!NO_FLIP[b.k]) h += '<button class="btn ghost" data-act="flip" data-ix="' + ix + '" style="flex:1">' + ICON.rotate + 'Xoay ' + ((b.f|0) & 3)*90 + '°</button>';
@@ -4577,6 +4851,9 @@ document.addEventListener('click', e => {
   else if (a === 'shownet'){ G.showNet = !G.showNet; $('#netBar').hidden = !G.showNet; if (G.showNet){ closeSheet(); updateModBtn(); } else updateModBtn(); }
   else if (a === 'modern') startModern(el.dataset.id);
   else if (a === 'give') doGive(el.dataset.id);
+  else if (a === 'army') setArmy(+el.dataset.d);
+  else if (a === 'tactic') useTactic(+el.dataset.i);
+  else if (a === 'fight') fightNow();
   else if (a === 'wk') setWork(+el.dataset.ix, el.dataset.d === 'max' ? 'max' : +el.dataset.d);
   else if (a === 'wkall') setWorkAll(el.dataset.k || null, el.dataset.d === 'max' ? 'max' : +el.dataset.d);
   else if (a === 'locate') doLocate(el.dataset.k);
@@ -4854,7 +5131,7 @@ requestAnimationFrame(frame);
   const alt = Cloud.uid && guest && best && best !== guest && (guest.created !== best.created || (guest.saved || 0) > (best.saved || 0) + 60000) ? guest : null;
   renderStart({save:best, cloudOk, alt, push:!!(Cloud.ref && cloudOk && best && best !== save0)});
 })();
-window.__banlang = {MATS, MAT_ERA, socialOf, nameAt, rankNameAt, expandLand, doUpgradeAll, SOC, cnt, doGive, goalProg, eraOf, bLock, EDU, SEATS, eduDay, eduStats, encodePeople, decodePeople, seedEdu, getVehicles: () => vehicles, syncVehicles, autoAssign, planRelocate, applyRelocate, startModern, MODERN, getPeople: () => people, setWork, setWorkAll, slotsOf, curQuest, serial, drawPerson, doFlip, drawBuildingAt, expandLand, setN, Sound, render, normalize, doPlant, startMove, doMove, G, Cloud, B, QUESTS, FESTS, newState, computeEconomy, dayTick, doPlace, doUpgrade, doTrade, doFest, doClear, claimQuest, placeCheck, openPanel, enterGame, save, cam};
+window.__banlang = {curQuest, changed, WARS, warDef, armyPower, armyDay, fightNow, setArmy, useTactic, maxArmy, MATS, MAT_ERA, socialOf, nameAt, rankNameAt, expandLand, doUpgradeAll, SOC, cnt, doGive, goalProg, eraOf, bLock, EDU, SEATS, eduDay, eduStats, encodePeople, decodePeople, seedEdu, getVehicles: () => vehicles, syncVehicles, autoAssign, planRelocate, applyRelocate, startModern, MODERN, getPeople: () => people, setWork, setWorkAll, slotsOf, curQuest, serial, drawPerson, doFlip, drawBuildingAt, expandLand, setN, Sound, render, normalize, doPlant, startMove, doMove, G, Cloud, B, QUESTS, FESTS, newState, computeEconomy, dayTick, doPlace, doUpgrade, doTrade, doFest, doClear, claimQuest, placeCheck, openPanel, enterGame, save, cam};
 })();
 </script>
 <script>

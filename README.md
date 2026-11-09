@@ -21,6 +21,16 @@ Trò chơi dựng bản làng vùng cao qua **9 thời kỳ lịch sử Việt N
 
 Mỗi thời kỳ có mục tiêu riêng (dân số, công trình, dự án, góp lương thực). Xong hết mục tiêu là sang thời kỳ sau, kèm một đoạn sự kiện lịch sử mở đầu.
 
+### Công trình mở theo đúng thời kỳ
+
+Thời nguyên thuỷ chỉ có túp lều, nương rẫy, lán săn bắt hái lượm, lán tiều phu, bãi ghè đá. Kho thóc, lò đúc đồng, nhà rông mở từ thời dựng nước; chợ, lò rèn, đồn luỹ từ thời Bắc thuộc; trường học, Văn Miếu, Hoàng thành từ thời phong kiến; xưởng xi măng thời Pháp thuộc; nhà trẻ, trạm y tế, cột cờ từ năm 1945... Mục Xây dựng xếp công trình theo từng màn, các thời kỳ sau được gom lại để xem trước. Nhiệm vụ cũng đi theo thời kỳ.
+
+### Quân đội và chiến tranh
+
+- Từ thời dựng nước có **bãi tập** (Bãi tập võ → Giảng Võ đường → Thao trường) để tuyển và rèn luyện quân. Lính và vũ khí đổi theo thời kỳ: giáo đồng, cung nỏ → gươm sắt → súng hoả mai → súng trường, pháo phòng không → trang bị hiện đại. Tân binh cần đồng, sắt, thép... tuỳ thời kỳ.
+- Mỗi thời kỳ có các trận lịch sử: chống quân Tần, Hai Bà Trưng, Bạch Đằng 938, chống Tống, chống Nguyên Mông, Quang Trung đại phá quân Thanh, Tổng khởi nghĩa tháng Tám, Việt Bắc 1947, Điện Biên Phủ, "Điện Biên Phủ trên không", Chiến dịch Hồ Chí Minh, bảo vệ biên giới 1979; thời bình là cứu hộ lũ lụt, diễn tập, gìn giữ hoà bình Liên Hợp Quốc. Có 16 ngày chuẩn bị: tuyển quân, rèn luyện, dùng mưu kế (cắm cọc Bạch Đằng, vườn không nhà trống, dân công hoả tuyến...). Thắng trận là một mục tiêu để sang thời kỳ sau.
+- Giặc cướp, thổ phỉ (thời bình là lũ quét, sạt lở) thỉnh thoảng xảy ra; có đủ quân thì giữ được bản và được thưởng.
+
 ### Vật liệu, tên gọi và tầng lớp xã hội thay đổi theo thời kỳ
 
 - **Vật liệu mở dần:** đồng (Dựng nước, Lò đúc đồng) → sắt (Bắc thuộc, Lò rèn) → gạch ngói (Phong kiến, Lò gạch ngói) → xi măng (Pháp thuộc, Xưởng xi măng) → thép (Chống Mỹ, Lò luyện gang thép) → linh kiện điện tử (Đổi mới, Nhà máy linh kiện). Nhà cửa, trường học, dự án cấp cao cần các vật liệu này; mua được ở chợ khi đã mở.
