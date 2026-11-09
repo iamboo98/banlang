@@ -451,7 +451,7 @@ const DAY_MS = 15000, SEASON_DAYS = 8, OFFLINE_CAP_DAYS = 480;
 const SEASONS = [
   {k:'xuan', name:'Xuân', field:1.0, msg:'Mùa Xuân về: hoa mận nở trắng, ruộng đổ nước cấy mạ.'},
   {k:'ha',   name:'Hạ',   field:1.2, msg:'Mùa Hạ: lúa lên xanh, ruộng cho thêm 20% lúa.'},
-  {k:'thu',  name:'Thu',  field:1.6, msg:'Mùa Thu: lúa chín vàng ruộng bậc thang, được mùa ×1,6!'},
+  {k:'thu',  name:'Thu',  field:1.6, msg:'Mùa Thu: lúa chín vàng khắp cánh đồng, được mùa ×1,6!'},
   {k:'dong', name:'Đông', field:0.35, msg:'Mùa Đông: gió lạnh, ruộng nghỉ. Nhớ tích trữ lúa!'},
 ];
 const RES_KEYS = ['lua','go','da','tc','bac','cu','sat','gach','xm','thep','ldt'];
@@ -470,7 +470,7 @@ function rankTitle(best, stars){ const ri = rankIdx(best), last = RANKS.length -
 
 const B = {
   nha_san:{name:'Nhà sàn', desc:'Nhà ở của dân bản. Cấp 1 là nhà sàn tranh 6 người; càng lên cấp nhà càng hiện đại: nhà sàn gỗ, nhà sàn lợp ngói, nhà sàn kiên cố, nhà xây nhiều tầng, biệt thự, chung cư, tới toà tháp 20 tầng chứa 270 người ở cấp 15.', rank:0, max:15, w:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], cost:[{go:20},{go:35,da:10},{go:60,da:25,bac:20},{go:90,da:45,bac:50},{go:130,da:70,bac:90,tc:4},{go:180,da:100,bac:150,tc:8},{go:240,da:140,bac:240,tc:12},{go:300,da:220,bac:380,tc:16},{go:360,da:320,bac:550,tc:20},{go:420,da:440,bac:780,tc:24},{go:480,da:600,bac:1100,tc:28},{go:520,da:820,bac:1500,tc:32},{go:560,da:1100,bac:2100,tc:36},{go:600,da:1450,bac:2900,tc:40},{go:650,da:1900,bac:4000,tc:50}], housing:[6,10,15,20,26,33,40,50,62,76,92,120,160,210,270], lvReq:{8:'kien_co',9:'kien_co',10:'kien_co',11:'kien_co',12:'kien_co',13:'kien_co',14:'mat_troi',15:'mat_troi'}, h:46},
-  ruong:{name:'Ruộng bậc thang', desc:'Trồng lúa nuôi dân. Sát suối hoặc mương được thêm 50%.', rank:0, max:5, w:[1,2,3,3,3], cost:[{go:8,lua:5},{go:20,da:5},{go:35,da:15},{go:50,da:25,bac:20},{go:80,da:40,bac:50}], h:16},
+  ruong:{name:'Ruộng lúa nước', desc:'Trồng lúa nuôi dân. Sát suối hoặc mương được thêm 50%. Nâng cấp thì khai thêm thửa ruộng.', rank:0, max:5, w:[1,2,3,3,3], cost:[{go:8,lua:5},{go:20,da:5},{go:35,da:15},{go:50,da:25,bac:20},{go:80,da:40,bac:50}], h:16},
   tieu_phu:{name:'Lán tiều phu', desc:'Lấy gỗ. Mỗi ô rừng xung quanh thêm 1 gỗ/ngày (tối đa 4). Tiều phu tự đốn cây đến tuổi trong vòng 2 ô rồi để cây non mọc lại.', rank:0, max:3, w:[1,2,2], cost:[{go:12},{go:30,da:10},{go:60,da:30,bac:30}], h:28},
   muong:{name:'Mương nước', desc:'Dẫn nước tưới ruộng. Phải nối với suối hoặc mương khác.', rank:0, max:1, w:[0], cost:[{go:2,da:3}], h:6},
   vuon:{name:'Vườn mận', desc:'Hoa trắng mùa xuân, quả chín mùa hè. +3 vui, +0,3 bạc/ngày.', rank:0, max:1, w:[0], cost:[{go:6,lua:10}], h:26},
@@ -538,7 +538,7 @@ for (const k in MAT_COST) for (const l in MAT_COST[k]) Object.assign(B[k].cost[l
 let NAME_ERA = null;
 function curEra(){ if (NAME_ERA != null) return NAME_ERA; try { return G && G.S ? G.S.era|0 : 2; } catch (e){ return 2; } }
 const ERA_NAMES = {
-  nha_san:[[0,'Túp lều'],[1,'Nhà sàn'],[7,'Nhà ở']], ruong:[[0,'Nương rẫy'],[1,'Ruộng bậc thang'],[7,'Ruộng hợp tác xã'],[8,'Ruộng bậc thang']],
+  nha_san:[[0,'Túp lều'],[1,'Nhà sàn'],[7,'Nhà ở']], ruong:[[0,'Nương rẫy'],[1,'Ruộng lúa nước'],[7,'Ruộng hợp tác xã'],[8,'Cánh đồng mẫu lớn']],
   tieu_phu:[[0,'Lán tiều phu'],[4,'Trại khai thác gỗ'],[6,'Lâm trường'],[8,'Xưởng chế biến gỗ']], mo_da:[[0,'Bãi ghè đá'],[1,'Bãi khai đá'],[4,'Mỏ đá'],[8,'Mỏ đá cơ giới']],
   mo_bac:[[0,'Mỏ bạc'],[7,'Mỏ khoáng sản']], kho:[[0,'Kho thóc'],[7,'Kho hợp tác xã'],[8,'Kho hàng']], cho_phien:[[0,'Chợ phiên'],[7,'Cửa hàng mậu dịch'],[8,'Chợ và siêu thị']],
   khung_det:[[0,'Nhà dệt thổ cẩm'],[7,'Hợp tác xã dệt'],[8,'Xưởng dệt thổ cẩm']], coi_nuoc:[[0,'Cối giã gạo nước'],[7,'Máy xay xát']], muong:[[0,'Mương nước'],[7,'Kênh mương thuỷ lợi']],
@@ -749,7 +749,7 @@ const MODERN_RAW = [
   {id:'dien', era:7, name:'Kéo điện lưới quốc gia', rank:5, days:8, cost:{da:200, go:100, bac:400}, desc:'Cột điện, đèn đường, bóng điện trong mọi nhà. Mọi công trình làm ra thêm 10%, +5 vui. Một số nhà thay mái tôn.'},
   {id:'song', era:8, name:'Sóng điện thoại và internet', rank:6, days:6, cost:{da:150, bac:600}, desc:'Homestay nhận khách đặt phòng qua mạng (+30%), bán hàng ở chợ được giá hơn 10%, +4 vui. Mở công trình Trạm phát sóng.'},
   {id:'kien_co', era:8, name:'Kiên cố hoá nhà ở', rank:7, days:10, cost:{go:300, da:500, bac:800}, desc:'Nhà sàn lợp ngói, lợp tôn, tường trát vững chắc. Mỗi nhà ở được thêm 20% người, +5 vui. Mở nhà ở cấp 8 trở lên: nhà kiên cố, nhà nhiều tầng, chung cư.'},
-  {id:'co_gioi', era:8, name:'Cơ giới hoá nông nghiệp', rank:8, days:8, cost:{go:200, da:300, bac:1000}, desc:'Máy cày, máy gặt về tận ruộng. Ruộng bậc thang và nương chè làm ra thêm 30%.'},
+  {id:'co_gioi', era:8, name:'Cơ giới hoá nông nghiệp', rank:8, days:8, cost:{go:200, da:300, bac:1000}, desc:'Máy cày, máy gặt về tận ruộng. Ruộng lúa và nương chè làm ra thêm 30%.'},
   {id:'mat_troi', era:8, name:'Điện mặt trời áp mái', rank:9, days:8, cost:{da:400, bac:1500}, desc:'Tấm pin mặt trời trên mái nhà. Mọi công trình làm ra thêm 5%, +6 vui. Mở nhà ở cấp 14–15: toà căn hộ và toà tháp xanh.'},
   {id:'so_hoa', era:8, name:'Chuyển đổi số', rank:10, days:8, cost:{da:600, bac:2500}, desc:'Cáp quang tới từng nhà, thanh toán điện tử, dịch vụ công trực tuyến. Mọi công trình làm ra thêm 10%, bán hàng ở chợ được giá hơn 10%, homestay +20%.'},
   {id:'xanh', era:8, name:'Năng lượng sạch, đô thị xanh', rank:11, days:10, cost:{go:500, da:900, bac:4000}, desc:'Điện gió, điện mặt trời phủ khắp, cây xanh rợp phố. +8 vui. Mở công trình Tua-bin gió.'},
@@ -762,11 +762,11 @@ function projReady(S, m){ if (m.era && (S.era|0) < m.era) return 'Từ thời k�
 const SOC = [
   {name:'Thời nguyên thuỷ', short:'Nguyên thuỷ', yrs:'Trước khoảng 2000 TCN', focus:'Sinh tồn, săn bắt, hái lượm',
    desc:'Người xưa sống thành bầy trong hang đá, mái đá và lều lá, săn bắt, hái lượm, chế tác công cụ bằng đá. Dấu tích còn ở các nền văn hoá Sơn Vi, Hoà Bình, Bắc Sơn.',
-   goals:[{t:'pop', n:8}, {t:'b', k:'lan_san', n:1, d:'Dựng Lán săn bắt hái lượm'}, {t:'b', k:'mo_da', n:1, d:'Chế tác công cụ đá: dựng Bãi khai đá'}, {t:'b', k:'ruong', n:1, d:'Nông nghiệp sơ khai: khai 1 Ruộng bậc thang'}]},
+   goals:[{t:'pop', n:8}, {t:'b', k:'lan_san', n:1, d:'Dựng Lán săn bắt hái lượm'}, {t:'b', k:'mo_da', n:1, d:'Chế tác công cụ đá: dựng Bãi khai đá'}, {t:'b', k:'ruong', n:1, d:'Nông nghiệp sơ khai: phát 1 Nương rẫy'}]},
   {name:'Thời dựng nước Văn Lang – Âu Lạc', short:'Dựng nước', yrs:'Khoảng 2000 TCN – 179 TCN', focus:'Xây dựng làng, trồng lúa, chế tác đồng',
    desc:'Từ các nền văn hoá Phùng Nguyên, Đồng Đậu, Gò Mun tới văn hoá Đông Sơn rực rỡ. Các Vua Hùng dựng nước Văn Lang; sau đó An Dương Vương lập nước Âu Lạc, xây thành Cổ Loa. Cư dân trồng lúa nước, đúc trống đồng.',
    ev:'Cư dân rời hang đá xuống ven sông, trồng lúa nước và biết đúc đồng. Theo truyền thuyết, các Vua Hùng dựng nước Văn Lang, nhà nước đầu tiên của người Việt.',
-   goals:[{t:'pop', n:26}, {t:'b', k:'ruong', n:4, d:'Trồng lúa nước: có 4 Ruộng bậc thang'}, {t:'b', k:'kho', n:1, d:'Dựng Kho thóc'}, {t:'b', k:'lo_duc', n:1, d:'Chế tác đồng: dựng Lò đúc đồng'}, {t:'b', k:'trong_dong', n:1, d:'Đúc Trống đồng Đông Sơn'}, {t:'wars', e:1}]},
+   goals:[{t:'pop', n:26}, {t:'b', k:'ruong', n:4, d:'Trồng lúa nước: có 4 Ruộng lúa nước'}, {t:'b', k:'kho', n:1, d:'Dựng Kho thóc'}, {t:'b', k:'lo_duc', n:1, d:'Chế tác đồng: dựng Lò đúc đồng'}, {t:'b', k:'trong_dong', n:1, d:'Đúc Trống đồng Đông Sơn'}, {t:'wars', e:1}]},
   {name:'Thời Bắc thuộc', short:'Bắc thuộc', yrs:'179 TCN – 938', focus:'Bảo vệ cộng đồng, đấu tranh giành độc lập',
    desc:'Hơn một nghìn năm phương Bắc đô hộ. Người Việt vẫn giữ tiếng nói, phong tục và liên tiếp đứng lên: Hai Bà Trưng (năm 40), Bà Triệu (248), Lý Bí lập nước Vạn Xuân (544), Mai Thúc Loan, Phùng Hưng, Khúc Thừa Dụ (905).',
    ev:'Năm 179 TCN, Triệu Đà đánh chiếm Âu Lạc. Từ đây đất nước bị phương Bắc đô hộ hơn một nghìn năm.',
@@ -2180,36 +2180,156 @@ function lanterns(c, p, u0, u1, v, z, n, env){
   for (const [x, y0] of pts){ const y = y0 + 3, sw = Math.sin((env.t||0)/700 + x)*0.6; ln(c, [x, y0 + 1], [x + sw, y - 2], '#3a2414', 0.6); ell(c, x + sw, y, 2.1, 2.6, (env.night||0) > 0.3 ? '#ff6a3d' : '#d8402c'); ell(c, x + sw - 0.6, y - 0.8, 0.7, 1, 'rgba(255,220,180,.6)'); c.fillStyle = '#e9b434'; c.fillRect(x + sw - 0.8, y + 2.4, 1.6, 1.2); }
   if (env.lights && env.night > 0.05){ const m = pts[Math.floor(n/2)]; env.lights.push([m[0], m[1] + 3, 9]); }
 }
-function dRuong(c, cx, cy, l, env, ex){
-  const p = mkP(cx, cy), S = 2 + l, step = 2.6, col = RICE[env.season];
-  for (let k = 0; k < S; k++){
-    const v0 = -0.5 + k/S, v1 = -0.5 + (k+1)/S, z = (S-1-k)*step;
-    if (z > 0) fp(c, [p(0.5,v0,0), p(0.5,v1,0), p(0.5,v1,z), p(0.5,v0,z)], '#6a4828');
-    fp(c, [p(-0.5,v0,z), p(0.5,v0,z), p(0.5,v1,z), p(-0.5,v1,z)], col.base);
-    c.beginPath();
-    const rows = 2;
-    for (let r = 1; r <= rows; r++){
-      const v = lerp(v0, v1, r/(rows+1));
-      for (let u = -0.44; u < 0.44; u += 0.07){ const a1 = p(u, v, z), a2 = p(u + 0.035, v, z); c.moveTo(a1[0], a1[1] - (env.season === 'xuan' ? 0.6 : 1.2)); c.lineTo(a2[0], a2[1]); }
-    }
-    c.strokeStyle = col.row; c.lineWidth = env.season === 'xuan' ? 1 : 1.6; c.stroke();
-    if (env.season === 'xuan' || env.season === 'dong'){
-      const sh = ((env.t/2500) + k*0.3) % 1;
-      const a1 = p(lerp(-0.4, 0.3, sh), lerp(v0, v1, 0.5), z), a2 = p(lerp(-0.4, 0.3, sh) + 0.1, lerp(v0, v1, 0.5), z);
-      ln(c, a1, a2, 'rgba(255,255,255,.35)', 0.8);
-    }
-    if (k < S-1){
-      const zn = (S-2-k)*step;
-      fp(c, [p(-0.5,v1,zn), p(0.5,v1,zn), p(0.5,v1,z), p(-0.5,v1,z)], '#87613a');
-      ln(c, p(-0.5,v1,z), p(0.5,v1,z), col.bank, 1.2);
+// Ruộng lúa nước trên đất bằng: các thửa ruộng ngăn bằng bờ đất, theo mùa và thời kỳ.
+const hrnd = (sd, n) => { const x = Math.sin(n*12.9898 + sd*78.233)*43758.5453; return x - Math.floor(x); };
+function riceTicks(c, p, u0, u1, v0, v1, z, env, big, sd){
+  const se = env.season, col = RICE[se], t = env.t || 0;
+  const hgt = se === 'xuan' ? 1.5 : se === 'ha' ? 2.7 : se === 'thu' ? 2.9 : 0.8;
+  const du = env.lod ? 0.12 : big ? 0.055 : 0.07, rv = env.lod ? 0.13 : big ? 0.065 : 0.08;
+  const nr = Math.max(1, Math.round((v1 - v0)/rv)), tips = [];
+  c.beginPath();
+  for (let r = 0; r < nr; r++){
+    const v = v0 + (v1 - v0)*(r + 0.5)/nr, off = big ? 0 : ((r % 2) ? du*0.5 : 0);
+    for (let u = u0 + 0.025 + off; u < u1 - 0.015; u += du){
+      const a = p(u, v, z), w = se === 'thu' ? 0.7 : Math.sin(t/1500 + u*9 + v*7 + sd*6)*(se === 'ha' ? 0.45 : 0.2);
+      c.moveTo(a[0], a[1]); c.lineTo(a[0] + w, a[1] - hgt);
+      if (se === 'thu' || se === 'ha') tips.push(a[0] + w, a[1] - hgt);
     }
   }
-  ln(c, p(-0.5,-0.5,(S-1)*step), p(0.5,-0.5,(S-1)*step), col.bank, 1);
-  if (env.mod && env.mod.co_gioi && env.season !== 'dong' && (ex && ex.seed != null ? ex.seed : 1) < 0.55){
-    const u = -0.32 + 0.64*(0.5 + 0.5*Math.sin((env.t || 0)/3200 + ex.seed*20)), v = 0.5 - 0.5/S;
-    box(c, p, u, v, 0.07, 0.045, 1.6, 4, '#d8402c', '#b83222', '#8f2419');
-    box(c, p, u - 0.025, v, 0.03, 0.035, 5.6, 4.5, '#dfe8ee', '#c3cfd7', '#a3b1bc');
-    ell(c, ...p(u + 0.045, v + 0.05, 1.6), 1.7, 1.7, '#222'); ell(c, ...p(u - 0.045, v + 0.05, 2.4), 2.5, 2.5, '#222'); ell(c, ...p(u - 0.045, v + 0.05, 2.4), 1, 1, '#e9b434');
+  c.strokeStyle = se === 'dong' ? '#c8b582' : col.row; c.lineWidth = se === 'xuan' ? 0.9 : se === 'dong' ? 0.8 : 1.25; c.lineCap = 'round'; c.stroke();
+  if (tips.length && !env.lod){
+    c.beginPath();
+    for (let k = 0; k < tips.length; k += 2){ const x = tips[k], y = tips[k+1]; if (se === 'thu'){ c.moveTo(x - 0.2, y + 0.2); c.quadraticCurveTo(x + 0.9, y - 0.5, x + 1.5, y + 0.9); } else { c.moveTo(x, y + 0.9); c.lineTo(x - 0.5, y - 0.2); } }
+    c.strokeStyle = se === 'thu' ? '#f4d462' : '#7cc552'; c.lineWidth = se === 'thu' ? 1.1 : 0.8; c.stroke();
+  }
+  c.lineCap = 'butt';
+}
+function scarecrow(c, q){
+  ell(c, q[0], q[1] + 0.3, 2.6, 1, 'rgba(0,0,0,.18)');
+  ln(c, q, [q[0], q[1] - 9], '#6b4a2a', 0.9);
+  ln(c, [q[0] - 3.4, q[1] - 6.8], [q[0] + 3.4, q[1] - 6.8], '#6b4a2a', 0.8);
+  fp(c, [[q[0] - 2.3, q[1] - 7.3], [q[0] + 2.3, q[1] - 7.3], [q[0] + 1.7, q[1] - 3.4], [q[0] - 1.7, q[1] - 3.4]], '#8a5a3c');
+  ln(c, [q[0] - 3.4, q[1] - 6.8], [q[0] - 3.9, q[1] - 5.6], '#e6d6a8', 0.9); ln(c, [q[0] + 3.4, q[1] - 6.8], [q[0] + 3.9, q[1] - 5.6], '#e6d6a8', 0.9);
+  circ(c, q[0], q[1] - 8.6, 1.3, '#e3cf98');
+  fp(c, [[q[0] - 3.2, q[1] - 8.9], [q[0] + 3.2, q[1] - 8.9], [q[0], q[1] - 11.8]], '#ead59d', 'rgba(120,90,40,.5)', 0.4);
+}
+function strawStack(c, q, s){
+  s = s || 1;
+  ell(c, q[0] + 1, q[1] + 0.6, 4.6*s, 1.9*s, 'rgba(0,0,0,.2)');
+  ln(c, [q[0], q[1]], [q[0], q[1] - 11*s], '#6b4a2a', 0.8);
+  fp(c, [[q[0] - 4.2*s, q[1]], [q[0] + 4.2*s, q[1]], [q[0] + 3.6*s, q[1] - 4.4*s], [q[0] + 1.4*s, q[1] - 8*s], [q[0] - 1.4*s, q[1] - 8*s], [q[0] - 3.6*s, q[1] - 4.4*s]], '#d8b257');
+  fp(c, [[q[0], q[1]], [q[0] + 4.2*s, q[1]], [q[0] + 3.6*s, q[1] - 4.4*s], [q[0] + 1.4*s, q[1] - 8*s], [q[0], q[1] - 8*s]], '#c29a45');
+  fp(c, [[q[0] - 1.6*s, q[1] - 7.6*s], [q[0] + 1.6*s, q[1] - 7.6*s], [q[0], q[1] - 9.4*s]], '#a8843a');
+  c.beginPath(); for (let k = 1; k < 4; k++){ const y = q[1] - k*2*s; c.moveTo(q[0] - 3.6*s + k*0.5*s, y); c.lineTo(q[0] + 3.6*s - k*0.5*s, y); } c.strokeStyle = 'rgba(140,100,40,.45)'; c.lineWidth = 0.5; c.stroke();
+}
+function duck(c, q, dir){
+  ell(c, q[0], q[1] + 0.3, 2, 0.7, 'rgba(40,90,90,.25)');
+  ell(c, q[0], q[1] - 0.6, 1.8, 1.05, '#f4f1e8');
+  circ(c, q[0] + 1.3*dir, q[1] - 1.9, 0.8, '#f4f1e8');
+  fp(c, [[q[0] + 1.9*dir, q[1] - 2.1], [q[0] + 2.9*dir, q[1] - 1.8], [q[0] + 1.9*dir, q[1] - 1.6]], '#e8902a');
+}
+function egret(c, q){
+  ln(c, [q[0] - 0.4, q[1]], [q[0] - 0.3, q[1] - 2.6], '#3a3a3a', 0.4); ln(c, [q[0] + 0.4, q[1]], [q[0] + 0.3, q[1] - 2.6], '#3a3a3a', 0.4);
+  ell(c, q[0], q[1] - 3.6, 2.2, 1.3, '#fbfbf7');
+  ln(c, [q[0] + 1.4, q[1] - 4], [q[0] + 2.1, q[1] - 6.6], '#fbfbf7', 0.9);
+  circ(c, q[0] + 2.2, q[1] - 6.9, 0.7, '#fbfbf7');
+  ln(c, [q[0] + 2.7, q[1] - 6.9], [q[0] + 4.3, q[1] - 6.5], '#e9b434', 0.6);
+}
+function dNuongRay(c, p, l, env, sd){
+  const se = env.season, col = RICE[se], t = env.t || 0, Z = 0.8;
+  fp(c, [p(0.5,-0.5,0), p(0.5,0.5,0), p(0.5,0.5,Z), p(0.5,-0.5,Z)], '#5e4026');
+  fp(c, [p(-0.5,0.5,0), p(0.5,0.5,0), p(0.5,0.5,Z), p(-0.5,0.5,Z)], '#7a5634');
+  fp(c, [p(-0.5,-0.5,Z), p(0.5,-0.5,Z), p(0.5,0.5,Z), p(-0.5,0.5,Z)], se === 'dong' ? '#a08e64' : se === 'xuan' ? '#6f5539' : '#8a6c45');
+  for (let k = 0; k < 3; k++){ const a = p(-0.3 + hrnd(sd, k)*0.6, -0.3 + hrnd(sd, k + 7)*0.6, Z); ell(c, a[0], a[1], 5 + hrnd(sd, k + 3)*4, 2.4, se === 'xuan' ? 'rgba(40,28,18,.35)' : 'rgba(60,44,28,.18)'); }
+  for (let k = 0; k < 2; k++){ const a = p(-0.36 + hrnd(sd, k + 20)*0.72, -0.36 + hrnd(sd, k + 30)*0.72, Z); ell(c, a[0], a[1], 1.6, 0.8, '#4a3220'); fp(c, [[a[0] - 1.6, a[1]], [a[0] + 1.6, a[1]], [a[0] + 1.3, a[1] - 2.2], [a[0] - 1.3, a[1] - 2.2]], '#5e4026'); ell(c, a[0], a[1] - 2.2, 1.3, 0.6, '#8a6a44'); }
+  const hgt = se === 'xuan' ? 1.6 : se === 'ha' ? 3.2 : se === 'thu' ? 3.4 : 1.4, n = env.lod ? 10 : 26 + 6*l;
+  c.beginPath();
+  for (let k = 0; k < n; k++){
+    const a = p(-0.43 + hrnd(sd, k + 40)*0.86, -0.43 + hrnd(sd, k + 140)*0.86, Z), w = Math.sin(t/1600 + k)*0.3;
+    for (const d of [-1, 0, 1]){ c.moveTo(a[0] + d*0.6, a[1]); c.lineTo(a[0] + d*1.5 + w, a[1] - hgt*(d ? 0.8 : 1)); }
+  }
+  c.strokeStyle = se === 'dong' ? '#c9b787' : col.row; c.lineWidth = 0.9; c.lineCap = 'round'; c.stroke(); c.lineCap = 'butt';
+  if (se === 'thu' && !env.lod){ c.beginPath(); for (let k = 0; k < n; k++){ const a = p(-0.43 + hrnd(sd, k + 40)*0.86, -0.43 + hrnd(sd, k + 140)*0.86, Z); c.moveTo(a[0] + 0.3, a[1] - hgt); c.quadraticCurveTo(a[0] + 1.6, a[1] - hgt - 0.8, a[0] + 2.2, a[1] - hgt + 1); } c.strokeStyle = '#f4d462'; c.lineWidth = 1; c.stroke(); }
+  if (l >= 3){
+    // chòi canh nương trên cột
+    const u = -0.3, v = -0.3, q = (dz, du, dv) => p(u + du, v + dv, Z + dz);
+    for (const [a, b] of [[-0.06,-0.06],[0.06,-0.06],[-0.06,0.06],[0.06,0.06]]) ln(c, q(0, a, b), q(7, a, b), '#5e4026', 0.9);
+    box(c, p, u, v, 0.08, 0.08, Z + 7, 0.8, '#b08a55', '#8a6a44', '#6e5232');
+    fp(c, [q(7.8, -0.1, -0.1), q(7.8, 0.1, -0.1), q(12.5, 0, 0)], '#d9bf73'); fp(c, [q(7.8, 0.1, -0.1), q(7.8, 0.1, 0.1), q(12.5, 0, 0)], '#b89a52'); fp(c, [q(7.8, -0.1, 0.1), q(7.8, 0.1, 0.1), q(12.5, 0, 0)], '#c8ab5f');
+  }
+}
+function dRuong(c, cx, cy, l, env, ex){
+  const p = mkP(cx, cy), se = env.season, col = RICE[se], e = env.era == null ? 1 : env.era|0, sd = ex && ex.seed != null ? ex.seed : 0.37, t = env.t || 0;
+  if (e === 0){ dNuongRay(c, p, l, env, sd); return; }
+  const big = e >= 8, BH = 1.6, ZW = 0.15, W = 0.03, rn = (ex && ex.rn) || [0,0,0,0];
+  const bank = col.bank, earth = '#7a5634', earthD = '#5e4026';
+  if (!rn[0]) fp(c, [p(0.5,-0.5,0), p(0.5,0.5,0), p(0.5,0.5,BH), p(0.5,-0.5,BH)], earthD);
+  if (!rn[2]) fp(c, [p(-0.5,0.5,0), p(0.5,0.5,0), p(0.5,0.5,BH), p(-0.5,0.5,BH)], earth);
+  fp(c, [p(-0.5,-0.5,BH), p(0.5,-0.5,BH), p(0.5,0.5,BH), p(-0.5,0.5,BH)], bank);
+  let va = -0.5;
+  const canal = big && !rn[3];
+  if (canal){
+    // mương bê tông dẫn nước ở mép sau
+    const m0 = -0.5 + W, m1 = -0.5 + 0.13;
+    fp(c, [p(-0.5,-0.5,BH), p(0.5,-0.5,BH), p(0.5,m1 + 0.03,BH), p(-0.5,m1 + 0.03,BH)], '#c9c6bd');
+    c.save(); c.beginPath(); const o = [p(-0.5 + W, m0, BH), p(0.5 - W, m0, BH), p(0.5 - W, m1, BH), p(-0.5 + W, m1, BH)]; c.moveTo(...o[0]); for (const q of o.slice(1)) c.lineTo(...q); c.closePath(); c.clip();
+    fp(c, o, '#9a978e'); fp(c, [p(-0.5 + W, m0, 0), p(0.5 - W, m0, 0), p(0.5 - W, m1, 0), p(-0.5 + W, m1, 0)], se === 'dong' ? '#7aa7b6' : '#6fb4c8');
+    const sh = ((t/2600) + sd) % 1, a1 = p(lerp(-0.45, 0.35, sh), (m0 + m1)/2, 0), a2 = p(lerp(-0.45, 0.35, sh) + 0.1, (m0 + m1)/2, 0); ln(c, a1, a2, 'rgba(255,255,255,.5)', 0.7);
+    c.restore();
+    va = m1 + 0.03;
+  }
+  const GR = big ? [1, 1] : [[1,1],[1,2],[1,3],[2,2],[2,3]][clamp(l, 1, 5) - 1];
+  const cut = (n, a, b, s0) => Array.from({length:n + 1}, (_, k) => k === 0 ? a : k === n ? b : a + (b - a)*k/n + (e >= 7 ? 0 : (hrnd(sd, s0 + k) - 0.5)*0.08));
+  const us = cut(GR[0], -0.5, 0.5, 1), vs = cut(GR[1], va, 0.5, 11), plots = [];
+  const eu0 = big && rn[1] ? 0 : W, eu1 = big && rn[0] ? 0 : W, ev0 = big && (rn[3] || canal) ? 0 : W, ev1 = big && rn[2] ? 0 : W;
+  for (let a = 0; a < GR[0]; a++) for (let b = 0; b < GR[1]; b++) plots.push([us[a] + (a === 0 ? eu0 : W), us[a + 1] - (a === GR[0] - 1 ? eu1 : W), vs[b] + (b === 0 ? ev0 : W), vs[b + 1] - (b === GR[1] - 1 ? ev1 : W), a + b]);
+  plots.sort((x, y) => x[4] - y[4]);
+  const surf = se === 'xuan' ? '#7cc3bf' : se === 'ha' ? '#4f9638' : se === 'thu' ? '#c59a30' : '#8f7f5c';
+  plots.forEach(([u0, u1, v0, v1], k) => {
+    const o = [p(u0, v0, BH), p(u1, v0, BH), p(u1, v1, BH), p(u0, v1, BH)];
+    c.save(); c.beginPath(); c.moveTo(...o[0]); for (const q of o.slice(1)) c.lineTo(...q); c.closePath(); c.clip();
+    fp(c, o, earth);
+    fp(c, [p(u0, v0, ZW), p(u0, v1, ZW), p(u0, v1, BH), p(u0, v0, BH)], earthD);
+    fp(c, [p(u0, v0, ZW), p(u1, v0, ZW), p(u1, v1, ZW), p(u0, v1, ZW)], surf);
+    if (se === 'xuan'){
+      // mặt nước phản chiếu trời
+      const g = p((u0 + u1)/2, (v0 + v1)/2, ZW);
+      ell(c, g[0] - 3, g[1] - 1, (u1 - u0)*HW*0.6, (v1 - v0)*HH*0.5, 'rgba(220,245,250,.28)');
+      if (se === 'xuan' && !env.lod){ const sh = ((t/2800) + k*0.37 + sd) % 1, vv = lerp(v0, v1, 0.3 + 0.4*hrnd(sd, k + 50)); ln(c, p(lerp(u0, u1, sh*0.8), vv, ZW), p(lerp(u0, u1, sh*0.8) + 0.08, vv, ZW), 'rgba(255,255,255,.55)', 0.7); }
+    }
+    c.restore();
+    riceTicks(c, p, u0, u1, v0, v1, ZW, env, big, sd + k);
+  });
+  // các bờ ruộng: viền sáng ở mép trên của bờ cho rõ thửa
+  if (!env.lod && !big){
+    c.beginPath();
+    for (const [u0, u1, v0, v1] of plots){ const a = p(u0 - W*0.5, v1 + W*0.5, BH), b = p(u1 + W*0.5, v1 + W*0.5, BH), d = p(u1 + W*0.5, v0 - W*0.5, BH); c.moveTo(...a); c.lineTo(...b); c.lineTo(...d); }
+    c.strokeStyle = 'rgba(255,255,255,.22)'; c.lineWidth = 0.6; c.stroke();
+  }
+  const pick2 = (k, s) => { const P = plots[Math.floor(hrnd(sd, s)*plots.length) % plots.length]; return [lerp(P[0] + 0.08, P[1] - 0.08, hrnd(sd, s + 1)), lerp(P[2] + 0.08, P[3] - 0.08, hrnd(sd, s + 2)), P]; };
+  if (!big && !env.lod){
+    if (l >= 2 && (se === 'ha' || se === 'thu') && hrnd(sd, 5) < 0.45){ const [u, v] = pick2(0, 60); scarecrow(c, p(u, v, ZW)); }
+    if (l >= 2 && se === 'dong' && hrnd(sd, 8) < 0.6){ const [u, v] = pick2(0, 70); strawStack(c, p(u, v, ZW), 0.9 + 0.1*Math.min(l, 4)/4); if (l >= 4){ const [u2, v2] = pick2(0, 80); if (Math.hypot(u2 - u, v2 - v) > 0.25) strawStack(c, p(u2, v2, ZW), 0.8); } }
+    if (l >= 3 && se === 'xuan' && hrnd(sd, 6) < 0.5){
+      const P = plots[plots.length - 1], ph = ((t/16000) + sd) % 1, dir = Math.floor((t/16000) + sd) % 2 ? -1 : 1, f = dir > 0 ? ph : 1 - ph;
+      for (let d = 0; d < 3; d++){ const u = lerp(P[0] + 0.06, P[1] - 0.06, clamp(f - d*0.07*dir, 0, 1)), v = lerp(P[2], P[3], 0.5) + (d % 2 ? 0.05 : -0.02); duck(c, p(u, v, ZW), dir); }
+    }
+    if (l >= 3 && se === 'ha' && hrnd(sd, 7) < 0.35){ const [u, v] = pick2(0, 90); egret(c, p(u, v, ZW)); }
+  }
+  if (big && se === 'dong' && !env.lod){
+    // rơm cuộn sau mùa gặt máy
+    for (let k = 0; k < 3; k++){ const q = p(-0.28 + k*0.24 + (hrnd(sd, k + 200) - 0.5)*0.08, 0.05 + hrnd(sd, k + 210)*0.3, ZW); ell(c, q[0] + 1, q[1] + 0.6, 3.4, 1.3, 'rgba(0,0,0,.2)'); fp(c, [[q[0] - 2.6, q[1]], [q[0] + 2.6, q[1]], [q[0] + 2.6, q[1] - 3.6], [q[0] - 2.6, q[1] - 3.6]], '#d8b257'); ell(c, q[0], q[1] - 3.6, 2.6, 1.1, '#e6c66e'); ell(c, q[0] + 2.6, q[1] - 1.8, 0.9, 1.8, '#c29a45'); }
+  }
+  if (canal && l >= 3 && hrnd(sd, 9) < 0.4){
+    // trạm bơm nhỏ bên mương
+    box(c, p, 0.36, -0.36, 0.08, 0.07, BH, 5.5, null, '#e9e6de', '#cfcac0');
+    fp(c, [p(0.27, -0.44, BH + 5.5), p(0.45, -0.44, BH + 5.5), p(0.45, -0.28, BH + 5.5), p(0.27, -0.28, BH + 5.5)], '#3b6ea8');
+  }
+  if (env.mod && env.mod.co_gioi && se !== 'dong' && sd < 0.55){
+    const u = -0.32 + 0.64*(0.5 + 0.5*Math.sin(t/3200 + sd*20)), v = 0.3;
+    box(c, p, u, v, 0.07, 0.045, ZW + 1.6, 4, '#d8402c', '#b83222', '#8f2419');
+    box(c, p, u - 0.025, v, 0.03, 0.035, ZW + 5.6, 4.5, '#dfe8ee', '#c3cfd7', '#a3b1bc');
+    ell(c, ...p(u + 0.045, v + 0.05, ZW + 1.6), 1.7, 1.7, '#222'); ell(c, ...p(u - 0.045, v + 0.05, ZW + 2.4), 2.5, 2.5, '#222'); ell(c, ...p(u - 0.045, v + 0.05, ZW + 2.4), 1, 1, '#e9b434');
   }
 }
 const ROAD_COL = [null, ['#8a6a44','#b8936a'], ['#8f8d86','#bdbab2'], ['#d6d2c8','#4b4e54']];
@@ -3240,7 +3360,7 @@ function drawBuildingAt(c, k, cx, cy, l, env, ex, flip){
     smoke: env.smoke ? (x, y) => env.smoke(2*cx - x, y) : null,
     splash: env.splash ? (x, y) => env.splash(2*cx - x, y) : null,
   });
-  const ex2 = ex && ex.waterDir ? Object.assign({}, ex, {waterDir:[ex.waterDir[1], ex.waterDir[0]]}) : ex;
+  const ex2 = ex && ex.waterDir ? Object.assign({}, ex, {waterDir:[ex.waterDir[1], ex.waterDir[0]]}) : ex && ex.rn ? Object.assign({}, ex, {rn:[ex.rn[2], ex.rn[3], ex.rn[0], ex.rn[1]]}) : ex;
   c.save(); c.translate(2*cx, 0); c.scale(-1, 1);
   DRAW[k](c, cx, cy, l, env2, ex2);
   c.restore();
@@ -3250,6 +3370,7 @@ function tileEx(S, k){
   const i = k % N, j = (k/N)|0, t = S.tiles[k], ex = {seed:hash2(i, j, 99)};
   if (t.b && t.b.k === 'duong'){ ex.conns = D4.filter(([di,dj]) => { const n = tileAt(S, i+di, j+dj); return n && n.b && n.b.k !== 'muong' && (n.b.k === 'duong' || t.t !== 'w'); }); }
   if (t.b && t.b.k === 'muong'){ ex.conns = D4.filter(([di,dj]) => { const n = tileAt(S, i+di, j+dj); return n && (n.t === 'w' || (n.b && (n.b.k === 'muong' || n.b.k === 'ruong'))); }); }
+  if (t.b && t.b.k === 'ruong') ex.rn = D4.map(([di,dj]) => { const n = tileAt(S, i+di, j+dj); return !!(n && n.b && n.b.k === 'ruong'); });
   if (t.b && (t.b.k === 'coi_nuoc' || t.b.k === 'thuy_dien')){ ex.waterDir = D4.find(([di,dj]) => { const n = tileAt(S, i+di, j+dj); return n && n.t === 'w'; }) || null; }
   return ex;
 }
