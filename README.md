@@ -25,6 +25,14 @@ Mỗi thời kỳ có mục tiêu riêng (dân số, công trình, dự án, gó
 
 Thời nguyên thuỷ chỉ có túp lều, nương rẫy, lán săn bắt hái lượm, lán tiều phu, bãi ghè đá. Kho thóc, lò đúc đồng, nhà rông mở từ thời dựng nước; chợ, lò rèn, đồn luỹ từ thời Bắc thuộc; trường học, Văn Miếu, Hoàng thành từ thời phong kiến; xưởng xi măng thời Pháp thuộc; nhà trẻ, trạm y tế, cột cờ từ năm 1945... Mục Xây dựng xếp công trình theo từng màn, các thời kỳ sau được gom lại để xem trước. Nhiệm vụ cũng đi theo thời kỳ.
 
+### Tự khai thác gỗ, đá theo tuổi cây
+
+- Cây có tuổi: ô vừa chặt mọc cây con, lớn dần thành rừng non; đủ **3 năm tuổi (12 ngày)** là đến tuổi khai thác.
+- **Lán tiều phu** có người làm thì tiều phu tự đốn cây đã đến tuổi trong vòng 2 ô quanh lán, rồi để cây non mọc lại, cứ thế luân phiên. **Bãi khai đá** cũng tự phá núi đá quanh bãi; đá lộ lên lại sau 20 ngày.
+- Luôn giữ 4 ô rừng/đá sát mỗi lán tiều phu, lán săn, bãi đá, mỏ bạc, xưởng xi măng nên sản lượng hằng ngày không giảm.
+- Dụng cụ tốt dần theo thời kỳ (rìu đá → rìu đồng → rìu sắt → cưa tay → cưa máy → máy cưa xích; búa đá → ... → mìn, máy khoan) nên mỗi lần khai thác được nhiều hơn.
+- Bật tắt tự khai thác trong bảng của từng lán. Chạm vào ô rừng để xem tuổi cây và lán nào sẽ khai thác.
+
 ### Quân đội và chiến tranh
 
 - Từ thời dựng nước có **bãi tập** (Bãi tập võ → Giảng Võ đường → Thao trường) để tuyển và rèn luyện quân. Lính và vũ khí đổi theo thời kỳ: giáo đồng, cung nỏ → gươm sắt → súng hoả mai → súng trường, pháo phòng không → trang bị hiện đại. Tân binh cần đồng, sắt, thép... tuỳ thời kỳ.

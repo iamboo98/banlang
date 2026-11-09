@@ -471,7 +471,7 @@ function rankTitle(best, stars){ const ri = rankIdx(best), last = RANKS.length -
 const B = {
   nha_san:{name:'Nhà sàn', desc:'Nhà ở của dân bản. Cấp 1 là nhà sàn tranh 6 người; càng lên cấp nhà càng hiện đại: nhà sàn gỗ, nhà sàn lợp ngói, nhà sàn kiên cố, nhà xây nhiều tầng, biệt thự, chung cư, tới toà tháp 20 tầng chứa 270 người ở cấp 15.', rank:0, max:15, w:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], cost:[{go:20},{go:35,da:10},{go:60,da:25,bac:20},{go:90,da:45,bac:50},{go:130,da:70,bac:90,tc:4},{go:180,da:100,bac:150,tc:8},{go:240,da:140,bac:240,tc:12},{go:300,da:220,bac:380,tc:16},{go:360,da:320,bac:550,tc:20},{go:420,da:440,bac:780,tc:24},{go:480,da:600,bac:1100,tc:28},{go:520,da:820,bac:1500,tc:32},{go:560,da:1100,bac:2100,tc:36},{go:600,da:1450,bac:2900,tc:40},{go:650,da:1900,bac:4000,tc:50}], housing:[6,10,15,20,26,33,40,50,62,76,92,120,160,210,270], lvReq:{8:'kien_co',9:'kien_co',10:'kien_co',11:'kien_co',12:'kien_co',13:'kien_co',14:'mat_troi',15:'mat_troi'}, h:46},
   ruong:{name:'Ruộng bậc thang', desc:'Trồng lúa nuôi dân. Sát suối hoặc mương được thêm 50%.', rank:0, max:5, w:[1,2,3,3,3], cost:[{go:8,lua:5},{go:20,da:5},{go:35,da:15},{go:50,da:25,bac:20},{go:80,da:40,bac:50}], h:16},
-  tieu_phu:{name:'Lán tiều phu', desc:'Lấy gỗ. Mỗi ô rừng xung quanh thêm 1 gỗ/ngày (tối đa 4).', rank:0, max:3, w:[1,2,2], cost:[{go:12},{go:30,da:10},{go:60,da:30,bac:30}], h:28},
+  tieu_phu:{name:'Lán tiều phu', desc:'Lấy gỗ. Mỗi ô rừng xung quanh thêm 1 gỗ/ngày (tối đa 4). Tiều phu tự đốn cây đến tuổi trong vòng 2 ô rồi để cây non mọc lại.', rank:0, max:3, w:[1,2,2], cost:[{go:12},{go:30,da:10},{go:60,da:30,bac:30}], h:28},
   muong:{name:'Mương nước', desc:'Dẫn nước tưới ruộng. Phải nối với suối hoặc mương khác.', rank:0, max:1, w:[0], cost:[{go:2,da:3}], h:6},
   vuon:{name:'Vườn mận', desc:'Hoa trắng mùa xuân, quả chín mùa hè. +3 vui, +0,3 bạc/ngày.', rank:0, max:1, w:[0], cost:[{go:6,lua:10}], h:26},
   kho:{name:'Kho thóc', desc:'Có Kho thóc thì lúa, gỗ, đá và thổ cẩm chứa không giới hạn.', rank:0, max:1, w:[0], cost:[{go:30,da:5}], h:36},
@@ -479,7 +479,7 @@ const B = {
   ben_xe:{name:'Bến xe', desc:'Xe khách đưa đón khách du lịch và người lao động. Homestay +20%. Khi bản thiếu người làm, người lao động từ nơi khác đến nhanh gấp đôi.', rank:5, req:'duong', max:1, unique:true, w:[1], cost:[{go:80,da:120,bac:200}], h:32},
   tram_song:{name:'Trạm phát sóng', desc:'Cột sóng điện thoại trên đồi, đèn đỏ nhấp nháy ban đêm. +4 vui.', rank:0, req:'song', max:1, unique:true, w:[0], cost:[{go:40,da:80,bac:150}], h:112},
   mo_bac:{name:'Mỏ bạc', desc:'Đào bạc trong lòng núi đá vôi. Đặt ở ô trống gần núi đá, càng nhiều núi đá xung quanh càng nhiều bạc. Cử đủ thợ mỏ để được thưởng.', rank:2, max:4, w:[3,4,5,6], cost:[{go:60,da:40,bac:30},{go:90,da:60,bac:60},{go:130,da:90,bac:100},{go:180,da:130,bac:160}], h:36},
-  mo_da:{name:'Bãi khai đá', desc:'Đặt ở ô trống gần núi đá. Mỗi núi đá xung quanh thêm 0,5 đá/ngày.', rank:0, max:3, w:[1,2,2], cost:[{go:25},{go:40,da:20},{go:70,da:30,bac:30}], h:22},
+  mo_da:{name:'Bãi khai đá', desc:'Đặt ở ô trống gần núi đá. Mỗi núi đá xung quanh thêm 0,5 đá/ngày. Thợ đá tự khai thác núi đá trong vòng 2 ô.', rank:0, max:3, w:[1,2,2], cost:[{go:25},{go:40,da:20},{go:70,da:30,bac:30}], h:22},
   chuong_trau:{name:'Chuồng trâu', desc:'Trâu cày giúp mỗi ruộng sát bên thêm 1,5 lúa/ngày.', rank:1, max:1, w:[1], cost:[{go:30,lua:30}], h:24},
   coi_nuoc:{name:'Cối giã gạo nước', desc:'Đặt sát suối. Ruộng trong bán kính 2 ô được thêm 25%.', rank:1, max:1, w:[0], cost:[{go:35,da:15}], h:30},
   khung_det:{name:'Nhà dệt thổ cẩm', desc:'Các mế, các chị dệt vải thổ cẩm, mặt hàng quý ở chợ.', rank:2, max:3, w:[2,3,3], cost:[{go:40,da:15,bac:25},{go:60,da:30,bac:50},{go:90,da:50,bac:90}], h:36},
@@ -1149,7 +1149,7 @@ function genMap(seed){
   return T;
 }
 function newState(name, seed){
-  const S = {v:1, seed, name:name || 'Bản Mây', day:1, dayT:0, tiles:genMap(seed), res:{lua:40, go:30, da:10, tc:0, bac:15, cu:0, sat:0, gach:0, xm:0, thep:0, ldt:0}, pop:3, best:3, growth:0, happy:55, hunger:0, quest:0, fest:null, mods:[], prices:{lua:1, go:1, da:1, tc:1, cu:1, sat:1, gach:1, xm:1, thep:1, ldt:1}, stats:{cleared:0, sold:0, fest:0, built:0, planted:0, weddings:0, births:0, arrived:0, passed:0}, nextId:1, created:Date.now(), saved:Date.now(), playMs:0, regrowV:1, size:BASE_N, qv:3, roadV:1, famPolicy:true, modern:{done:[], cur:null}, eduV:1, eduMax:6, gradAcc:[0,0,0,0,0,0,0], footV:1, era:0, fame:0, epoch:0, starsSeen:0, vnV:1, gave:{}, armyV:1, army:{n:0, want:0, tr:0, won:[], war:null, raid:null, wait:6, nextRaid:40}};
+  const S = {v:1, seed, name:name || 'Bản Mây', day:1, dayT:0, tiles:genMap(seed), res:{lua:40, go:30, da:10, tc:0, bac:15, cu:0, sat:0, gach:0, xm:0, thep:0, ldt:0}, pop:3, best:3, growth:0, happy:55, hunger:0, quest:0, fest:null, mods:[], prices:{lua:1, go:1, da:1, tc:1, cu:1, sat:1, gach:1, xm:1, thep:1, ldt:1}, stats:{cleared:0, sold:0, fest:0, built:0, planted:0, weddings:0, births:0, arrived:0, passed:0}, nextId:1, created:Date.now(), saved:Date.now(), playMs:0, regrowV:1, size:BASE_N, qv:3, roadV:1, famPolicy:true, modern:{done:[], cur:null}, eduV:1, eduMax:6, gradAcc:[0,0,0,0,0,0,0], footV:1, era:0, fame:0, epoch:0, starsSeen:0, vnV:1, gave:{}, harvV:1, armyV:1, army:{n:0, want:0, tr:0, won:[], war:null, raid:null, wait:6, nextRaid:40}};
   let bk = -1, bd = 1e9;
   S.tiles.forEach((t,k) => { if (t.t !== 'g') return; const d = Math.hypot(k%BASE_N - 7, ((k/BASE_N)|0) - 6); if (d < bd){ bd = d; bk = k; } });
   S.tiles[bk].b = {k:'nha_san', l:1, id:S.nextId++};
@@ -1169,7 +1169,7 @@ function normalize(s){
   out.prices = Object.assign({}, d.prices, s.prices || {});
   out.mods = Array.isArray(s.mods) ? s.mods : [];
   out.tiles = s.tiles.map(t => {
-    const o = {t: ['g','f','r','w'].includes(t && t.t) ? t.t : 'g', b: t && t.b && B[t.b.k] ? {k:t.b.k, l:clamp(t.b.l|0 || 1, 1, B[t.b.k].max), id:t.b.id|0, f:clamp(t.b.f|0, 0, 3), wk:(t.b.wk == null || !WORK[t.b.k]) ? undefined : clamp(t.b.wk|0, 0, 6)} : null};
+    const o = {t: ['g','f','r','w'].includes(t && t.t) ? t.t : 'g', b: t && t.b && B[t.b.k] ? {k:t.b.k, l:clamp(t.b.l|0 || 1, 1, B[t.b.k].max), id:t.b.id|0, f:clamp(t.b.f|0, 0, 3), wk:(t.b.wk == null || !WORK[t.b.k]) ? undefined : clamp(t.b.wk|0, 0, 6), nh:t.b.nh && HARV[t.b.k] ? 1 : undefined} : null};
     if (t && t.rg && (t.rg.k === 'f' || t.rg.k === 'r') && !o.b && o.t === 'g'){ const n = REGROW[t.rg.k]; o.rg = {k:t.rg.k, n, d:clamp(Math.ceil(t.rg.d) || 1, 1, n)}; }
     return o;
   });
@@ -1181,6 +1181,8 @@ function normalize(s){
   }
   out.size = sz;
   out.autoWork = !!s.autoWork;
+  if (!s.harvV && out.tiles.some(t => t.b && HARV[t.b.k])) addNotice('Mới: Lán tiều phu và Bãi khai đá giờ tự khai thác. Cây đủ ' + fmt1(TREE_AGE) + ' năm tuổi (' + REGROW.f + ' ngày) là đến tuổi khai thác: tiều phu tự đốn rồi để cây non mọc lại; thợ đá tự phá núi đá quanh bãi. Bật tắt trong bảng của từng lán.');
+  out.harvV = 1;
   out.famPolicy = s.famPolicy === undefined ? true : !!s.famPolicy;
   if (!s.roadV){ for (const t of out.tiles) if (t.b && t.b.k === 'duong') t.b.l = 2; } out.roadV = 1;
   { const md = s.modern && typeof s.modern === 'object' ? s.modern : {}; const ids = MODERN.map(m => m.id); const done = Array.isArray(md.done) ? ids.filter(id => md.done.includes(id)) : []; const cur = md.cur && (ids.includes(md.cur.id) || md.cur.id === 'ky_nguyen') && !done.includes(md.cur.id) ? {id:md.cur.id, d:clamp(md.cur.d|0, 1, 99), n:clamp(md.cur.n|0, 1, 99)} : null; out.modern = {done, cur}; }
@@ -1366,7 +1368,7 @@ function computeEconomy(S, laborOverride){
   for (const k of list){
     const t = S.tiles[k], b = t.b, i = k % N, j = (k/N)|0, on = active.has(k), lm = 1 + 0.8*(b.l-1);
     const got = wk[k] || 0, sl = slotsOf(b), lvB = 1 + 0.15*(b.l-1), cf = got*crewBonus(got, sl)*lvB;
-    const info = {on, res:null, amt:0, notes:[], got, slots:sl, want:desiredOf(b)};
+    const info = {on, res:null, amt:0, notes:[], got, slots:sl, want:desiredOf(b), cf};
     if (WORK[b.k] && got){ const cb = crewBonus(got, sl); info.notes.push('Người làm ' + got + '/' + sl + (cb > 1 ? (cb >= 1.25 ? ' · đủ người: +25%' : ' · được nửa số người: +10%') : ' · cử thêm người để được thưởng')); }
     switch (b.k){
       case 'ruong': {
@@ -1455,6 +1457,118 @@ function computeEconomy(S, laborOverride){
 }
 function addRes(S, E, r, a){ const cap = E.caps[r]; if (S.res[r] < cap) S.res[r] = Math.min(cap, S.res[r] + a); }
 
+/* ================= TỰ KHAI THÁC GỖ, ĐÁ ================= */
+// Lán tiều phu, Bãi khai đá có người làm thì tự đốn cây đã đến tuổi / phá núi đá trong vòng 2 ô.
+// Ô vừa khai thác để trống sẽ mọc cây non (đá lộ lên lại). Luôn giữ 4 ô sát mỗi nơi đang dùng rừng/đá.
+const HARV = {
+  tieu_phu:{t:'f', res:'go', y:6, per:5},
+  mo_da:{t:'r', res:'da', y:4, per:6},
+};
+const HARV_KEEP = {f:['tieu_phu','lan_san'], r:['mo_da','mo_bac','xuong_xm']};
+const HARV_TOOL = {
+  f:[[0,'rìu đá',1],[1,'rìu đồng',1.1],[2,'rìu sắt',1.25],[4,'cưa tay',1.4],[6,'cưa máy',1.6],[8,'máy cưa xích',1.8]],
+  r:[[0,'búa đá',1],[1,'đục đồng',1.1],[2,'búa sắt, xà beng',1.25],[4,'mìn phá đá',1.4],[6,'máy khoan',1.6],[8,'máy khoan, máy xúc',1.8]],
+};
+const TREE_AGE = REGROW.f*AGE_PER_DAY;
+const toolOf = (t, e) => { let r = HARV_TOOL[t][0]; for (const x of HARV_TOOL[t]) if ((e|0) >= x[0]) r = x; return r; };
+const harvWorker = (t, e) => t === 'f' ? ((e|0) >= 6 ? 'công nhân lâm trường' : (e|0) >= 4 ? 'phu khai thác gỗ' : 'tiều phu') : ((e|0) >= 4 ? 'công nhân mỏ đá' : 'thợ đá');
+const harvPer = (cf, H) => clamp(Math.round(H.per/Math.max(0.3, cf || 0)), 1, 12);
+const harvYield = (S, E, H) => H.y*toolOf(H.t, S.era|0)[2]*((E && E.hm) || 1);
+const capFirst = s => s.charAt(0).toUpperCase() + s.slice(1);
+function harvKeepers(S, t){
+  const out = [], ks = HARV_KEEP[t];
+  S.tiles.forEach((x, k) => { if (x.b && ks.includes(x.b.k)) out.push([k % N, (k/N)|0, footOf(x.b.k, x.b.l)]); });
+  return out;
+}
+// Ô kk có được khai thác không: không làm nơi nào bên cạnh tụt xuống dưới 4 ô rừng/đá.
+function harvOK(S, kk, t, keepers){
+  const i = kk % N, j = (kk/N)|0;
+  for (const [i0, j0, z] of keepers){
+    if (i < i0 - 1 || i > i0 + z || j < j0 - 1 || j > j0 + z) continue;
+    let c = 0;
+    for (let jj = j0 - 1; jj <= j0 + z; jj++) for (let ii = i0 - 1; ii <= i0 + z; ii++){
+      if (!inB(ii, jj) || (ii >= i0 && ii < i0 + z && jj >= j0 && jj < j0 + z)) continue;
+      if (S.tiles[idx(ii, jj)].t === t) c++;
+    }
+    if (c <= 4) return false;
+  }
+  return true;
+}
+function harvInfo(S, k, keepers){
+  const b = S.tiles[k] && S.tiles[k].b, H = b && HARV[b.k]; if (!H) return null;
+  keepers = keepers || harvKeepers(S, H.t);
+  const z = footOf(b.k, b.l), i0 = k % N, j0 = (k/N)|0, ready = []; let young = 0, kept = 0, soon = 99;
+  for (let jj = j0 - 2; jj <= j0 + z + 1; jj++) for (let ii = i0 - 2; ii <= i0 + z + 1; ii++){
+    if (!inB(ii, jj)) continue;
+    const kk = idx(ii, jj), x = S.tiles[kk]; if (x.b) continue;
+    if (x.t === H.t){ if (harvOK(S, kk, H.t, keepers)) ready.push(kk); else kept++; }
+    else if (x.t === 'g' && x.rg && x.rg.k === H.t){ young++; soon = Math.min(soon, x.rg.d); }
+  }
+  const ring = kk => { const i = kk % N, j = (kk/N)|0; return Math.max(i0 - i, i - (i0 + z - 1), j0 - j, j - (j0 + z - 1), 0); };
+  ready.sort((a, c) => ring(c) - ring(a) || a - c);
+  return {H, ready, young, kept, soon};
+}
+function harvestDay(S, E, live){
+  const got = {}; if (!E || !E.active) return got;
+  const keep = {};
+  for (const k of E.active){
+    const b = S.tiles[k] && S.tiles[k].b, H = b && HARV[b.k]; if (!H || b.nh) continue;
+    const inf = E.info[k]; if (!inf || !inf.on || !inf.got) continue;
+    if ((S.day + (b.id|0)*3) % harvPer(inf.cf, H)) continue;
+    const hi = harvInfo(S, k, keep[H.t] || (keep[H.t] = harvKeepers(S, H.t))); if (!hi.ready.length) continue;
+    const kk = hi.ready[0], x = S.tiles[kk], amt = harvYield(S, E, H);
+    x.t = 'g'; x.rg = {k:H.t, d:REGROW[H.t], n:REGROW[H.t]};
+    addRes(S, E, H.res, amt); got[H.res] = (got[H.res] || 0) + amt;
+    const sk = H.t === 'f' ? 'felled' : 'quarried', first = !(S.stats[sk]|0); S.stats[sk] = (S.stats[sk]|0) + 1;
+    if (live){
+      const [x0, y0] = tileCenter(kk); spawnDust(x0, y0, H.t === 'f' ? 12 : 14); addFloat(x0, y0 - 18, '+' + fmt1(amt), RES_COL[H.res]); Sound.sfx(H.t === 'f' ? 'chop' : 'rock');
+      if (first) toast(H.t === 'f'
+        ? capFirst(harvWorker('f', S.era)) + ' đã tự đốn cây đến tuổi đầu tiên (+' + fmt1(amt) + ' gỗ). Ô vừa đốn sẽ mọc cây non, đủ ' + fmt1(TREE_AGE) + ' năm tuổi (' + REGROW.f + ' ngày) lại khai thác được.'
+        : capFirst(harvWorker('r', S.era)) + ' đã tự khai thác núi đá đầu tiên (+' + fmt1(amt) + ' đá). Đá sẽ lộ lên lại sau ' + REGROW.r + ' ngày.', 'good');
+    }
+  }
+  return got;
+}
+function toggleHarv(ix){
+  const t = G.S.tiles[ix]; if (!t || !t.b || !HARV[t.b.k]) return;
+  if (t.b.nh) delete t.b.nh; else t.b.nh = 1;
+  Sound.sfx('tap'); toast((t.b.nh ? 'Đã tắt' : 'Đã bật') + ' tự khai thác ở ' + B[t.b.k].name + '.', 'good'); changed(true);
+}
+function harvHTML(S, ix, b, inf){
+  const H = HARV[b.k]; if (!H) return '';
+  const isF = H.t === 'f', on = !b.nh, e = S.era|0;
+  let h = '<div class="kv"><span>' + (isF ? 'Tự đốn cây đến tuổi' : 'Tự khai thác núi đá') + '</span><button class="tgl' + (on ? ' on' : '') + '" data-act="harv" data-ix="' + ix + '" aria-label="Bật tắt tự khai thác"><i></i></button></div>';
+  if (!on) return h + '<p class="hint" style="margin:2px 0 6px">Đang tắt: ' + (isF ? 'rừng' : 'núi đá') + ' quanh đây được giữ nguyên.</p>';
+  const hi = harvInfo(S, ix), per = harvPer(inf.cf, H), y = harvYield(S, G.E, H), unit = isF ? 'cây' : 'khối đá', work = !!(inf.on && inf.got);
+  h += '<div class="kv"><span>' + (isF ? 'Cây đến tuổi khai thác' : 'Núi đá khai thác được') + '</span><b>' + hi.ready.length + '</b></div>';
+  if (hi.young) h += '<div class="kv"><span>' + (isF ? 'Rừng non đang lớn' : 'Đá đang lộ lên') + '</span><b>' + hi.young + '<small style="font-weight:500;color:var(--muted)"> · sớm nhất ' + hi.soon + ' ngày</small></b></div>';
+  h += '<div class="kv"><span>Nhịp khai thác</span><b style="font-size:14px">' + (!work ? 'Cần người làm' : !hi.ready.length ? (isF ? 'Chờ cây đến tuổi' : 'Chờ đá lộ lên') : '1 ' + unit + (per === 1 ? '/ngày' : '/' + per + ' ngày') + ' · +' + fmt1(y) + ' ' + RES_NAME[H.res].toLowerCase()) + '</b></div>';
+  h += '<p class="hint" style="margin:2px 0 6px">' + capFirst(harvWorker(H.t, e)) + ' dùng ' + toolOf(H.t, e)[1] + ' tự ' + (isF ? 'đốn cây đủ ' + fmt1(TREE_AGE) + ' năm tuổi (' + REGROW.f + ' ngày)' : 'phá núi đá') + ' trong vòng 2 ô, rồi để ' + (isF ? 'cây non mọc lại' : 'đá lộ lên lại') + '. Luôn giữ 4 ô ' + (isF ? 'rừng' : 'đá') + ' sát mỗi nơi đang dùng để sản lượng hằng ngày không giảm' + (hi.kept ? ' (đang giữ ' + hi.kept + ' ô)' : '') + '.</p>';
+  return h;
+}
+function harvTileNote(S, kk, t){
+  const isF = t === 'f', i = kk % N, j = (kk/N)|0; let near = null, off = null;
+  S.tiles.forEach((x, k) => {
+    if (!x.b || !HARV[x.b.k] || HARV[x.b.k].t !== t) return;
+    const z = footOf(x.b.k, x.b.l), i0 = k % N, j0 = (k/N)|0;
+    if (i < i0 - 2 || i > i0 + z + 1 || j < j0 - 2 || j > j0 + z + 1) return;
+    if (x.b.nh) off = off || x.b.k; else near = near || x.b.k;
+  });
+  if (!harvOK(S, kk, t, harvKeepers(S, t))) return isF ? 'Ô rừng này sát lán tiều phu hoặc lán săn nên được giữ lại để lấy củi, săn bắt.' : 'Núi đá này sát bãi đá, mỏ bạc hoặc xưởng xi măng nên được giữ lại.';
+  if (near) return capFirst(harvWorker(t, S.era)) + ' ở ' + B[near].name + ' gần đây sẽ tự ' + (isF ? 'đốn cây này.' : 'khai thác núi đá này.');
+  if (off) return B[off].name + ' gần đây đang tắt tự khai thác.';
+  return 'Dựng ' + (isF ? B.tieu_phu.name : B.mo_da.name) + ' cách đây 1–2 ô thì ' + harvWorker(t, S.era) + ' sẽ tự ' + (isF ? 'đốn cây khi đến tuổi.' : 'khai thác.');
+}
+// Người làm ở lán đi ra chỗ cây sắp đốn để chặt (chỉ để hiển thị).
+function harvSpot(k){
+  const S = G.S, b = S.tiles[k] && S.tiles[k].b, H = b && HARV[b.k]; if (!H || b.nh || Math.random() > 0.6) return null;
+  const inf = G.E && G.E.info && G.E.info[k]; if (!inf || !inf.on || !inf.got) return null;
+  const hi = harvInfo(S, k); if (!hi || !hi.ready.length) return null;
+  const kk = hi.ready[Math.random() < 0.7 ? 0 : (Math.random()*hi.ready.length)|0], i = kk % N, j = (kk/N)|0, bi = k % N, bj = (k/N)|0;
+  const u = i + Math.sign(bi - i)*0.36 + (Math.random() - 0.5)*0.2, v = j + Math.sign(bj - j)*0.36 + (Math.random() - 0.5)*0.2;
+  return [(u - v)*HW, (u + v)*HH];
+}
+
 function dayTick(S, live){
   if (S.autoWork) autoAssign(S);
   const E = computeEconomy(S);
@@ -1466,7 +1580,8 @@ function dayTick(S, live){
     if (t.b || t.t !== 'g'){ delete t.rg; continue; }
     if (--t.rg.d <= 0){ t.t = t.rg.k; if (t.t === 'f') regF++; else regR++; delete t.rg; }
   }
-  if (live && (regF || regR)) toast((regF ? regF + ' ô rừng đã xanh trở lại' : '') + (regF && regR ? ', ' : '') + (regR ? regR + ' núi đá đã lộ lên lại' : '') + '.', 'good');
+  if (live && (regF || regR)) toast((regF ? regF + ' ô rừng non đã đến tuổi khai thác' : '') + (regF && regR ? ', ' : '') + (regR ? regR + ' núi đá đã lộ lên lại' : '') + '.', 'good');
+  harvestDay(S, E, live);
   if (S.res.lua >= E.cons){ S.res.lua -= E.cons; S.hunger = 0; }
   else { S.res.lua = 0; S.hunger++; if (live && S.hunger === 1) toast('Bản hết lúa ăn! Dân đói, vui vẻ giảm mạnh.', 'bad'); }
   if (S.hunger >= 3 && S.people.length > 1){ leaveOne(S, live, 'vì đói'); S.hunger = 1; }
@@ -3222,7 +3337,7 @@ function syncPeople(){
 }
 function updatePeople(dt){
   for (const pp of people){
-    if (pp.wait > 0){ pp.wait -= dt; pp.moving = false; if (pp.wait <= 0 && pp.work != null && G.S.tiles[pp.work] && G.S.tiles[pp.work].b && Math.random() < 0.72){ const [cx, cy, big] = workSpot(pp.work), u = big ? -0.35 + Math.random()*0.4 : 0.1 + Math.random()*0.32, v = big ? -0.35 + Math.random()*0.4 : 0.1 + Math.random()*0.32; pp.tx = cx + (u - v)*HW; pp.ty = cy + (u + v)*HH; pp.goWork = true; continue; } if (pp.wait <= 0){ pp.goWork = false; const mate = pp.fam && pp.fam.length && Math.random() < 0.55 ? people.find(q => pp.fam.includes(q.pid)) : null; if (mate){ pp.tx = mate.tx + (Math.random() < 0.5 ? -5 : 5); pp.ty = mate.ty + 1.5; } else { const s = randomSpot(); pp.tx = s[0]; pp.ty = s[1]; } } continue; }
+    if (pp.wait > 0){ pp.wait -= dt; pp.moving = false; if (pp.wait <= 0 && pp.work != null && G.S.tiles[pp.work] && G.S.tiles[pp.work].b && Math.random() < 0.72){ const hs = harvSpot(pp.work); if (hs){ pp.tx = hs[0]; pp.ty = hs[1]; pp.goWork = true; continue; } const [cx, cy, big] = workSpot(pp.work), u = big ? -0.35 + Math.random()*0.4 : 0.1 + Math.random()*0.32, v = big ? -0.35 + Math.random()*0.4 : 0.1 + Math.random()*0.32; pp.tx = cx + (u - v)*HW; pp.ty = cy + (u + v)*HH; pp.goWork = true; continue; } if (pp.wait <= 0){ pp.goWork = false; const mate = pp.fam && pp.fam.length && Math.random() < 0.55 ? people.find(q => pp.fam.includes(q.pid)) : null; if (mate){ pp.tx = mate.tx + (Math.random() < 0.5 ? -5 : 5); pp.ty = mate.ty + 1.5; } else { const s = randomSpot(); pp.tx = s[0]; pp.ty = s[1]; } } continue; }
     const dx = pp.tx - pp.x, dy = pp.ty - pp.y, d = Math.hypot(dx, dy);
     if (d < 1){ pp.atWork = !!pp.goWork; pp.wait = pp.atWork ? 4000 + Math.random()*5000 : 1500 + Math.random()*4500; pp.moving = false; continue; }
     pp.atWork = false;
@@ -5235,6 +5350,7 @@ const PANELS = {
         if (want < w && !AW) h += '<div class="btns" style="margin:2px 0 6px"><button class="btn small gold" data-act="wk" data-ix="' + ix + '" data-d="max">Cử đủ ' + w + ' người</button></div>';
       } else if (w) h += '<div class="kv"><span>Người làm</span><span>' + (inf.on ? '<span class="tag">' + w + ' người, đang làm</span>' : '<span class="tag off">Thiếu người (cần ' + w + ')</span>') + '</span></div>';
       if (inf.res) h += '<div class="kv"><span>Sản lượng</span><b>+' + fmt1(inf.on ? inf.amt : 0) + ' ' + RES_NAME[inf.res].toLowerCase() + '/ngày</b></div>';
+      if (HARV[b.k]) h += harvHTML(S, ix, b, inf);
       if (b.k === 'nha_san') h += '<div class="kv"><span>Kiểu nhà</span><b style="font-size:14px">' + houseName(b.l) + '</b></div><div class="kv"><span>Chỗ ở</span><b>' + houseCap(S, b.l) + ' người</b></div>';
       if (b.k === 'kho') h += '<div class="kv"><span>Sức chứa</span><b style="font-size:14px">Không giới hạn</b></div>';
       if (b.k === 'vuon') h += '<div class="kv"><span>Vui vẻ</span><b>+3</b></div>';
@@ -5263,14 +5379,14 @@ const PANELS = {
       if (b.l < d.max){ const nw = slotsOf({k:b.k, l:b.l + 1}); const extra = b.k === 'nha_san' ? (houseName(b.l + 1) !== houseName(b.l) ? 'thành ' + houseName(b.l + 1).toLowerCase() + ', c' : 'C') + 'hỗ ở lên ' + houseCap(S, b.l + 1) + ' người.' : SEATS[b.k] ? (FOOT[b.k] ? 'rộng ' + footOf(b.k, b.l + 1) + '×' + footOf(b.k, b.l + 1) + ' ô, ' : '') + Object.keys(SEATS[b.k]).map(L => SEATS[b.k][L][b.l] + ' chỗ học ' + EDU[L].name.toLowerCase()).join(', ') + ', cần ' + nw + ' thầy cô.' : WORK[b.k] ? nw + ' chỗ làm, mỗi người làm ra nhiều hơn 15%.' : (nw ? 'Cần ' + nw + ' người làm.' : 'Đẹp và bề thế hơn.'); h += '<p class="hint" style="margin-top:8px">Cấp ' + (b.l + 1) + ': ' + extra + '</p>'; }
       return [(b.k === 'nha_san' ? houseName(b.l) : d.name) + (d.max > 1 ? ' · cấp ' + b.l : ''), h];
     }
-    if (t.t === 'f') return ['Rừng già', '<div class="bhead"><canvas data-thumb="forest"></canvas><p>Rừng cho gỗ. Chặt cây lấy gỗ ngay, rừng sẽ mọc lại sau ' + REGROW.f + ' ngày nếu để trống ô. Dựng Lán tiều phu bên cạnh thì có gỗ đều đặn mà không mất rừng.</p></div><div class="btns"><button class="btn primary" data-act="clear" data-ix="' + ix + '" style="flex:1">Chặt cây: tốn ' + costHTML({lua:5}) + ' nhận ' + costHTML({go:10}, true) + '</button></div>'];
-    if (t.t === 'r') return ['Núi đá vôi', '<div class="bhead"><canvas data-thumb="rock"></canvas><p>Đá vôi tai mèo. Phá đá lấy đá ngay, đá sẽ lộ lên lại sau ' + REGROW.r + ' ngày nếu để trống ô. Bãi khai đá đặt cạnh núi đá thì có đá đều đặn. Muốn thêm núi đá, chọn Khơi núi đá vôi ở ô đất trống.</p></div><div class="btns"><button class="btn primary" data-act="clear" data-ix="' + ix + '" style="flex:1 1 100%">Phá đá: tốn ' + costHTML({lua:8}) + ' nhận ' + costHTML({da:6}, true) + '</button><button class="btn dark" data-act="build" data-k="mo_da" style="flex:1 1 100%">Xây Bãi khai đá cạnh đây <span class="costs">' + costHTML(B.mo_da.cost[0]) + '</span></button>' + (rankIdx(S.best) >= B.mo_bac.rank ? '<button class="btn gold" data-act="build" data-k="mo_bac" style="flex:1 1 100%">Xây Mỏ bạc cạnh đây <span class="costs">' + costHTML(B.mo_bac.cost[0]) + '</span></button>' : '<p class="hint" style="margin:4px 0 0">Mỏ bạc mở khi bản thành ' + RANKS[B.mo_bac.rank].name + '.</p>') + '</div>'];
+    if (t.t === 'f') return ['Rừng già', '<div class="bhead"><canvas data-thumb="forest"></canvas><p>Rừng cho gỗ. Chặt cây lấy gỗ ngay, rừng sẽ mọc lại sau ' + REGROW.f + ' ngày nếu để trống ô. Cây đã đến tuổi khai thác. ' + harvTileNote(S, ix, 'f') + '</p></div><div class="btns"><button class="btn primary" data-act="clear" data-ix="' + ix + '" style="flex:1">Chặt cây: tốn ' + costHTML({lua:5}) + ' nhận ' + costHTML({go:10}, true) + '</button></div>'];
+    if (t.t === 'r') return ['Núi đá vôi', '<div class="bhead"><canvas data-thumb="rock"></canvas><p>Đá vôi tai mèo. Phá đá lấy đá ngay, đá sẽ lộ lên lại sau ' + REGROW.r + ' ngày nếu để trống ô. Bãi khai đá đặt cạnh núi đá thì có đá đều đặn. ' + harvTileNote(S, ix, 'r') + '</p></div><div class="btns"><button class="btn primary" data-act="clear" data-ix="' + ix + '" style="flex:1 1 100%">Phá đá: tốn ' + costHTML({lua:8}) + ' nhận ' + costHTML({da:6}, true) + '</button><button class="btn dark" data-act="build" data-k="mo_da" style="flex:1 1 100%">Xây Bãi khai đá cạnh đây <span class="costs">' + costHTML(B.mo_da.cost[0]) + '</span></button>' + (rankIdx(S.best) >= B.mo_bac.rank ? '<button class="btn gold" data-act="build" data-k="mo_bac" style="flex:1 1 100%">Xây Mỏ bạc cạnh đây <span class="costs">' + costHTML(B.mo_bac.cost[0]) + '</span></button>' : '<p class="hint" style="margin:4px 0 0">Mỏ bạc mở khi bản thành ' + RANKS[B.mo_bac.rank].name + '.</p>') + '</div>'];
     if (t.t === 'w') return ['Suối', '<div class="bhead"><canvas data-thumb="water"></canvas><p>Con suối chảy qua bản. Ruộng sát suối được thêm 50% lúa. Cối giã gạo nước phải đặt sát suối, và mương nước bắt đầu từ đây.</p></div><button class="card opt" data-act="place" data-k="duong" data-ix="' + ix + '"' + (canAfford(S, {go:12}) ? '' : ' style="opacity:.6"') + '><canvas data-thumb="duong"></canvas><span class="oinfo"><b>Bắc cầu qua suối</b><span class="costs">' + costHTML({go:12}) + '<span style="font-size:12px;color:var(--muted);font-family:inherit;font-weight:500">· nối đường hai bờ</span></span></span></button>'];
     let h = '', title = 'Đất trống';
     if (t.rg){
       const isF = t.rg.k === 'f', pr = clamp(1 - t.rg.d/t.rg.n, 0, 1)*100;
       title = isF ? 'Rừng non' : 'Đá đang lộ lên';
-      h += '<div class="bhead"><canvas data-thumb="' + (isF ? 'sapling' : 'rubble') + '"></canvas><p>' + (isF ? 'Cây non đang mọc lại. Để trống ô này thêm <b>' + t.rg.d + ' ngày</b> nữa là thành rừng.' : 'Mưa xói lớp đất, đá vôi đang lộ dần lên. Để trống ô này thêm <b>' + t.rg.d + ' ngày</b> nữa là thành núi đá.') + '</p></div>';
+      h += '<div class="bhead"><canvas data-thumb="' + (isF ? 'sapling' : 'rubble') + '"></canvas><p>' + (isF ? ((t.rg.n - t.rg.d)*AGE_PER_DAY < 0.5 ? 'Cây con mới mọc' : 'Cây non ' + fmt1((t.rg.n - t.rg.d)*AGE_PER_DAY) + ' năm tuổi') + '. Đủ ' + fmt1(TREE_AGE) + ' năm tuổi (còn <b>' + t.rg.d + ' ngày</b>) là thành rừng, đến tuổi khai thác.' : 'Mưa xói lớp đất, đá vôi đang lộ dần lên. Để trống ô này thêm <b>' + t.rg.d + ' ngày</b> nữa là thành núi đá.') + '</p></div>';
       h += '<div class="pbar"><i style="width:' + pr + '%"></i></div><p class="hint" style="margin:4px 0 12px">Xây công trình ở đây sẽ dừng việc mọc lại.</p>';
     } else {
       for (const [key, T] of Object.entries(TERRA)){
@@ -5329,6 +5445,7 @@ document.addEventListener('click', e => {
   else if (a === 'flip') doFlip(+el.dataset.ix);
   else if (a === 'flipbuild'){ G.buildFlip = ((G.buildFlip|0) + 1) % 4; drawBarThumb(); flipLabel(); }
   else if (a === 'clear') doClear(+el.dataset.ix);
+  else if (a === 'harv') toggleHarv(+el.dataset.ix);
   else if (a === 'plant') doPlant(+el.dataset.ix, el.dataset.key);
   else if (a === 'expand') expandLand();
   else if (a === 'sell') doTrade(el.dataset.r, true);
@@ -5599,7 +5716,7 @@ requestAnimationFrame(frame);
   const alt = Cloud.uid && guest && best && best !== guest && (guest.created !== best.created || (guest.saved || 0) > (best.saved || 0) + 60000) ? guest : null;
   renderStart({save:best, cloudOk, alt, push:!!(Cloud.ref && cloudOk && best && best !== save0)});
 })();
-window.__banlang = {makeBattle, simBattle, battleStep, openBattle, startBattle, autoFight, bcfgOf, curQuest, changed, WARS, warDef, armyPower, armyDay, fightNow, setArmy, useTactic, maxArmy, MATS, MAT_ERA, socialOf, nameAt, rankNameAt, expandLand, doUpgradeAll, SOC, cnt, doGive, goalProg, eraOf, bLock, EDU, SEATS, eduDay, eduStats, encodePeople, decodePeople, seedEdu, getVehicles: () => vehicles, syncVehicles, autoAssign, planRelocate, applyRelocate, startModern, MODERN, getPeople: () => people, setWork, setWorkAll, slotsOf, curQuest, serial, drawPerson, doFlip, drawBuildingAt, expandLand, setN, Sound, render, normalize, doPlant, startMove, doMove, G, Cloud, B, QUESTS, FESTS, newState, computeEconomy, dayTick, doPlace, doUpgrade, doTrade, doFest, doClear, claimQuest, placeCheck, openPanel, enterGame, save, cam};
+window.__banlang = {HARV, harvInfo, harvestDay, harvKeepers, harvOK, toggleHarv, harvTileNote, makeBattle, simBattle, battleStep, openBattle, startBattle, autoFight, bcfgOf, curQuest, changed, WARS, warDef, armyPower, armyDay, fightNow, setArmy, useTactic, maxArmy, MATS, MAT_ERA, socialOf, nameAt, rankNameAt, expandLand, doUpgradeAll, SOC, cnt, doGive, goalProg, eraOf, bLock, EDU, SEATS, eduDay, eduStats, encodePeople, decodePeople, seedEdu, getVehicles: () => vehicles, syncVehicles, autoAssign, planRelocate, applyRelocate, startModern, MODERN, getPeople: () => people, setWork, setWorkAll, slotsOf, curQuest, serial, drawPerson, doFlip, drawBuildingAt, expandLand, setN, Sound, render, normalize, doPlant, startMove, doMove, G, Cloud, B, QUESTS, FESTS, newState, computeEconomy, dayTick, doPlace, doUpgrade, doTrade, doFest, doClear, claimQuest, placeCheck, openPanel, enterGame, save, cam};
 })();
 </script>
 <script>
