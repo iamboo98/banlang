@@ -345,6 +345,21 @@ svg{display:block}
 #tabs button .dot.show{display:block}
 
 /* Modal */
+#battle{position:fixed;inset:0;z-index:15;background:#1b2416;display:flex;flex-direction:column;color:#fff;touch-action:none}
+#battle .btop{padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;background:#131a33}
+#battle .bt1{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#battle .bt1 b{font-family:var(--disp);font-size:16px}
+#battle .bt1 span{font-size:12px;opacity:.8}
+#battle .bt2{font-size:12px;opacity:.9;margin:3px 0 6px;line-height:1.35}
+#battle .bbar{display:grid;grid-template-columns:auto 1fr auto 1fr;align-items:center;gap:6px;font-size:11px}
+#battle .bbar i{display:block;height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden}
+#battle .bbar b{display:block;height:100%;width:100%;background:#5fd38a;transition:width .3s}
+#battle .bbar b.foe{background:#ff5a4a}
+#bcv{flex:1;width:100%;min-height:0;display:block}
+#battle .btip{font-size:11.5px;padding:5px 12px;background:#131a33;opacity:.92;line-height:1.35}
+#battle .bbot{display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px calc(env(safe-area-inset-bottom) + 8px);background:#131a33}
+#battle .bbot .btn{flex:1 1 auto}
+#battle .bbot .btn:disabled{opacity:.35;color:#fff;border-color:rgba(255,255,255,.3)}
 #modal{position:fixed;inset:0;z-index:20;background:rgba(10,14,30,.55);display:grid;place-items:center;padding:20px}
 #modal[hidden]{display:none}
 .mcard{background:var(--lanh);color:var(--ink);border-radius:18px;max-width:380px;width:100%;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:sup .22s ease-out}
@@ -418,6 +433,7 @@ svg{display:block}
     <button data-act="panel" data-p="village" id="tab-village"></button>
   </nav>
 </div>
+<div id="battle" hidden><div class="btop"><div class="bt1"><b id="bName"></b><span id="bTime"></span></div><div class="bt2" id="bObj"></div><div class="bbar"><span>Ta</span><i><b id="bA"></b></i><span>Địch</span><i><b id="bE" class="foe"></b></i></div></div><canvas id="bcv"></canvas><div class="btip" id="bTip"></div><div class="bbot" id="bBot"></div></div>
 <div id="modal" hidden><div class="mcard"><div class="sheet-band"></div><h3 id="mTitle"></h3><div class="mbody" id="mBody"></div><div class="mbtns" id="mBtns"></div></div></div>
 <div id="start">
   <div class="st-title"><h1>Bản Làng</h1><div class="bandline"></div><p>Dựng bản qua các thời kỳ lịch sử Việt Nam</p></div>
@@ -715,7 +731,7 @@ const maxArmy = E => Math.floor((E.laborAll || 0)*0.4);
 function armyPower(S, E, war){
   const A = S.army; if (!A) return 0; const fl = (E && E.fort) | 0;
   let tb = 0; if (war){ const D = warDef(war.id); if (D) for (const i of war.tac || []) tb += (D.tac[i] && D.tac[i].b) || 0; }
-  return (A.n*(0.5 + A.tr/100) + fl*4)*(1 + 0.15*fl)*(1 + tb);
+  return (A.n*(0.5 + A.tr/100) + fl*2)*(1 + 0.15*fl)*(1 + tb);
 }
 function socialOf(e, x){
   const D = SOCIAL[clamp(e|0, 0, SOCIAL.length - 1)], used = new Set(); D.forEach(t => (t.jobs || []).forEach(j => used.add(j)));
@@ -3874,7 +3890,7 @@ function armyDay(S, E, live){
     if (k > 0 && !got && live && S.day % 4 === 0) toast('Thiếu vũ khí cho tân binh: ' + missingText(S, cost).charAt(0).toLowerCase() + missingText(S, cost).slice(1), 'bad');
   }
   if (A.n > 0) A.tr = cap > 0 ? Math.min(100, A.tr + 2.5*Math.min(1, cap/A.n)) : Math.max(0, A.tr - 0.5);
-  if (A.war){ if (--A.war.d <= 0) resolveWar(S, E, live); }
+  if (A.war){ if (A.war.d > 0) A.war.d--; if (A.war.d <= 0) resolveWar(S, E, live); }
   else { const id = nextWarId(S); if (id){ if (A.wait > 0) A.wait--; else warStart(S, E, id, live); } }
   if (A.raid){ if (--A.raid.d <= 0) resolveRaid(S, E, live); }
   else if (!A.war && e >= 1 && S.pop >= 20 && S.day >= (A.nextRaid|0) && (e >= 2 || cnt(S, 'thao_truong'))){
@@ -3888,11 +3904,13 @@ function warStart(S, E, id, live){
 }
 function resolveWar(S, E, live){
   const A = S.army, w = A.war, D = w && warDef(w.id); if (!D){ A.war = null; return; }
-  const pw = armyPower(S, E, w), roll = pw*(0.9 + Math.random()*0.2), win = roll >= D.need, info = {};
-  if (win){ A.won.push(D.id); A.war = null; A.wait = D.era >= ERA_FUT ? 25 : 8; info.bac = Math.round(D.need*25); S.res.bac += info.bac; S.fame = (S.fame || 0) + D.need*3; A.tr = Math.min(100, A.tr + 10); S.happy = Math.min(100, S.happy + 8); }
-  else { info.lua = Math.floor(S.res.lua*0.1); info.bacL = Math.floor(S.res.bac*0.1); S.res.lua -= info.lua; S.res.bac -= info.bacL; if (!D.peace){ info.lost = A.n - Math.floor(A.n*0.8); A.n -= info.lost; } A.tr = Math.max(0, A.tr - 5); S.happy = Math.max(0, S.happy - 8); w.d = 12; w.tac = []; }
-  if (live) battleModal(D, roll, win, info);
-  changed(true);
+  if (live && G.playing){
+    if (G.battle) return;
+    if (!A.n){ const B = makeBattle(S, E, D, w); B.res = {win:false, why:'Bản không có quân.', lostA:0, lostE:0}; finishBattle(S, B); return; }
+    showModal(D.peace ? 'Đến lúc làm nhiệm vụ: ' + D.name : (['assault', 'capture'].includes(bcfgOf(D.id).mode) ? 'Thời cơ đã đến: ' : 'Giặc đã tới: ') + D.name, '<p class="ev">' + D.desc + '</p><p>Hết thời gian chuẩn bị. ' + (D.peace ? 'Lực lượng' : 'Quân ta') + ' có ' + A.n + ' người, sức mạnh ước tính ' + fmt(armyPower(S, E, w)) + ' so với ' + D.need + '.</p>', [{label:'Vào trận', cls:'gold', fn:() => startBattle(S, w, false)}, {label:'Để quân tự đánh', cls:'dark', fn:() => startBattle(S, w, true)}]);
+    return;
+  }
+  const B = makeBattle(S, E, D, w); simBattle(B); finishBattle(S, B, true);
 }
 function resolveRaid(S, E, live){
   const A = S.army, e = S.era|0, need = A.raid.need, pw = armyPower(S, E, null)*(0.9 + Math.random()*0.2), nm = raidName(e);
@@ -3912,7 +3930,444 @@ function battleModal(D, roll, win, info){
 }
 function setArmy(d){ const S = G.S, A = S.army, mx = maxArmy(G.E); if (!cnt(S, 'thao_truong') && d > 0){ toast('Cần dựng ' + B.thao_truong.name + ' để tuyển và rèn luyện quân.', 'bad'); return; } A.want = clamp(A.want + d, 0, mx); if (A.n > A.want) A.n = A.want; Sound.sfx('tap'); changed(true); }
 function useTactic(i){ const S = G.S, w = S.army.war, D = w && warDef(w.id), T = D && D.tac[i]; if (!T || w.tac.includes(i)) return; if (!canAfford(S, T.cost)){ toast(missingText(S, T.cost), 'bad'); return; } payCost(S, T.cost); w.tac.push(i); Sound.sfx('reward'); toast('Đã dùng mưu kế: ' + T.n + ' (+' + Math.round(T.b*100) + '% sức mạnh).', 'good'); changed(true); }
-function fightNow(){ const S = G.S; if (!S.army.war) return; resolveWar(S, G.E || computeEconomy(S), true); }
+function fightNow(){ const S = G.S; if (!S.army.war) return; openBattle(S, S.army.war); }
+function autoFight(){ const S = G.S; if (!S.army.war) return; startBattle(S, S.army.war, true); }
+/* ================= TRẬN ĐÁNH THỜI GIAN THỰC ================= */
+const BW = 360, BH = 600;
+const UT = {
+  inf:{sp:26, rg:14, dps:1.8, hp:10, st:1},
+  arc:{sp:24, rg:80, dps:1.35, hp:8, rngd:1, st:0.8},
+  gun:{sp:24, rg:95, dps:1.8, hp:9, rngd:1, st:1},
+  voi:{sp:22, rg:20, dps:4.3, hp:26, big:1, st:2.6},
+  cav:{sp:44, rg:16, dps:2.3, hp:13, st:1.4},
+  art:{sp:10, rg:175, dps:4.3, hp:8, rngd:1, st:2},
+  aa:{sp:14, rg:190, dps:5.4, hp:9, rngd:1, aa:1, st:2},
+  boat:{sp:19, rg:62, dps:2.0, hp:30, rngd:1, boat:1, big:1, st:3},
+  tank:{sp:14, rg:85, dps:5.4, hp:55, rngd:1, big:1, st:6},
+  plane:{sp:58, rg:0, dps:0, hp:36, air:1, big:1, st:4},
+  crowd:{sp:26, rg:0, dps:0, hp:4, st:0},
+};
+const RIVER = [[300,-30],[292,70],[205,140],[110,205],[86,300],[165,370],[268,430],[255,520],[185,600]];
+const BCFG = {
+  tan:{mode:'defend', map:'forest', k:0.7, foe:['inf','inf','arc'], fx:[{t:'ambush', n:2}, {t:'dmg', v:0.3}]},
+  trung:{mode:'assault', map:'field', forts:['Lỵ sở của thái thú','Đồn giặc'], foe:['inf','arc'], fx:[{t:'reinf', n:3}, {t:'dmg', v:0.3}]},
+  bachdang938:{mode:'river', map:'river', k:1.15, foe:['boat'], land:['inf'], fx:[{t:'stakes'}, {t:'ambush', n:3, bank:1}]},
+  nhunguyet:{mode:'defend', map:'riverline', k:1.35, foe:['inf','inf','arc'], fx:[{t:'line'}, {t:'weaken', v:0.3}]},
+  nguyenmong:{mode:'river', map:'river', k:1.35, foe:['boat'], land:['cav','cav','inf'], fx:[{t:'slow', v:0.3}, {t:'stakes'}]},
+  dongda:{mode:'assault', map:'field', forts:['Đồn Hà Hồi','Đồn Ngọc Hồi','Đồn Đống Đa'], foe:['inf','arc','cav'], voi:1, fx:[{t:'stun', v:12}, {t:'weaken', v:0.3}]},
+  cmt8:{mode:'capture', map:'town', forts:['Phủ huyện','Đồn lính','Kho thóc của giặc','Nhà ngục'], foe:['gun','inf'], fx:[{t:'crowd', n:8}, {t:'reinf', n:2}]},
+  vietbac:{mode:'defend', map:'forest', foe:['gun','gun','inf'], para:1, fx:[{t:'ambush', n:3}, {t:'basehp', v:0.6}]},
+  dbp:{mode:'assault', map:'valley', forts:['Him Lam','Độc Lập','Đồi A1'], foe:['gun','gun','tank'], fx:[{t:'art', n:5}, {t:'supply', v:18}]},
+  dbptk:{mode:'air', map:'city', foe:['plane'], fx:[{t:'aa', v:0.5}, {t:'shelter', v:0.4}]},
+  hcm75:{mode:'capture', map:'city', k:0.75, forts:['Sân bay Tân Sơn Nhất','Bộ Tổng tham mưu','Biệt khu Thủ đô','Tổng nha Cảnh sát','Dinh Độc Lập'], foe:['gun','gun','tank'], fx:[{t:'speed', v:0.4}, {t:'reinf', n:3}]},
+  biengioi:{mode:'defend', map:'mountain', k:0.85, foe:['gun','gun','tank'], fx:[{t:'ambush', n:3}, {t:'basehp', v:0.6}]},
+  cuuho:{mode:'rescue', map:'flood', fx:[{t:'boat', v:0.6}, {t:'time', v:0.4}]},
+  dientap:{mode:'drill', map:'field', fx:[{t:'art', n:4, drone:1}, {t:'reinf', n:3}]},
+};
+const bcfgOf = id => BCFG[id] || (/^gghb/.test(id || '') ? {mode:'rescue', map:'camp', camp:1, fx:[{t:'medic'}, {t:'reinf', n:2}]} : {mode:'defend', map:'field', foe:['inf'], fx:[{t:'dmg', v:0.3}, {t:'hp', v:0.3}]});
+const MODE_TXT = {defend:'Giữ vững căn cứ, đánh tan các đợt tấn công.', river:'Chặn đoàn thuyền giặc trên sông, không để tới căn cứ.', assault:'Tiến công, phá hết các đồn giặc.', capture:'Chiếm hết các mục tiêu: đứng gần mục tiêu khi không còn quân giặc quanh đó.', air:'Bắn hạ máy bay, bảo vệ thành phố.', rescue:'Đưa đội tới chỗ người dân để cứu trước khi quá muộn.', drill:'Bắn trúng các mục tiêu trong thời gian quy định.'};
+const FX_NAME = {ambush:'Mai phục', reinf:'Gọi quân tiếp viện', art:'Pháo kích', crowd:'Quần chúng nổi dậy'};
+const brand = seed => { let x = seed >>> 0 || 1; return () => { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; return ((x >>> 0) % 100000)/100000; }; };
+function riverLen(){ if (RIVER.L) return RIVER.L; let L = 0; RIVER.cum = [0]; for (let k = 1; k < RIVER.length; k++){ L += Math.hypot(RIVER[k][0] - RIVER[k-1][0], RIVER[k][1] - RIVER[k-1][1]); RIVER.cum.push(L); } return RIVER.L = L; }
+function riverAt(d, off){
+  const L = riverLen(); d = clamp(d, 0, L); let k = 1; while (k < RIVER.length - 1 && RIVER.cum[k] < d) k++;
+  const a = RIVER[k-1], b = RIVER[k], f = (d - RIVER.cum[k-1])/Math.max(1e-6, RIVER.cum[k] - RIVER.cum[k-1]), dx = b[0] - a[0], dy = b[1] - a[1], ln2 = Math.hypot(dx, dy) || 1;
+  return [a[0] + dx*f - dy/ln2*(off || 0), a[1] + dy*f + dx/ln2*(off || 0)];
+}
+function makeBattle(S, E, D, war){
+  const C = bcfgOf(D.id), A = S.army, e = S.era|0, fl = (E && E.fort)|0, q = 0.5 + A.tr/100;
+  const fx = (war.tac || []).map(i => C.fx[i]).filter(Boolean), has = t => fx.find(f => f.t === t);
+  const B = {D, C, mode:C.mode, map:C.map, e, t:0, speed:1, uid:0, sq:[], st:[], pr:[], ef:[], zones:[], waves:[], sel:new Set(), res:null, lostE:0, a0:A.n, q, banner:'', bannerT:0, rescued:0, lostC:0, hit:0, aim:null, mark:null, rng:brand(hash2(D.id.length*31, (S.day|0) + 7, 11)*1e9 + 1), fx};
+  B.mods = {dmg:1 + ((has('dmg') || {}).v || 0), hp:1 + ((has('hp') || {}).v || 0), espd:1 - ((has('slow') || {}).v || 0), aspd:(1 + ((has('speed') || {}).v || 0))*(1 + ((has('boat') || {}).v || 0)), aa:1 + ((has('aa') || {}).v || 0), shelter:1 - ((has('shelter') || {}).v || 0), starve:has('slow') ? 0.006 : 0, stun:(has('stun') || {}).v || 0, weaken:1 - ((has('weaken') || {}).v || 0), water:1 - ((has('time') || {}).v || 0), medic:!!has('medic'), stakes:!!has('stakes'), line:!!has('line'), supply:(has('supply') || {}).v || 0, basehp:1 + ((has('basehp') || {}).v || 0)};
+  B.abil = fx.filter(f => FX_NAME[f.t]).map(f => ({f, left:f.t === 'art' ? f.n : 1}));
+  const need = D.need, rT = B.mode === 'air' ? (e >= 6 ? 'aa' : 'gun') : (e >= 4 ? 'gun' : 'arc');
+  const n = A.n, sz = Math.max(4, Math.ceil(n/(C.mode === 'rescue' ? 5 : 10))), k = Math.ceil(n/sz);
+  B.sz = sz; B.rT = rT;
+  let left = n;
+  for (let i = 0; i < k; i++){
+    const c = Math.min(sz, left); left -= c; let ty = (i % 5 === 1 || i % 5 === 3) ? rT : 'inf';
+    if (B.mode === 'air') ty = rT; if (C.voi && i === 0 && e === 3) ty = 'voi';
+    const cols = Math.min(k, 5), x = 50 + (i % cols)*(260/Math.max(1, cols - 1 || 1)), y = 500 + Math.floor(i/cols)*28;
+    addSq(B, 'A', ty, k === 1 ? 180 : x, y, Math.max(1, Math.round(c/UT[ty].st)), q, {own:1});
+  }
+  if (B.mode === 'defend' || B.mode === 'river'){
+    B.base = addSt(B, {side:'A', kind:'base', x:180, y:566, r:20, hp:need*9*B.mods.basehp});
+    if (fl) addSt(B, {side:'A', kind:'tower', x:B.mode === 'river' ? 80 : 110, y:470, r:12, hp:fl*40*B.mods.basehp, rg:95, dps:fl*4.3});
+  }
+  const ES = need*B.mods.weaken*(C.k || {defend:1, river:1, assault:1, capture:1}[C.mode] || 1);
+  const foeSq = (ty, x, y, sol, ex) => addSq(B, 'E', ty, x, y, Math.max(1, Math.round(sol/UT[ty].st)), 1, ex);
+  const spread = (tot, list, place) => { const szE = Math.max(4, Math.ceil(need/10)); let rem = tot, j = 0; while (rem > 0.5){ const sol = Math.min(szE, rem); rem -= sol; place(list[j % list.length], sol, j); j++; } };
+  if (B.mode === 'defend'){
+    const fr = [[3, 0.3], [26, 0.35], [52, 0.35]];
+    fr.forEach(([t, f], wi) => B.waves.push({t, fn:() => { B.banner = wi ? 'Đợt tấn công thứ ' + (wi + 1) + '!' : 'Giặc tới!'; B.bannerT = 2.5; spread(ES*f, C.foe, (ty, sol, j) => { const para = C.para && wi === 1; foeSq(ty, para ? 60 + B.rng()*240 : 30 + B.rng()*300, para ? 180 + B.rng()*150 : -10 - (j % 3)*16, sol, para ? {para:1.5} : null); }); }}));
+    if (B.map === 'riverline') B.rv = [262, 318];
+  } else if (B.mode === 'river'){
+    B.tideT = 30; riverLen();
+    const boats = Math.max(2, Math.round(ES*0.6/UT.boat.st));
+    for (let i = 0; i < boats; i++) B.waves.push({t:2 + (i < boats/2 ? i*2.2 : 12 + i*2.2), fn:() => { const s = foeSq('boat', RIVER[0][0], RIVER[0][1], UT.boat.st, {d:0, lane:((i % 3) - 1)*11}); s.c = s.c0 = 1; s.hp = s.hpU = UT.boat.hp*ES*0.6/boats/UT.boat.st; if (!B.banner){ B.banner = 'Thuyền giặc vào sông!'; B.bannerT = 2.5; } }});
+    B.waves.push({t:24, fn:() => { B.banner = 'Giặc đổ bộ lên bờ!'; B.bannerT = 2.5; spread(ES*0.4, C.land || ['inf'], (ty, sol, j) => foeSq(ty, j % 2 ? 330 : 30, 160 + (j % 3)*30, sol)); }});
+    if (B.mods.stakes) for (const f of [0.46, 0.55, 0.64]){ const [x, y] = riverAt(riverLen()*f, 0); B.zones.push({kind:'stake', x, y, r:30}); }
+    B.waves.sort((a2, b2) => a2.t - b2.t);
+  } else if (B.mode === 'assault' || B.mode === 'capture'){
+    const names = C.forts.slice(0, B.mode === 'assault' ? 3 : 5), F = names.length;
+    names.forEach((nm, i) => {
+      const x = F === 1 ? 180 : 50 + i*(260/(F - 1)), y = 90 + (i % 2)*70 + (F > 3 ? (i % 3)*20 : 0);
+      const st = addSt(B, {side:'E', kind:B.mode === 'assault' ? 'fort' : 'office', x, y, r:B.mode === 'assault' ? 22 : 18, hp:B.mode === 'assault' ? ES*6/F : 1, rg:B.mode === 'assault' ? 100 : 0, dps:B.mode === 'assault' ? ES*0.09/F : 0, name:nm, cap:0});
+      spread(ES*0.9/F, C.foe, (ty, sol, j) => foeSq(ty, x + (j % 2 ? 24 : -24), y + 46 + Math.floor(j/2)*14, sol, {home:st}));
+    });
+    if (B.mods.stun) B.stunT = B.mods.stun;
+  } else if (B.mode === 'air'){
+    for (let i = 0; i < 7; i++) addSt(B, {side:'A', kind:'block', x:50 + (i % 4)*86 + (i > 3 ? 43 : 0), y:330 + (i > 3 ? 90 : 0), r:22, hp:need*1.3});
+    const P = Math.max(4, Math.round(need/6)), hpP = need*15/P;
+    for (let i = 0; i < P; i++) B.waves.push({t:3 + Math.floor(i/(P/3))*22 + (i % Math.ceil(P/3))*1.6, fn:() => { const x = 40 + B.rng()*280; const s = addSq(B, 'E', 'plane', x, -30, 1, 1, {vx:(B.rng() - 0.5)*30, vy:UT.plane.sp, bombCd:0}); s.hp = s.hpU = hpP; B.banner = 'Máy bay địch!'; B.bannerT = 2; }});
+  } else if (B.mode === 'rescue'){
+    const N = C.camp ? 8 : 10; B.needR = Math.ceil(N*0.75);
+    for (let i = 0; i < N; i++){ const x = 30 + B.rng()*300, y = 40 + B.rng()*330; addSt(B, {side:'N', kind:'civ', x, y, r:12, hp:1, elev:1 - (y + 8)/BH, prog:0, dl:C.camp ? 22 + i*7 + B.rng()*12 : 0}); }
+  } else if (B.mode === 'drill'){
+    B.needR = 9; B.limit = 90;
+    for (let i = 0; i < 12; i++){ const t0 = 1 + Math.floor(i/2)*7; B.waves.push({t:t0, fn:() => addSt(B, {side:'E', kind:'target', x:30 + B.rng()*300, y:40 + B.rng()*280, r:11, hp:need*1.6, ttl:t0 + 13})}); }
+  }
+  return B;
+}
+function addSq(B, side, ty, x, y, c, q, ex){
+  const U = UT[ty], s = Object.assign({id:++B.uid, side, ty, x, y, c, c0:c, q, hpU:U.hp*q*(side === 'A' ? B.mods.hp : 1), cd:B.rng()*0.6, tgt:null, ox:null, oy:null, anim:B.rng()*6, fresh:0}, ex || {});
+  s.hp = s.hpU*s.c; B.sq.push(s); return s;
+}
+function addSt(B, o){ o.id = ++B.uid; o.hp0 = o.hp; o.cd = 0; B.st.push(o); return o; }
+const bAlive = (B, side) => B.sq.some(s => s.side === side && s.hp > 0 && s.ty !== 'crowd');
+function bTargets(B, s){
+  const U = UT[s.ty], out = [];
+  for (const o of B.sq){ if (o.side === s.side || o.hp <= 0) continue; if (o.ty === 'plane' && !U.rngd) continue; if (U.aa && o.ty !== 'plane') continue; out.push(o); }
+  for (const o of B.st){ if (o.hp <= 0 || o.side === s.side || o.side === 'N') continue; if (o.kind === 'office') continue; if (U.aa) continue; if (s.side === 'E' && o.side !== 'A') continue; out.push(o); }
+  return out;
+}
+function bDmg(B, s, o, amt){
+  if (o.kind){ if (o.kind === 'block') amt *= B.mods.shelter; o.hp -= amt; if (o.hp <= 0){ o.hp = 0; if (o.side === 'E'){ B.ef.push({k:'boom', x:o.x, y:o.y, t:0, T:1.2, r:26}); B.banner = (o.name || 'Mục tiêu') + ' đã bị phá!'; B.bannerT = 2.2; } else if (o.kind === 'block') B.ef.push({k:'boom', x:o.x, y:o.y, t:0, T:1.2, r:22}); } return; }
+  const c1 = o.c; o.hp -= amt; o.c = Math.max(0, Math.ceil(o.hp/o.hpU - 1e-6));
+  if (o.c < c1){ for (let k = 0; k < c1 - o.c && k < 3; k++) B.ef.push({k:o.ty === 'plane' ? 'boom' : 'fall', x:o.x + (B.rng() - 0.5)*14, y:o.y + (B.rng() - 0.5)*8, t:0, T:o.ty === 'plane' ? 1 : 3.5, side:o.side, ty:o.ty, r:18}); if (o.side === 'E') B.lostE += (c1 - o.c)*UT[o.ty].st; }
+}
+function bShot(B, s, o){
+  const U = UT[s.ty]; if (!U.rngd) { if (B.rng() < 0.35) B.ef.push({k:'spark', x:(s.x + o.x)/2 + (B.rng() - 0.5)*8, y:(s.y + o.y)/2 + (B.rng() - 0.5)*6, t:0, T:0.25}); return; }
+  const kind = s.ty === 'arc' ? 'arrow' : s.ty === 'art' ? 'shell' : s.ty === 'aa' ? 'flak' : s.ty === 'boat' && B.e <= 3 ? 'arrow' : 'bullet';
+  B.pr.push({k:kind, x:s.x, y:s.y - 6, tx:o.x + (B.rng() - 0.5)*10, ty:o.y + (B.rng() - 0.5)*8 - (o.ty === 'plane' ? 0 : 4), t:0, T:kind === 'shell' ? 0.9 : kind === 'arrow' ? 0.45 : 0.18});
+}
+function useAbil(B, i, x, y){
+  const a = B.abil[i]; if (!a || a.left <= 0 || B.res) return false; const f = a.f;
+  if (f.t === 'ambush'){
+    const pts = f.bank ? [[60, 300], [300, 240], [240, 380]] : [[x - 24, y], [x + 24, y], [x, y - 22]];
+    for (let k = 0; k < f.n; k++){ const [px, py] = pts[k % pts.length]; const s = addSq(B, 'A', B.rT, clamp(px, 14, BW - 14), clamp(py, 14, BH - 14), Math.max(1, Math.round(B.sz/UT[B.rT].st)), B.q*0.9, {fresh:5, extra:1}); B.ef.push({k:'smoke', x:s.x, y:s.y, t:0, T:1}); }
+    B.banner = 'Mai phục!'; B.bannerT = 2;
+  } else if (f.t === 'reinf'){
+    for (let k = 0; k < f.n; k++) addSq(B, 'A', k % 2 ? B.rT : 'inf', 120 + k*40, 590, Math.max(1, Math.round(B.sz/UT[k % 2 ? B.rT : 'inf'].st)), B.q*0.85, {extra:1});
+    B.banner = 'Quân tiếp viện tới!'; B.bannerT = 2;
+  } else if (f.t === 'crowd'){
+    for (let k = 0; k < f.n; k++) addSq(B, 'A', 'crowd', 40 + k*(280/Math.max(1, f.n - 1)), 585, 5, 1, {extra:1});
+    B.banner = 'Quần chúng xuống đường!'; B.bannerT = 2;
+  } else if (f.t === 'art'){
+    B.pr.push({k:'shell', x:180, y:BH + 20, tx:x, ty:y, t:0, T:1.1, big:1, cb:() => {
+      B.ef.push({k:'boom', x, y, t:0, T:1.3, r:34});
+      const dmg = B.D.need*0.9;
+      for (const o of B.sq) if (o.side === 'E' && o.hp > 0 && o.ty !== 'plane' && Math.hypot(o.x - x, o.y - y) < 34) bDmg(B, null, o, dmg);
+      for (const o of B.st) if (o.side === 'E' && o.hp > 0 && Math.hypot(o.x - x, o.y - y) < 34 + o.r) bDmg(B, null, o, dmg*2);
+    }});
+  }
+  a.left--; Sound.sfx(f.t === 'art' ? 'demolish' : 'gong'); return true;
+}
+function bAuto(B){
+  for (let i = 0; i < B.abil.length; i++){
+    const a = B.abil[i]; if (a.left <= 0) continue; const f = a.f;
+    if (f.t === 'reinf' && B.t > 4) useAbil(B, i);
+    else if (f.t === 'crowd' && B.t > 1) useAbil(B, i);
+    else if (f.t === 'ambush'){ const en = B.sq.filter(s => s.side === 'E' && s.hp > 0 && s.ty !== 'plane' && s.y > 150); if (en.length >= 2 || B.t > 40){ const tg = en[0] || {x:180, y:380}; useAbil(B, i, tg.x, Math.min(tg.y + 50, 500)); } }
+    else if (f.t === 'art' && (B.artCd || 0) <= B.t){ let best = null, bv = 0; for (const o of B.st) if (o.side === 'E' && o.hp > 0 && o.hp > bv){ bv = o.hp; best = o; } if (!best){ for (const o of B.sq) if (o.side === 'E' && o.hp > 0 && o.ty !== 'plane' && o.hp > bv){ bv = o.hp; best = o; } } if (best){ useAbil(B, i, best.x, best.y); B.artCd = B.t + 5; } }
+  }
+}
+function battleStep(B, dt){
+  if (B.res) return;
+  B.t += dt; if (B.bannerT > 0) B.bannerT -= dt;
+  while (B.waves.length && B.waves[0].t <= B.t) B.waves.shift().fn();
+  if (B.auto) bAuto(B);
+  if (B.mode === 'river' && !B.ebb && B.t >= B.tideT){
+    B.ebb = true; B.banner = 'Nước triều rút!'; B.bannerT = 3;
+    for (const s of B.sq) if (s.ty === 'boat' && s.hp > 0){ if (B.zones.some(z => Math.hypot(z.x - s.x, z.y - s.y) < z.r)) { s.stuck = 1; B.ef.push({k:'splash', x:s.x, y:s.y, t:0, T:1}); } }
+  }
+  if (B.mods.supply && B.t >= (B.supT || B.mods.supply)){ B.supT = B.t + B.mods.supply; for (const s of B.sq) if (s.side === 'A' && s.hp > 0 && s.ty !== 'crowd'){ const mx = s.hpU*s.c0; s.hp = Math.min(mx, s.hp + mx*0.15); s.c = Math.ceil(s.hp/s.hpU - 1e-6); } B.banner = 'Dân công tiếp tế!'; B.bannerT = 1.8; }
+  const water = B.mode === 'rescue' && !B.C.camp ? Math.min(1, B.t/60*B.mods.water) : 0; B.water = water;
+  for (const s of B.sq){
+    if (s.hp <= 0) continue; const U = UT[s.ty]; s.anim += dt*(s.moving ? 9 : 3); s.moving = false; if (s.fresh > 0) s.fresh -= dt;
+    if (s.side === 'E' && B.stunT && B.t < B.stunT && !U.air) continue;
+    if (s.side === 'E' && B.mods.starve){ s.hp -= s.hpU*s.c*B.mods.starve*dt; s.c = Math.max(1, Math.ceil(s.hp/s.hpU - 1e-6)); }
+    let sp = U.sp*(s.side === 'A' ? B.mods.aspd : B.mods.espd);
+    if (s.para > 0){ s.para -= dt; continue; }
+    if (B.rv && !U.air && s.y > B.rv[0] && s.y < B.rv[1]){ sp *= B.mods.line && s.side === 'E' ? 0.3 : 0.45; if (B.mods.line && s.side === 'E'){ s.hp -= s.hpU*s.c*0.02*dt; s.c = Math.max(0, Math.ceil(s.hp/s.hpU - 1e-6)); } }
+    if (U.air){
+      s.x += s.vx*dt; s.y += s.vy*dt; s.bombCd -= dt;
+      if (s.bombCd <= 0){ const tg = B.st.find(o => o.kind === 'block' && o.hp > 0 && Math.abs(o.x - s.x) < 34 && Math.abs(o.y - s.y) < 40); if (tg){ s.bombCd = 0.9; const bx = tg.x + (B.rng() - 0.5)*20, by = tg.y + (B.rng() - 0.5)*14; B.pr.push({k:'bomb', x:s.x, y:s.y, tx:bx, ty:by, t:0, T:0.7, cb:() => { B.ef.push({k:'boom', x:bx, y:by, t:0, T:1, r:20}); for (const o of B.st) if (o.kind === 'block' && o.hp > 0 && Math.hypot(o.x - bx, o.y - by) < 30) bDmg(B, null, o, B.D.need*0.55); for (const o of B.sq) if (o.side === 'A' && o.hp > 0 && Math.hypot(o.x - bx, o.y - by) < 22) bDmg(B, null, o, B.D.need*0.15); }}); } }
+      if (s.y > BH + 40 || s.x < -60 || s.x > BW + 60){ s.hp = 0; s.c = 0; s.gone = 1; }
+      continue;
+    }
+    if (U.boat){
+      const L = riverLen(); if (!s.stuck){ s.d += sp*(B.ebb ? 0.5 : 1)*dt; s.moving = true; }
+      else { s.hp -= s.hpU*0.05*dt; s.c = Math.max(0, Math.ceil(s.hp/s.hpU - 1e-6)); if (s.hp <= 0) bDmg(B, null, s, 0.01); }
+      const p2 = riverAt(s.d, s.lane); s.x = p2[0]; s.y = p2[1];
+      if (s.d >= L - 2 && B.base){ bDmg(B, s, B.base, s.hp*0.6); s.hp = 0; s.c = 0; s.gone = 1; B.ef.push({k:'boom', x:B.base.x, y:B.base.y - 10, t:0, T:1, r:24}); continue; }
+    }
+    if (s.ty === 'crowd'){
+      const of = B.st.filter(o => o.kind === 'office' && o.side === 'E').sort((a2, b2) => Math.hypot(a2.x - s.x, a2.y - s.y) - Math.hypot(b2.x - s.x, b2.y - s.y))[0];
+      const gx = s.ox != null ? s.ox : of ? of.x : s.x, gy = s.ox != null ? s.oy : of ? of.y + 20 : s.y; const d2 = Math.hypot(gx - s.x, gy - s.y); if (d2 > 6){ s.x += (gx - s.x)/d2*sp*dt; s.y += (gy - s.y)/d2*sp*dt; s.moving = true; } else if (s.ox != null){ s.ox = s.oy = null; }
+      continue;
+    }
+    let tg = s.tgt && (s.tgt.hp > 0) && (s.tgt.side !== s.side) ? s.tgt : null; if (!tg) s.tgt = null;
+    const cand = bTargets(B, s);
+    const near = (r) => { let b = null, bd = r; for (const o of cand){ const d2 = Math.hypot(o.x - s.x, o.y - s.y) - (o.r || 0); if (d2 < bd){ bd = d2; b = o; } } return b; };
+    if (!tg){
+      const inR = near(U.rg + 4);
+      if (inR && (s.ox == null || U.rngd)) tg = inR;
+      else if (s.ox == null){
+        if (s.side === 'A'){
+          if (B.mode === 'rescue'){ const cv = B.st.filter(o => o.kind === 'civ' && !o.done).sort((a2, b2) => Math.hypot(a2.x - s.x, a2.y - s.y) - Math.hypot(b2.x - s.x, b2.y - s.y)).find(o => !B.sq.some(z => z !== s && z.side === 'A' && z.goal === o)); s.goal = cv || null; if (cv){ s.gx = cv.x; s.gy = cv.y + 10; } }
+          else if (B.mode === 'assault' || B.mode === 'drill' || B.mode === 'capture'){ const ag = near(130); if (ag) tg = ag; else { const obj = B.st.filter(o => o.side === 'E' && o.hp > 0 && (B.mode !== 'capture' || o.kind === 'office')).sort((a2, b2) => Math.hypot(a2.x - s.x, a2.y - s.y) - Math.hypot(b2.x - s.x, b2.y - s.y))[0]; if (obj){ if (obj.kind === 'office'){ s.gx = obj.x + ((s.id % 3) - 1)*14; s.gy = obj.y + 18; } else tg = obj; } } }
+          else { const zone = B.mode === 'river' ? -100 : 200; let best = null, bd = 1e9; for (const o of cand){ if (o.kind) continue; const d3 = Math.hypot(o.x - s.x, o.y - s.y); if (o.y < zone && d3 > 160) continue; if (d3 < bd){ bd = d3; best = o; } } tg = best; if (!tg){ if (s.hx == null){ s.hx = s.x; s.hy = clamp(s.y, 380, 540); } s.gx = s.hx; s.gy = s.hy; } }
+        } else {
+          tg = near(s.home ? 110 : 100);
+          if (!tg){ if (s.home){ s.gx = s.home.x + ((s.id % 3) - 1)*20; s.gy = s.home.y + 36; } else if (B.base){ s.gx = B.base.x + ((s.id % 5) - 2)*16; s.gy = B.base.y - 10; } else { const bl = B.st.find(o => o.side === 'A' && o.hp > 0); if (bl){ s.gx = bl.x; s.gy = bl.y; } } }
+        }
+      }
+    }
+    if (s.home && tg && Math.hypot(s.x - s.home.x, s.y - s.home.y) > 150){ tg = null; s.gx = s.home.x; s.gy = s.home.y + 30; }
+    if (tg){
+      const d2 = Math.hypot(tg.x - s.x, tg.y - s.y) - (tg.r || 0);
+      if (d2 > U.rg){ if (!U.boat){ const dd = Math.hypot(tg.x - s.x, tg.y - s.y) || 1; s.x += (tg.x - s.x)/dd*sp*dt; s.y += (tg.y - s.y)/dd*sp*dt; s.moving = true; } }
+      else {
+        let mult = 1; if (s.side === 'A'){ mult = B.mods.dmg*(s.fresh > 0 ? 2 : 1); if (tg.stuck) mult *= 1.5; if (tg.ty === 'plane') mult *= U.aa ? B.mods.aa : 0.5; }
+        if (s.ty === 'art'){ s.cd -= dt; if (s.cd <= 0){ s.cd = 1.6; const tx = tg.x, ty = tg.y, dmg = s.c*U.dps*s.q*mult*1.6; B.pr.push({k:'shell', x:s.x, y:s.y - 6, tx, ty, t:0, T:0.9, cb:() => { B.ef.push({k:'boom', x:tx, y:ty, t:0, T:1, r:20}); for (const o of B.sq) if (o.side !== s.side && o.hp > 0 && o.ty !== 'plane' && Math.hypot(o.x - tx, o.y - ty) < 22) bDmg(B, s, o, dmg); for (const o of B.st) if (o.side !== s.side && o.side !== 'N' && o.hp > 0 && Math.hypot(o.x - tx, o.y - ty) < 22 + o.r) bDmg(B, s, o, dmg*1.5); }}); } }
+        else { bDmg(B, s, tg, s.c*U.dps*s.q*mult*dt); s.cd -= dt; if (s.cd <= 0){ s.cd = 0.45 + B.rng()*0.4; bShot(B, s, tg); } }
+        s.attacking = true;
+      }
+      if (s.ox != null && Math.hypot(s.ox - s.x, s.oy - s.y) < 8) s.ox = s.oy = null;
+    } else {
+      s.attacking = false;
+      const gx = s.ox != null ? s.ox : s.gx, gy = s.ox != null ? s.oy : s.gy;
+      if (gx != null && !U.boat){ const d2 = Math.hypot(gx - s.x, gy - s.y); if (d2 > 5){ s.x += (gx - s.x)/d2*Math.min(sp*dt, d2); s.y += (gy - s.y)/d2*Math.min(sp*dt, d2); s.moving = true; } else { if (s.ox != null) s.ox = s.oy = null; s.gx = s.gy = null; } }
+    }
+    if (!U.boat){ s.x = clamp(s.x, 8, BW - 8); s.y = clamp(s.y, -20, BH - 6);
+      if (B.map === 'river' && !(B.ebb && s.side === 'A')){ let bd = 1e9, bx = 0, by = 0; for (let k = 1; k < RIVER.length; k++){ const a2 = RIVER[k-1], b2 = RIVER[k], vx = b2[0] - a2[0], vy = b2[1] - a2[1], L2 = vx*vx + vy*vy, f = clamp(((s.x - a2[0])*vx + (s.y - a2[1])*vy)/L2, 0, 1), px = a2[0] + vx*f, py = a2[1] + vy*f, d3 = Math.hypot(s.x - px, s.y - py); if (d3 < bd){ bd = d3; bx = px; by = py; } } if (bd < 27){ const k2 = (27 - bd)/(bd || 1); s.x += (s.x - bx)*k2; s.y += (s.y - by)*k2; } } }
+  }
+  for (let a = 0; a < B.sq.length; a++){ const s = B.sq[a]; if (s.hp <= 0 || UT[s.ty].air || UT[s.ty].boat) continue; for (let b = a + 1; b < B.sq.length; b++){ const o = B.sq[b]; if (o.hp <= 0 || UT[o.ty].air || UT[o.ty].boat) continue; const dx = o.x - s.x, dy = o.y - s.y, d2 = Math.hypot(dx, dy); if (d2 < 15 && d2 > 0.01){ const pu = (15 - d2)*0.25; s.x -= dx/d2*pu; s.y -= dy/d2*pu; o.x += dx/d2*pu; o.y += dy/d2*pu; } } }
+  for (const o of B.st){
+    if (o.hp <= 0 || !o.dps) continue; o.cd -= dt;
+    let b = null, bd = o.rg; for (const s of B.sq){ if (s.side === o.side || s.hp <= 0 || UT[s.ty].air) continue; const d2 = Math.hypot(s.x - o.x, s.y - o.y); if (d2 < bd){ bd = d2; b = s; } }
+    if (b){ bDmg(B, o, b, o.dps*dt*(o.side === 'E' && B.stunT && B.t < B.stunT ? 0 : 1)); if (o.cd <= 0){ o.cd = 0.5; B.pr.push({k:B.e <= 3 ? 'arrow' : 'bullet', x:o.x, y:o.y - 14, tx:b.x, ty:b.y - 4, t:0, T:0.35}); } }
+  }
+  for (const o of B.st){
+    if (o.kind === 'office' && o.side === 'E'){
+      const ours = B.sq.filter(s => s.side === 'A' && s.hp > 0 && Math.hypot(s.x - o.x, s.y - o.y) < 30), foes = B.sq.some(s => s.side === 'E' && s.hp > 0 && Math.hypot(s.x - o.x, s.y - o.y) < 60);
+      if (ours.length && !foes){ o.cap += dt/5*(ours.some(s => s.ty === 'crowd') ? 2 : 1)*(1 + 0.3*(ours.length - 1)); if (o.cap >= 1){ o.cap = 1; o.side = 'A'; B.banner = 'Đã chiếm ' + o.name + '!'; B.bannerT = 2.2; Sound.sfx('reward'); } }
+    }
+    if (o.kind === 'civ' && !o.done){
+      if ((!B.C.camp && water >= o.elev) || (B.C.camp && B.t >= o.dl)){ o.done = 'lost'; B.lostC++; B.ef.push({k:'splash', x:o.x, y:o.y, t:0, T:1}); }
+      else if (B.sq.some(s => s.side === 'A' && s.hp > 0 && Math.hypot(s.x - o.x, s.y - o.y) < 22)){ const sq2 = B.sq.filter(s => s.side === 'A' && s.hp > 0 && Math.hypot(s.x - o.x, s.y - o.y) < 22).reduce((a2, s) => a2 + s.c*s.q*UT[s.ty].st, 0); o.prog += dt/(B.mods.medic ? 2 : 3.2)*clamp(sq2/(B.D.need*0.2), 0.25, 1.4); if (o.prog >= 1){ o.done = 'ok'; B.rescued++; B.ef.push({k:'text', x:o.x, y:o.y - 16, t:0, T:1.4, txt:'+1'}); Sound.sfx('reward'); } }
+    }
+  }
+  for (const o of B.st) if (o.kind === 'target' && o.hp > 0 && o.ttl && B.t > o.ttl){ o.hp = 0; o.miss = 1; B.ef.push({k:'smoke', x:o.x, y:o.y - 8, t:0, T:0.8}); }
+  for (const p of B.pr){ p.t += dt; if (p.t >= p.T && !p.done){ p.done = 1; if (p.cb) p.cb(); } }
+  B.pr = B.pr.filter(p => !p.done);
+  for (const f of B.ef) f.t += dt; B.ef = B.ef.filter(f => f.t < f.T);
+  B.sq = B.sq.filter(s => s.hp > 0 || s.own);
+  for (const s of B.sq) if (s.hp <= 0){ s.c = 0; if (B.sel.has(s.id)) B.sel.delete(s.id); }
+  const end = (win, why) => { const lostA = Math.round(B.sq.filter(s => s.own).reduce((a2, s) => a2 + (s.c0 - s.c)*UT[s.ty].st, 0)); B.res = {win, why, lostA:Math.min(B.a0, lostA), lostE:Math.round(B.lostE)}; };
+  const M = B.mode;
+  if (M === 'defend' || M === 'river'){ if (B.base && B.base.hp <= 0) end(false, 'Căn cứ bị phá.'); else if (!B.waves.length && !bAlive(B, 'E')) end(true); else if (!bAlive(B, 'A') && B.t > 2) end(false, 'Quân ta không còn ai đứng vững.'); }
+  else if (M === 'assault'){ if (!B.st.some(o => o.kind === 'fort' && o.hp > 0)) end(true); else if (!bAlive(B, 'A')) end(false, 'Quân ta không còn ai đứng vững.'); }
+  else if (M === 'capture'){ if (!B.st.some(o => o.kind === 'office' && o.side === 'E')) end(true); else if (!bAlive(B, 'A') && !B.sq.some(s => s.ty === 'crowd' && s.hp > 0)) end(false, 'Lực lượng của ta đã tan.'); else if (B.t > 200) end(false, 'Hết thời gian.'); }
+  else if (M === 'air'){ const dead = B.st.filter(o => o.kind === 'block' && o.hp <= 0).length; if (dead >= 4) end(false, 'Thành phố bị tàn phá nặng.'); else if (!B.waves.length && !B.sq.some(s => s.ty === 'plane' && s.hp > 0)) end(true); }
+  else if (M === 'rescue'){ if (B.st.filter(o => o.kind === 'civ').every(o => o.done)) end(B.rescued >= B.needR, 'Cứu được ' + B.rescued + ' người, cần ' + B.needR + '.'); else if (!bAlive(B, 'A')) end(false, 'Không còn đội cứu hộ.'); }
+  else if (M === 'drill'){ const hit = B.st.filter(o => o.kind === 'target' && o.hp <= 0 && !o.miss).length, miss = B.st.filter(o => o.miss).length; B.hit = hit; if (hit >= B.needR) end(true); else if (B.t > B.limit || miss > 12 - B.needR) end(false, 'Mới trúng ' + hit + '/' + B.needR + ' mục tiêu.'); }
+  if (!B.res && B.t > 240){ let a2 = 0, e2 = 0; for (const s of B.sq) if (s.hp > 0){ if (s.side === 'A') a2 += s.hp; else e2 += s.hp; } end(a2 > e2, 'Hết thời gian.'); }
+}
+function simBattle(B){ B.auto = true; let guard = 0; while (!B.res && guard++ < 3000) battleStep(B, 0.1); if (!B.res) B.res = {win:false, why:'Hết thời gian.', lostA:0, lostE:0}; return B.res; }
+/* ---- vẽ trận đánh ---- */
+function enemyFig(c, x, y, e, ph, s){
+  const uni = e <= 3 ? '#4f4a63' : '#55627e', hel = e <= 3 ? '#2c2838' : '#2f3a4f';
+  ln(c, [x - 0.9*s, y], [x - 1.1*s, y - 4*s], '#1e1e24', 1.2*s); ln(c, [x + 0.9*s, y], [x + 1.1*s, y - 4*s], '#1e1e24', 1.2*s);
+  c.fillStyle = uni; c.fillRect(x - 2*s, y - 9*s, 4*s, 5.4*s);
+  circ(c, x, y - 10.6*s, 1.7*s, '#d9b08c');
+  if (e <= 3) fp(c, [[x - 2.2*s, y - 11*s], [x + 2.2*s, y - 11*s], [x, y - 14.4*s]], hel); else ell(c, x, y - 11.8*s, 2.1*s, 1.4*s, hel);
+  const th = Math.sin(ph)*1.6*s;
+  if (e <= 3){ ln(c, [x - 2*s - th, y - 5.5*s], [x - 4.6*s - th*1.4, y - 16*s], '#4a3a2a', 0.9*s); }
+  else ln(c, [x - 1.6*s, y - 5*s], [x - 4*s, y - 13*s], '#222', 1.1*s);
+}
+function drawBig(c, s, e, side){
+  const x = s.x, y = s.y, A = side === 'A', bob = Math.sin(s.anim)*0.6;
+  if (s.ty === 'voi'){ for (let k = 0; k < Math.min(3, s.c); k++){ const ox = (k - (Math.min(3, s.c) - 1)/2)*16; ell(c, x + ox, y + 1, 8, 2.5, 'rgba(0,0,0,.2)'); ell(c, x + ox, y - 7 + bob, 8, 6, '#8d8f92'); circ(c, x + ox + 6, y - 9 + bob, 4, '#7d7f82'); ln(c, [x + ox + 9, y - 8 + bob], [x + ox + 10, y - 1], '#7d7f82', 2); for (const lx of [-5, -1, 3, 6]) ln(c, [x + ox + lx, y - 3], [x + ox + lx, y + 1], '#6f7174', 2); c.fillStyle = '#b8322a'; c.fillRect(x + ox - 4, y - 15 + bob, 6, 3); soldierFig(c, x + ox - 1, y - 13 + bob, e, s.anim, 0.7); } return; }
+  if (s.ty === 'boat'){ const k = s.stuck ? 0.25 : 0; c.save(); c.translate(x, y); c.rotate(k); ell(c, 0, 3, 16, 5, 'rgba(20,40,60,.3)'); fp(c, [[-16, -2], [16, -2], [11, 5], [-11, 5]], A ? '#7a5532' : '#4b3b30'); ln(c, [0, -2], [0, -24], '#3a2a1a', 1.4); fp(c, [[0, -23], [12, -12], [0, -6]], A ? '#e8dcc0' : '#6e5e58'); for (let o = -10; o <= 10; o += 5) ln(c, [o, 4], [o - 3, 9], '#3a2a1a', 0.8); if (!A) for (let o = -8; o <= 8; o += 8) enemyFig(c, o, -1, e, s.anim, 0.55); c.restore(); if (s.stuck){ for (let o = -10; o <= 10; o += 6) ln(c, [x + o, y + 6], [x + o + 1, y - 2], '#4a3420', 1.6); } return; }
+  if (s.ty === 'tank'){ for (let k = 0; k < Math.min(2, s.c); k++){ const ox = (k - (Math.min(2, s.c) - 1)/2)*20; c.fillStyle = 'rgba(0,0,0,.2)'; c.fillRect(x + ox - 10, y - 1, 20, 4); c.fillStyle = A ? '#4f6a3a' : '#5d6670'; c.fillRect(x + ox - 9, y - 8, 18, 8); c.fillStyle = A ? '#3e5530' : '#46505a'; c.fillRect(x + ox - 9, y - 2, 18, 3); circ(c, x + ox, y - 10, 4.2, A ? '#5b7844' : '#6b747e'); ln(c, [x + ox, y - 10], [x + ox + (A ? 0 : 0), y + (A ? -22 : 4)], '#2a2a2a', 1.8); } return; }
+  if (s.ty === 'plane'){ const k = 1.7; c.globalAlpha = 0.22; fp(c, [[x + 18, y + 50 - 14*k], [x + 18 + 22*k*0.6, y + 50], [x + 18 - 22*k*0.6, y + 50]], '#000'); c.globalAlpha = 1; fp(c, [[x, y + 14*k], [x - 3*k, y - 12*k], [x + 3*k, y - 12*k]], '#6b7480'); fp(c, [[x - 22*k, y + 3*k], [x + 22*k, y + 3*k], [x + 3*k, y - 4*k], [x - 3*k, y - 4*k]], '#7d8691'); fp(c, [[x - 8*k, y - 11*k], [x + 8*k, y - 11*k], [x + 2*k, y - 8*k], [x - 2*k, y - 8*k]], '#7d8691'); for (const ex2 of [-14, -7, 7, 14]) circ(c, x + ex2*k, y + 2*k, 1.4*k, '#4a525c'); return; }
+}
+function drawSq(c, B, s){
+  const U = UT[s.ty], A = s.side === 'A';
+  if (s.para > 0){ circ(c, s.x, s.y - 24 - s.para*10, 7, '#e8e8e2'); ln(c, [s.x - 6, s.y - 22 - s.para*10], [s.x, s.y - 8], '#999', 0.6); ln(c, [s.x + 6, s.y - 22 - s.para*10], [s.x, s.y - 8], '#999', 0.6); }
+  if (B.sel.has(s.id)){ c.beginPath(); c.ellipse(s.x, s.y + 1, 15, 6, 0, 0, Math.PI*2); c.strokeStyle = '#ffe27a'; c.lineWidth = 1.6; c.stroke(); }
+  if (U.big){ drawBig(c, s, B.e, s.side); }
+  else if (s.ty === 'art' || s.ty === 'aa'){ const n = Math.min(3, Math.ceil(s.c/2)); for (let k = 0; k < n; k++){ const ox = (k - (n - 1)/2)*14; circ(c, s.x + ox - 4, s.y, 2.6, '#3a3a3a'); circ(c, s.x + ox + 4, s.y, 2.6, '#3a3a3a'); c.fillStyle = '#4f5a3a'; c.fillRect(s.x + ox - 5, s.y - 5, 10, 4); if (s.ty === 'aa'){ ln(c, [s.x + ox - 1, s.y - 4], [s.x + ox + 4, s.y - 17], '#2a2a2a', 1.6); ln(c, [s.x + ox + 1, s.y - 4], [s.x + ox + 6, s.y - 16], '#2a2a2a', 1.6); } else ln(c, [s.x + ox, s.y - 4], [s.x + ox, s.y - 15], '#2a2a2a', 2.2); soldierFig(c, s.x + ox + 7, s.y + 1, B.e, s.anim, 0.7); } }
+  else {
+    const n = s.ty === 'crowd' ? Math.min(6, s.c + 2) : Math.min(8, s.c), cols = Math.min(4, n), ph = s.attacking ? s.anim*2.2 : s.anim;
+    for (let k = 0; k < n; k++){
+      const col = k % cols, row = Math.floor(k/cols), fx2 = s.x + (col - (cols - 1)/2)*6 + (row % 2)*3, fy = s.y + row*5 - 3 + (s.moving ? Math.abs(Math.sin(s.anim + k))*-1.2 : 0);
+      ell(c, fx2, fy + 0.5, 2.4, 1, 'rgba(0,0,0,.18)');
+      if (s.ty === 'crowd'){ circ(c, fx2, fy - 9, 1.6, '#e0b48a'); c.fillStyle = ['#b8322a', '#3f6b9a', '#e9b434', '#6b4a2a'][(k + s.id) % 4]; c.fillRect(fx2 - 1.8, fy - 7.4, 3.6, 6); if (k === 0){ ln(c, [fx2 + 2, fy - 6], [fx2 + 2, fy - 20], '#5a3d22', 0.8); c.fillStyle = '#da251d'; c.fillRect(fx2 + 2, fy - 20, 8, 5); star(c, fx2 + 6, fy - 17.5, 1.6, '#ffde00'); } }
+      else if (s.ty === 'cav'){ ell(c, fx2, fy - 4, 4.5, 2.6, A ? '#7a5532' : '#4a3a30'); ln(c, [fx2 + 3.5, fy - 5], [fx2 + 5.5, fy - 8], A ? '#7a5532' : '#4a3a30', 1.6); for (const lx of [-3, 3]) ln(c, [fx2 + lx, fy - 2], [fx2 + lx, fy + 1], '#2a2a2a', 1); (A ? soldierFig : enemyFig)(c, fx2, fy - 4, B.e, ph + k, 0.75); }
+      else (A ? soldierFig : enemyFig)(c, fx2, fy, B.e, ph + k*0.7, 0.85);
+    }
+  }
+  if (s.ty !== 'crowd'){ const w = 18, f = clamp(s.hp/(s.hpU*Math.max(1, s.c0)), 0, 1), yb = s.y - (U.big ? 30 : 22); c.fillStyle = 'rgba(0,0,0,.45)'; c.fillRect(s.x - w/2, yb, w, 3); c.fillStyle = A ? '#5fd38a' : '#ff5a4a'; c.fillRect(s.x - w/2, yb, w*f, 3); if (s.fresh > 0){ c.fillStyle = '#ffe27a'; c.font = 'bold 8px sans-serif'; c.textAlign = 'center'; c.fillText('×2', s.x, yb - 2); } }
+}
+function drawSt(c, B, o){
+  const x = o.x, y = o.y, e = B.e, dead = o.hp <= 0;
+  if (B.labels){ c.font = 'bold 9px sans-serif'; c.textAlign = 'center'; c.fillStyle = 'rgba(0,0,0,.6)'; const tw = c.measureText(o.name).width + 8; c.fillRect(x - tw/2, y + 6, tw, 12); c.fillStyle = o.side === 'A' ? '#9ff0b8' : '#fff'; c.fillText(o.name, x, y + 15); return; }
+  if (o.kind === 'base' || o.kind === 'tower'){
+    if (o.kind === 'base'){ fp(c, [[x - 22, y], [x + 22, y], [x + 18, y - 10], [x - 18, y - 10]], e >= 5 ? '#8a8a7a' : '#8a6a42'); for (let k = -18; k <= 18; k += 4) ln(c, [x + k, y - 9], [x + k, y - (e >= 5 ? 13 : 17)], e >= 5 ? '#6f6f62' : '#6b4a26', 2); c.fillStyle = e >= 5 ? '#7d7d70' : '#a07a4a'; c.fillRect(x - 8, y - 24, 16, 14); fp(c, [[x - 11, y - 24], [x + 11, y - 24], [x, y - 32]], e >= 5 ? '#5f6a50' : '#7a6a3a'); }
+    else { for (const dx of [-5, 5]) ln(c, [x + dx, y], [x + dx, y - 22], '#5a3d22', 1.6); c.fillStyle = '#94602f'; c.fillRect(x - 7, y - 26, 14, 5); fp(c, [[x - 9, y - 26], [x + 9, y - 26], [x, y - 33]], '#7a6a3a'); }
+    const fx2 = x + (o.kind === 'base' ? 0 : 0), fy = y - (o.kind === 'base' ? 32 : 33); ln(c, [fx2, fy], [fx2, fy - 14], '#3a2a1a', 1); if (e >= 5) flag(c, fx2, fy - 14, 10, 7, B.t*1000, 0.4); else fp(c, [[fx2, fy - 14], [fx2 + 10, fy - 11], [fx2, fy - 8]], '#e9b434');
+  } else if (o.kind === 'block'){
+    const h = dead ? 6 : 16; c.fillStyle = dead ? '#5a5650' : '#c9c2b0'; c.fillRect(x - 16, y - h, 32, h); fp(c, [[x - 18, y - h], [x + 18, y - h], [x + 12, y - h - 7], [x - 12, y - h - 7]], dead ? '#4a4640' : '#9a4a3a'); if (!dead) for (let k = -12; k <= 8; k += 7){ c.fillStyle = '#7fa3c0'; c.fillRect(x + k, y - h + 5, 4, 4); } else if (Math.floor(B.t*3 + o.id) % 2) B.ef.push({k:'smoke', x:x + (B.rng() - 0.5)*12, y:y - 8, t:0, T:1.5});
+  } else if (o.kind === 'fort'){
+    if (e <= 3){ c.fillStyle = dead ? '#5a4a3a' : '#8a6a46'; c.fillRect(x - 22, y - 12, 44, 12); for (let k = -20; k <= 20; k += 4) ln(c, [x + k, y - 11], [x + k, y - (dead ? 13 : 20)], '#5a3d22', 2); if (!dead){ c.fillStyle = '#6e5a42'; c.fillRect(x - 7, y - 30, 14, 14); fp(c, [[x - 10, y - 30], [x + 10, y - 30], [x, y - 37]], '#4b3b30'); ln(c, [x, y - 37], [x, y - 48], '#3a2a1a', 1); fp(c, [[x, y - 48], [x + 9, y - 45], [x, y - 42]], '#3c3a48'); } }
+    else { ell(c, x, y - 4, 24, 9, dead ? '#4a4840' : '#7d7a6a'); for (let k = 0; k < 10; k++){ const an = Math.PI + k/9*Math.PI; ell(c, x + Math.cos(an)*22, y - 4 + Math.sin(an)*7, 4, 2.4, dead ? '#5a564e' : '#b8a983'); } if (!dead){ c.fillStyle = '#5d5b50'; c.fillRect(x - 9, y - 18, 18, 10); c.fillStyle = '#1c1c18'; c.fillRect(x - 6, y - 14, 12, 3); } }
+    if (dead && Math.floor(B.t*2 + o.id) % 3 === 0) B.ef.push({k:'smoke', x:x + (B.rng() - 0.5)*16, y:y - 10, t:0, T:1.6});
+  } else if (o.kind === 'office'){
+    c.fillStyle = '#e3d3a3'; c.fillRect(x - 15, y - 16, 30, 16); fp(c, [[x - 17, y - 16], [x + 17, y - 16], [x + 13, y - 22], [x - 13, y - 22]], '#9a5a3a'); for (let k = -11; k <= 9; k += 6){ c.fillStyle = '#6b5a3a'; c.fillRect(x + k, y - 11, 3, 6); }
+    ln(c, [x, y - 22], [x, y - 36], '#3a2a1a', 1); if (o.side === 'A') flag(c, x, y - 36, 10, 7, B.t*1000, 0.2); else { c.fillStyle = '#8a8a8a'; c.fillRect(x, y - 36, 9, 6); }
+    if (o.side === 'E' && o.cap > 0){ c.fillStyle = 'rgba(0,0,0,.4)'; c.fillRect(x - 14, y + 4, 28, 3); c.fillStyle = '#ffd45e'; c.fillRect(x - 14, y + 4, 28*o.cap, 3); }
+  } else if (o.kind === 'civ'){
+    if (o.done === 'lost') return;
+    ell(c, x, y + 2, 13, 5, '#8a7a5a'); c.fillStyle = '#a07a4a'; c.fillRect(x - 9, y - 8, 18, 9); fp(c, [[x - 12, y - 8], [x + 12, y - 8], [x, y - 17]], '#7a5a2a');
+    if (!o.done){ const wv = Math.sin(B.t*8 + o.id)*3; circ(c, x + 8, y - 22, 2, '#e0b48a'); c.fillStyle = '#3f6b9a'; c.fillRect(x + 6.5, y - 20, 3, 6); ln(c, [x + 9, y - 19], [x + 12 + wv*0.3, y - 25], '#e0b48a', 1); if (o.prog > 0){ c.fillStyle = 'rgba(0,0,0,.4)'; c.fillRect(x - 12, y + 6, 24, 3); c.fillStyle = '#5fd38a'; c.fillRect(x - 12, y + 6, 24*o.prog, 3); } if (B.C.camp){ c.fillStyle = '#fff'; c.font = 'bold 8px sans-serif'; c.textAlign = 'center'; c.fillText(Math.max(0, Math.ceil(o.dl - B.t)) + 's', x, y - 28); } }
+    else { c.strokeStyle = '#2f9a5a'; c.lineWidth = 2; c.beginPath(); c.moveTo(x - 5, y - 26); c.lineTo(x - 1, y - 22); c.lineTo(x + 6, y - 30); c.stroke(); }
+  } else if (o.kind === 'target'){
+    if (dead) return; ln(c, [x - 4, y], [x, y - 10], '#5a3d22', 1); ln(c, [x + 4, y], [x, y - 10], '#5a3d22', 1); circ(c, x, y - 13, 8, '#f4efe4'); circ(c, x, y - 13, 5.5, '#c0392b'); circ(c, x, y - 13, 3, '#f4efe4'); circ(c, x, y - 13, 1.2, '#c0392b');
+  }
+  if (o.name && o.kind !== 'civ' && B.labels){ c.font = 'bold 9px sans-serif'; c.textAlign = 'center'; c.fillStyle = 'rgba(0,0,0,.55)'; const tw = c.measureText(o.name).width + 8; c.fillRect(x - tw/2, y + 9, tw, 12); c.fillStyle = '#fff'; c.fillText(o.name, x, y + 18); }
+  if ((o.kind === 'fort' || o.kind === 'base' || o.kind === 'tower' || o.kind === 'block' || o.kind === 'target') && o.hp > 0 && o.hp0 > 1){ const w = o.kind === 'block' || o.kind === 'target' ? 22 : 34, f = clamp(o.hp/o.hp0, 0, 1), yb = y - (o.kind === 'fort' ? 54 : o.kind === 'base' ? 52 : o.kind === 'target' ? 26 : 30); c.fillStyle = 'rgba(0,0,0,.45)'; c.fillRect(x - w/2, yb, w, 4); c.fillStyle = o.side === 'E' ? '#ff5a4a' : '#5fd38a'; c.fillRect(x - w/2, yb, w*f, 4); }
+}
+function drawBattleBg(B, g){
+  const m = B.map, r = brand(B.D.id.length*977 + 13);
+  const base = {forest:'#5f8a45', field:'#7da756', river:'#6f9a4c', riverline:'#77a052', valley:'#9a8a5a', town:'#8fa368', city:'#a3a39a', flood:'#7d9a5a', mountain:'#7f8a6a', camp:'#bba878'}[m] || '#79a253';
+  g.fillStyle = base; g.fillRect(0, 0, BW, BH);
+  for (let k = 0; k < 700; k++){ g.fillStyle = r() < 0.5 ? 'rgba(0,0,0,.05)' : 'rgba(255,255,255,.05)'; g.fillRect(r()*BW, r()*BH, 2 + r()*3, 1 + r()*2); }
+  const tree = (x, y, s) => { ell(g, x + 3, y + 2, 7*s, 3*s, 'rgba(0,0,0,.18)'); circ(g, x, y - 4*s, 7*s, '#2f5a2a'); circ(g, x - 3*s, y - 7*s, 5*s, '#3d6e33'); circ(g, x + 3*s, y - 8*s, 4*s, '#4d8040'); };
+  if (m === 'field' || m === 'riverline' || m === 'flood'){ for (let k = 0; k < 9; k++){ const x = r()*BW, y = 60 + r()*440, w = 50 + r()*50, h = 30 + r()*20; g.fillStyle = 'rgba(160,210,110,.35)'; g.fillRect(x, y, w, h); g.strokeStyle = 'rgba(90,70,40,.3)'; g.strokeRect(x, y, w, h); } }
+  if (m === 'forest' || m === 'mountain' || m === 'river' || m === 'valley'){ const nT = m === 'forest' ? 70 : 34; for (let k = 0; k < nT; k++){ let x = r()*BW, y = r()*BH; if (m === 'forest' && x > 130 && x < 230 && r() < 0.8) x = r() < 0.5 ? x - 90 : x + 90; tree(x, y, 0.8 + r()*0.6); } }
+  if (m === 'mountain' || m === 'valley'){ for (let k = 0; k < (m === 'valley' ? 10 : 14); k++){ const x = m === 'valley' ? (k < 5 ? 10 + k*85 : 10 + (k - 5)*85) : r()*BW, y = m === 'valley' ? (k < 5 ? 20 : 590) : r()*BH, s = 20 + r()*24; fp(g, [[x - s, y + s*0.5], [x, y - s], [x + s, y + s*0.5]], m === 'valley' ? '#6f7a4a' : '#8a8a80'); fp(g, [[x, y - s], [x + s, y + s*0.5], [x + s*0.3, y + s*0.5]], 'rgba(0,0,0,.15)'); } }
+  if (m === 'valley'){ g.strokeStyle = 'rgba(70,50,30,.55)'; g.lineWidth = 3; for (let k = 0; k < 4; k++){ g.beginPath(); let x = 60 + k*80, y = 560; g.moveTo(x, y); while (y > 200){ y -= 24; x += (k % 2 ? 1 : -1)*(10 + r()*10)*(Math.floor(y/24) % 2 ? 1 : -1); g.lineTo(x, y); } g.stroke(); } }
+  if (m === 'river'){ g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); RIVER.forEach((p2, k) => k ? g.lineTo(p2[0], p2[1]) : g.moveTo(p2[0], p2[1])); g.strokeStyle = '#a89a6a'; g.lineWidth = 58; g.stroke(); g.strokeStyle = '#3f7fa8'; g.lineWidth = 46; g.stroke(); g.strokeStyle = 'rgba(160,210,235,.35)'; g.lineWidth = 16; g.stroke(); }
+  if (m === 'riverline'){ g.fillStyle = '#a89a6a'; g.fillRect(0, 254, BW, 72); g.fillStyle = '#3f7fa8'; g.fillRect(0, 262, BW, 56); g.fillStyle = 'rgba(160,210,235,.3)'; g.fillRect(0, 282, BW, 12); }
+  if (m === 'town' || m === 'city'){ g.fillStyle = m === 'city' ? '#8a8a84' : '#b8a97a'; g.fillRect(170, 0, 20, BH); g.fillRect(0, 250, BW, 18); if (m === 'city'){ g.fillRect(0, 470, BW, 14); g.fillRect(70, 0, 12, BH); g.fillRect(280, 0, 12, BH); } for (let k = 0; k < (m === 'city' ? 26 : 14); k++){ const x = r()*BW, y = r()*BH; if (Math.abs(x - 180) < 24 || Math.abs(y - 259) < 18) continue; g.fillStyle = m === 'city' ? '#b9b3a4' : '#c9b48a'; g.fillRect(x - 9, y - 7, 18, 12); g.fillStyle = m === 'city' ? '#7a7a74' : '#8a4a32'; g.fillRect(x - 10, y - 9, 20, 4); } }
+  if (m === 'camp'){ for (let k = 0; k < 12; k++){ const x = r()*BW, y = r()*BH; fp(g, [[x - 10, y + 6], [x + 10, y + 6], [x, y - 8]], '#e8e4d8'); fp(g, [[x, y - 8], [x + 10, y + 6], [x + 3, y + 6]], '#c9c4b6'); } }
+}
+function renderBattle(B){
+  const cv = $('#bcv'); if (!cv) return; const dp = Math.min(2, window.devicePixelRatio || 1), W2 = cv.clientWidth, H2 = cv.clientHeight;
+  if (cv.width !== Math.round(W2*dp) || cv.height !== Math.round(H2*dp)){ cv.width = Math.round(W2*dp); cv.height = Math.round(H2*dp); }
+  const sc = Math.min(W2/BW, H2/BH), ox = (W2 - BW*sc)/2, oy = (H2 - BH*sc)/2; B.view = {sc, ox, oy};
+  const c = cv.getContext('2d'); c.setTransform(dp, 0, 0, dp, 0, 0); c.fillStyle = '#1b2416'; c.fillRect(0, 0, W2, H2);
+  c.setTransform(dp*sc, 0, 0, dp*sc, dp*ox, dp*oy);
+  if (!B.bg){ B.bg = document.createElement('canvas'); B.bg.width = Math.round(BW*2); B.bg.height = Math.round(BH*2); const g = B.bg.getContext('2d'); g.scale(2, 2); drawBattleBg(B, g); }
+  c.drawImage(B.bg, 0, 0, BW, BH);
+  if (B.water > 0){ c.fillStyle = 'rgba(70,120,170,' + (0.25 + B.water*0.45) + ')'; c.fillRect(0, BH*(1 - B.water), BW, BH*B.water); c.fillStyle = 'rgba(70,120,170,' + B.water*0.35 + ')'; c.fillRect(0, 0, BW, BH); }
+  if (B.mode === 'river' && B.ebb){ c.globalAlpha = 0.35; c.lineCap = 'round'; c.beginPath(); RIVER.forEach((p2, k) => k ? c.lineTo(p2[0], p2[1]) : c.moveTo(p2[0], p2[1])); c.strokeStyle = '#b5a77a'; c.lineWidth = 44; c.stroke(); c.globalAlpha = 1; }
+  for (const z of B.zones){ for (let k = 0; k < 14; k++){ const an = k*2.4, rr = (k % 5)*5 + 4, x = z.x + Math.cos(an)*rr, y = z.y + Math.sin(an)*rr*0.6; ln(c, [x, y + 2], [x + 0.6, y - (B.ebb ? 7 : 2)], B.ebb ? '#4a3420' : 'rgba(60,40,20,.35)', 1.6); } }
+  if (B.rv && B.mods.line){ for (let x = 6; x < BW; x += 9) ln(c, [x, 322], [x + 2, 314], '#4a3420', 1.4); }
+  const items = [];
+  for (const o of B.st) items.push([o.y, 0, o]);
+  for (const s of B.sq) if (s.hp > 0 && !UT[s.ty].air) items.push([s.y, 1, s]);
+  for (const f of B.ef) if (f.k === 'fall') items.push([f.y - 1, 2, f]);
+  items.sort((a2, b2) => a2[0] - b2[0]);
+  for (const [, k, o] of items){ if (k === 0) drawSt(c, B, o); else if (k === 1) drawSq(c, B, o); else { c.globalAlpha = clamp(1 - o.t/o.T, 0, 1)*0.8; c.fillStyle = o.side === 'A' ? '#5c6e3a' : '#55627e'; c.fillRect(o.x - 5, o.y - 2, 10, 3); circ(c, o.x + 6, o.y - 1, 1.6, '#c9a888'); c.globalAlpha = 1; } }
+  B.labels = true; for (const o of B.st) if (o.name) drawSt(c, B, o); B.labels = false;
+  for (const s of B.sq) if (s.hp > 0 && UT[s.ty].air) drawSq(c, B, s);
+  for (const p of B.pr){ const f = clamp(p.t/p.T, 0, 1), x = lerp(p.x, p.tx, f), y = lerp(p.y, p.ty, f) - (p.k === 'shell' ? Math.sin(f*Math.PI)*(p.big ? 90 : 40) : 0);
+    if (p.k === 'arrow'){ const dx = p.tx - p.x, dy = p.ty - p.y, d2 = Math.hypot(dx, dy) || 1; ln(c, [x - dx/d2*5, y - dy/d2*5], [x, y], '#3a2a1a', 0.9); }
+    else if (p.k === 'bullet'){ const dx = p.tx - p.x, dy = p.ty - p.y, d2 = Math.hypot(dx, dy) || 1; ln(c, [x - dx/d2*4, y - dy/d2*4], [x, y], '#ffe08a', 1); }
+    else if (p.k === 'flak'){ if (f > 0.85) circ(c, p.tx, p.ty, 3 + (f - 0.85)*30, 'rgba(90,90,90,.6)'); else ln(c, [x, y], [x, y + 4], '#ffd27a', 1); }
+    else if (p.k === 'bomb') circ(c, x, y, 1.8, '#222');
+    else circ(c, x, y, p.big ? 2.6 : 1.8, '#2a2a2a'); }
+  for (const f of B.ef){ const k = f.t/f.T;
+    if (f.k === 'boom'){ c.globalAlpha = 1 - k; circ(c, f.x, f.y, f.r*(0.3 + k*0.9), k < 0.35 ? '#ffd45e' : '#e8742a'); circ(c, f.x, f.y - k*10, f.r*(0.2 + k*0.8), 'rgba(80,80,80,.7)'); c.globalAlpha = 1; }
+    else if (f.k === 'smoke'){ c.globalAlpha = (1 - k)*0.55; circ(c, f.x, f.y - k*16, 4 + k*8, '#8a8a8a'); c.globalAlpha = 1; }
+    else if (f.k === 'splash'){ c.globalAlpha = 1 - k; c.beginPath(); c.ellipse(f.x, f.y, 6 + k*14, 3 + k*6, 0, 0, Math.PI*2); c.strokeStyle = '#d8eef8'; c.lineWidth = 1.4; c.stroke(); c.globalAlpha = 1; }
+    else if (f.k === 'spark'){ circ(c, f.x, f.y, 2*(1 - k) + 0.5, '#fff2b0'); }
+    else if (f.k === 'text'){ c.globalAlpha = 1 - k; c.fillStyle = '#ffe27a'; c.font = 'bold 12px sans-serif'; c.textAlign = 'center'; c.fillText(f.txt, f.x, f.y - k*12); c.globalAlpha = 1; } }
+  if (B.mark && B.t - B.mark.t < 0.8){ const k = (B.t - B.mark.t)/0.8; c.beginPath(); c.ellipse(B.mark.x, B.mark.y, 10 - k*6, 4 - k*2.4, 0, 0, Math.PI*2); c.strokeStyle = B.mark.atk ? '#ff6a5a' : '#ffe27a'; c.lineWidth = 2; c.stroke(); }
+  if (B.aim != null){ c.fillStyle = 'rgba(255,226,122,.08)'; c.fillRect(0, 0, BW, BH); }
+  if (B.stunT && B.t < B.stunT){ c.fillStyle = 'rgba(0,0,0,.5)'; c.fillRect(BW/2 - 90, 6, 180, 18); c.fillStyle = '#ffe27a'; c.font = 'bold 10px sans-serif'; c.textAlign = 'center'; c.fillText('Giặc bất ngờ, chưa kịp trở tay: ' + Math.ceil(B.stunT - B.t) + 's', BW/2, 19); }
+  if (B.bannerT > 0 && B.banner){ c.globalAlpha = Math.min(1, B.bannerT); c.fillStyle = 'rgba(19,26,51,.82)'; c.fillRect(30, BH/2 - 22, BW - 60, 40); c.fillStyle = '#ffe27a'; c.font = 'bold 17px sans-serif'; c.textAlign = 'center'; c.fillText(B.banner, BW/2, BH/2 + 4); c.globalAlpha = 1; }
+}
+/* ---- giao diện trận đánh ---- */
+function battleHUD(B){
+  const D = B.D; let ourHp = 0, ourMax = 0, foeHp = 0;
+  for (const s of B.sq){ if (s.ty === 'crowd') continue; if (s.side === 'A'){ ourHp += Math.max(0, s.hp); ourMax += s.hpU*s.c0; } else if (s.hp > 0) foeHp += s.hp; }
+  for (const o of B.st) if (o.side === 'E' && o.hp > 0 && o.kind !== 'office') foeHp += o.hp;
+  B.foeMax = Math.max(B.foeMax || 0, foeHp);
+  let obj = MODE_TXT[B.mode];
+  if (B.mode === 'rescue') obj = 'Đã cứu ' + B.rescued + ', cần ' + B.needR + '/' + B.st.filter(o => o.kind === 'civ').length + (B.lostC ? ', không kịp ' + B.lostC : '') + '. ' + (B.C.camp ? 'Đưa đội y tế tới các trại trước khi hết giờ.' : 'Nước đang lên!');
+  else if (B.mode === 'drill') obj = 'Trúng ' + B.hit + '/' + B.needR + ' mục tiêu · còn ' + Math.max(0, Math.ceil(B.limit - B.t)) + ' giây.';
+  else if (B.mode === 'capture') obj = 'Đã chiếm ' + B.st.filter(o => o.kind === 'office' && o.side === 'A').length + '/' + B.st.filter(o => o.kind === 'office').length + ' mục tiêu. ' + MODE_TXT.capture;
+  else if (B.mode === 'river') obj = (B.ebb ? 'Triều đã rút! ' : 'Nước triều đang lên, triều rút sau ' + Math.max(0, Math.ceil(B.tideT - B.t)) + ' giây. ') + MODE_TXT.river;
+  $('#bName').textContent = D.name; $('#bTime').textContent = Math.floor(B.t) + 's'; $('#bObj').textContent = obj;
+  $('#bA').style.width = (ourMax ? clamp(ourHp/ourMax, 0, 1)*100 : 0) + '%'; $('#bE').style.width = (B.foeMax ? clamp(foeHp/B.foeMax, 0, 1)*100 : 0) + '%';
+  const sig = B.abil.map(a => a.left).join(',') + '|' + B.sel.size + '|' + B.speed + '|' + B.aim + '|' + !!B.res;
+  if (sig !== B.botSig){ B.botSig = sig;
+    $('#bBot').innerHTML = B.abil.map((a, i) => '<button class="btn small ' + (B.aim === i ? 'gold' : a.left > 0 ? 'primary' : 'ghost') + '" data-bab="' + i + '"' + (a.left > 0 ? '' : ' disabled') + '>' + FX_NAME[a.f.t] + (a.f.t === 'art' ? ' (' + a.left + ')' : '') + '</button>').join('') +
+      '<button class="btn small dark" data-bact="all">' + (B.sel.size ? 'Bỏ chọn' : 'Chọn cả đội') + '</button><button class="btn small dark" data-bact="speed">×' + B.speed + '</button><button class="btn small ghost danger" data-bact="flee">Rút lui</button>';
+    const pas = B.fx.filter(f => !FX_NAME[f.t]).map(f => B.D.tac[B.C.fx.indexOf(f)] ? B.D.tac[B.C.fx.indexOf(f)].n : '').filter(Boolean);
+    $('#bTip').textContent = (B.aim != null ? 'Chạm lên bản đồ để chọn chỗ ' + FX_NAME[B.abil[B.aim].f.t].toLowerCase() + '. ' : 'Chạm đội quân để chọn, chạm chỗ khác để đi tới hoặc tấn công. Không chọn ai thì cả đội cùng đi. ') + (pas.length ? 'Mưu kế đang dùng: ' + pas.join(', ') + '.' : '');
+  }
+}
+function openBattle(S, war){
+  const D = warDef(war.id); if (!D) return;
+  const C = bcfgOf(D.id), A = S.army, E = G.E || computeEconomy(S), pw = armyPower(S, E, war);
+  if (!A.n){ showModal(D.name, '<p>Bản chưa có quân để ' + (D.peace ? 'làm nhiệm vụ' : 'ra trận') + '. Hãy tuyển quân ở mục Quân đội.</p>', [{label:'Đến Quân đội', cls:'gold', fn:() => openPanel('army')}, {label:'Đóng', cls:'ghost'}]); return; }
+  closeSheet();
+  const used = (war.tac || []).map(i => D.tac[i].n);
+  showModal(D.name + ' (' + D.yrs + ')', '<p class="ev">' + D.desc + '</p><p><b>Nhiệm vụ:</b> ' + MODE_TXT[C.mode] + '</p><p><b>Quân ta:</b> ' + A.n + ' người, rèn luyện ' + Math.round(A.tr) + '% (' + trLabel(A.tr) + '). Sức mạnh ước tính ' + fmt(pw) + ' so với ' + D.need + '.</p>' + (used.length ? '<p><b>Mưu kế:</b> ' + used.join(', ') + '.</p>' : '<p class="hint">Chưa dùng mưu kế nào. Mưu kế mua ở mục Quân đội sẽ thành chiêu đánh trong trận.</p>') + '<p class="hint">Chạm vào đội quân để chọn, chạm chỗ khác để ra lệnh đi tới hoặc tấn công. Có thể để quân tự đánh.</p>',
+    [{label:'Vào trận', cls:'gold', fn:() => startBattle(S, war, false)}, {label:'Để quân tự đánh', cls:'dark', fn:() => startBattle(S, war, true)}, {label:'Để sau', cls:'ghost'}]);
+}
+function startBattle(S, war, auto){
+  const D = warDef(war.id), B = makeBattle(S, G.E || computeEconomy(S), D, war);
+  if (auto){ simBattle(B); finishBattle(S, B); return; }
+  G.battle = B; $('#battle').hidden = false; B.botSig = ''; Sound.sfx('gong'); B.banner = D.peace ? 'Bắt đầu nhiệm vụ!' : 'Vào trận!'; B.bannerT = 2;
+}
+function battleFrame(dtMs){
+  const B = G.battle; if (!B) return;
+  if (!B.res){ const steps = B.speed*Math.min(dtMs, 50)/1000; let left = steps; while (left > 0){ const d = Math.min(0.05, left); battleStep(B, d); left -= d; if (B.res) break; } }
+  renderBattle(B); battleHUD(B);
+  if (B.res && !B.shown){ B.shown = true; setTimeout(() => finishBattle(G.S, B), 900); }
+}
+function finishBattle(S, B, quiet){
+  const A = S.army, D = B.D, w = A.war, r = B.res, info = {lost:r.lostA};
+  A.n = Math.max(0, A.n - r.lostA);
+  if (r.win){ A.won.push(D.id); A.war = null; A.wait = D.era >= ERA_FUT ? 25 : 8; info.bac = Math.round(D.need*25); S.res.bac += info.bac; S.fame = (S.fame || 0) + D.need*3; A.tr = Math.min(100, A.tr + 10); S.happy = Math.min(100, S.happy + 8); }
+  else { info.lua = Math.floor(S.res.lua*0.08); info.bacL = Math.floor(S.res.bac*0.08); S.res.lua -= info.lua; S.res.bac -= info.bacL; A.tr = Math.max(0, A.tr - 3); S.happy = Math.max(0, S.happy - 6); if (w){ w.d = 12; w.tac = []; } }
+  if (G.battle === B){ G.battle = null; $('#battle').hidden = true; }
+  if (quiet){ changed(false); return; }
+  const res = r.win ? '<b>' + (D.peace ? 'Hoàn thành!' : 'Chiến thắng!') + '</b> ' + D.win
+    : '<b>Chưa thành công.</b> ' + (r.why || '') + ' ' + (D.peace ? '' : 'Quân ta rút lui củng cố lực lượng. ') + 'Bản mất ' + fmt(info.lua) + ' lúa, ' + fmt(info.bacL) + ' bạc. Còn 12 ngày để chuẩn bị đánh lại.';
+  showModal(D.name + ' (' + D.yrs + ')', '<p>' + res + '</p><div class="pstats p4" style="margin:8px 0">' + [['Quân ta', B.a0], ['Tổn thất', r.lostA], [D.peace ? 'Cứu được' : 'Diệt địch', D.peace ? (B.rescued || B.hit || 0) : r.lostE], ['Thời gian', Math.floor(B.t) + 's']].map(([a, b]) => '<div class="pst"><b>' + b + '</b><span>' + a + '</span></div>').join('') + '</div>' + (r.win ? '<p>Thưởng ' + fmt(info.bac) + ' bạc; quân lính dày dạn thêm.</p>' : ''), [r.win ? {label:'Tuyệt vời', cls:'gold'} : {label:'Chuẩn bị lại', cls:'gold', fn:() => openPanel('army')}]);
+  Sound.sfx(r.win ? 'rank' : 'error'); if (r.win){ const h = houseSpot(); if (h) spawnConfetti(h[0], h[1], 50); }
+  changed(true);
+}
+function battleTap(cx, cy){
+  const B = G.battle; if (!B || B.res || !B.view) return;
+  const x = (cx - B.view.ox)/B.view.sc, y = (cy - B.view.oy)/B.view.sc;
+  if (B.aim != null){ const i = B.aim; B.aim = null; useAbil(B, i, x, y); B.botSig = ''; return; }
+  const own = B.sq.filter(s => s.side === 'A' && s.hp > 0).map(s => [Math.hypot(s.x - x, s.y - 4 - y), s]).sort((a2, b2) => a2[0] - b2[0])[0];
+  if (own && own[0] < 18){ if (B.sel.has(own[1].id)) B.sel.delete(own[1].id); else B.sel.add(own[1].id); Sound.sfx('tap'); B.botSig = ''; return; }
+  const foe = [...B.sq.filter(s => s.side === 'E' && s.hp > 0), ...B.st.filter(o => o.side === 'E' && o.hp > 0 && o.kind !== 'office')].map(o => [Math.hypot(o.x - x, o.y - 6 - y) - (o.r || 0), o]).sort((a2, b2) => a2[0] - b2[0])[0];
+  const group = B.sel.size ? B.sq.filter(s => B.sel.has(s.id) && s.hp > 0) : B.sq.filter(s => s.side === 'A' && s.hp > 0);
+  if (foe && foe[0] < 16){ for (const s of group){ s.tgt = foe[1]; s.ox = s.oy = null; } B.mark = {x:foe[1].x, y:foe[1].y, t:B.t, atk:1}; }
+  else { group.forEach((s, k) => { s.tgt = null; const n2 = group.length, col = k % 4, row = Math.floor(k/4); s.ox = clamp(x + (n2 > 1 ? (col - Math.min(3, n2 - 1)/2)*16 : 0), 8, BW - 8); s.oy = clamp(y + row*14, 8, BH - 8); }); B.mark = {x, y, t:B.t}; }
+}
+
 function giveReserve(S){ return {lua:Math.ceil(((G.E && G.E.cons) || S.pop*0.6)*3)}; }
 function canGive(S, g){ const gv = (S.gave && S.gave[g.id]) || {}, rs = giveReserve(S); for (const r in g.res){ const need = g.res[r] - (gv[r] || 0); if (need > 0 && (S.res[r] || 0) - (rs[r] || 0) < need) return false; } return true; }
 function doGive(id){
@@ -4319,6 +4774,18 @@ function showModal(title, html, btns){
   $('#mBtns').innerHTML = modalBtns.map((b, k) => '<button class="btn ' + (b.cls || 'dark') + '" data-mb="' + k + '">' + esc(b.label) + '</button>').join('');
   $('#modal').hidden = false;
 }
+(() => {
+  const cv = $('#bcv'); let down = null;
+  cv.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
+  cv.addEventListener('pointerup', e => { if (!down) return; const r = cv.getBoundingClientRect(); if (Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 14) battleTap(e.clientX - r.left, e.clientY - r.top); down = null; });
+  $('#bBot').addEventListener('click', e => {
+    const B = G.battle; if (!B) return; const el = e.target.closest('button'); if (!el) return;
+    if (el.dataset.bab != null){ const i = +el.dataset.bab, a = B.abil[i]; if (!a || a.left <= 0) return; if ((a.f.t === 'ambush' && !a.f.bank) || a.f.t === 'art') B.aim = B.aim === i ? null : i; else useAbil(B, i); B.botSig = ''; }
+    else if (el.dataset.bact === 'all'){ if (B.sel.size) B.sel.clear(); else B.sq.forEach(s2 => { if (s2.side === 'A' && s2.hp > 0) B.sel.add(s2.id); }); B.botSig = ''; }
+    else if (el.dataset.bact === 'speed'){ B.speed = B.speed === 1 ? 2 : B.speed === 2 ? 3 : 1; B.botSig = ''; }
+    else if (el.dataset.bact === 'flee'){ if (!B.res){ const lostA = Math.round(B.sq.filter(s2 => s2.own).reduce((a2, s2) => a2 + (s2.c0 - s2.c)*UT[s2.ty].st, 0)); B.res = {win:false, why:'Ta đã rút lui.', lostA:Math.min(B.a0, lostA), lostE:Math.round(B.lostE)}; } }
+  });
+})();
 $('#modal').addEventListener('click', e => {
   const b = e.target.closest('[data-mb]');
   if (b){ const fn = modalBtns[+b.dataset.mb].fn; $('#modal').hidden = true; if (fn) fn(); return; }
@@ -4484,7 +4951,7 @@ function armyHTML(S, E){
     h += '<div class="sec">' + (D.peace ? 'Nhiệm vụ' : 'Chiến sự') + '</div><div class="card hist"><div class="row" style="gap:6px;flex-wrap:wrap"><span class="tag ' + (pw >= D.need ? 'gold' : 'off') + '">Còn ' + w.d + ' ngày</span><span class="tag">' + D.yrs + '</span></div><h3>' + D.name + '</h3><p>' + D.desc + '</p>' +
       '<div class="kv"><span>Sức mạnh</span><b style="color:' + (pw >= D.need ? 'var(--ok)' : '#b8322a') + '">' + fmt(pw) + ' / ' + D.need + '</b></div><div class="pbar"><i style="width:' + pct*100 + '%"></i></div>' +
       '<div class="sec" style="margin-top:8px">Mưu kế</div><ul class="tacl">' + D.tac.map((T, i) => '<li><div><b>' + T.n + ' <span style="color:var(--ok);font-weight:600">+' + Math.round(T.b*100) + '%</span></b><small>' + T.d + '</small><div class="costs">' + costHTML(T.cost) + '</div></div>' + (w.tac.includes(i) ? '<span class="tag gold">Đã dùng</span>' : '<button class="btn small ' + (canAfford(S, T.cost) ? 'primary' : 'ghost') + '" data-act="tactic" data-i="' + i + '">Dùng</button>') + '</li>').join('') + '</ul>' +
-      '<div class="btns" style="margin-top:10px"><button class="btn ' + (pw >= D.need ? 'gold' : 'dark') + '" data-act="fight" style="flex:1">' + (D.peace ? 'Bắt đầu nhiệm vụ' : 'Xuất quân ngay') + '</button></div><p class="hint" style="margin:6px 0 0">Kết quả dao động ±10%. Hết ngày chuẩn bị, trận đánh tự diễn ra.</p></div>';
+      '<div class="btns" style="margin-top:10px"><button class="btn ' + (pw >= D.need ? 'gold' : 'dark') + '" data-act="fight" style="flex:1">' + (D.peace ? 'Bắt đầu nhiệm vụ' : 'Xuất quân ngay') + '</button></div><p class="hint" style="margin:6px 0 0">Trận đánh diễn ra trên chiến trường: bạn chỉ huy các đội quân, mưu kế đã mua thành chiêu đánh. Nên có sức mạnh hơn yêu cầu khoảng 30% cho chắc thắng. Hết ngày chuẩn bị thì trận đánh tự bắt đầu.</p></div>';
   } else if (e >= 1){
     const id = nextWarId(S), N = id && warDef(id);
     h += '<div class="sec">Trận tiếp theo</div><p class="hint" style="margin:0 0 6px">' + (N ? '<b>' + N.name + '</b> (' + N.yrs + ') sẽ bắt đầu sau khoảng ' + A.wait + ' ngày.' : 'Thời kỳ này không còn trận chiến nào. Giữ một ít quân để chống ' + raidName(e).toLowerCase() + '.') + '</p>';
@@ -5081,6 +5548,7 @@ let last = performance.now(), hudT = 0, coiPh = null;
 function frame(now){
   let dt = now - last; last = now;
   frameDt = Math.min(dt, 100);
+  if (G.battle){ battleFrame(dt); hudT = 0; requestAnimationFrame(frame); return; }
   const S = G.S;
   if (S && G.playing){
     if (dt > 5000){
@@ -5131,7 +5599,7 @@ requestAnimationFrame(frame);
   const alt = Cloud.uid && guest && best && best !== guest && (guest.created !== best.created || (guest.saved || 0) > (best.saved || 0) + 60000) ? guest : null;
   renderStart({save:best, cloudOk, alt, push:!!(Cloud.ref && cloudOk && best && best !== save0)});
 })();
-window.__banlang = {curQuest, changed, WARS, warDef, armyPower, armyDay, fightNow, setArmy, useTactic, maxArmy, MATS, MAT_ERA, socialOf, nameAt, rankNameAt, expandLand, doUpgradeAll, SOC, cnt, doGive, goalProg, eraOf, bLock, EDU, SEATS, eduDay, eduStats, encodePeople, decodePeople, seedEdu, getVehicles: () => vehicles, syncVehicles, autoAssign, planRelocate, applyRelocate, startModern, MODERN, getPeople: () => people, setWork, setWorkAll, slotsOf, curQuest, serial, drawPerson, doFlip, drawBuildingAt, expandLand, setN, Sound, render, normalize, doPlant, startMove, doMove, G, Cloud, B, QUESTS, FESTS, newState, computeEconomy, dayTick, doPlace, doUpgrade, doTrade, doFest, doClear, claimQuest, placeCheck, openPanel, enterGame, save, cam};
+window.__banlang = {makeBattle, simBattle, battleStep, openBattle, startBattle, autoFight, bcfgOf, curQuest, changed, WARS, warDef, armyPower, armyDay, fightNow, setArmy, useTactic, maxArmy, MATS, MAT_ERA, socialOf, nameAt, rankNameAt, expandLand, doUpgradeAll, SOC, cnt, doGive, goalProg, eraOf, bLock, EDU, SEATS, eduDay, eduStats, encodePeople, decodePeople, seedEdu, getVehicles: () => vehicles, syncVehicles, autoAssign, planRelocate, applyRelocate, startModern, MODERN, getPeople: () => people, setWork, setWorkAll, slotsOf, curQuest, serial, drawPerson, doFlip, drawBuildingAt, expandLand, setN, Sound, render, normalize, doPlant, startMove, doMove, G, Cloud, B, QUESTS, FESTS, newState, computeEconomy, dayTick, doPlace, doUpgrade, doTrade, doFest, doClear, claimQuest, placeCheck, openPanel, enterGame, save, cam};
 })();
 </script>
 <script>
