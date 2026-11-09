@@ -1,24 +1,39 @@
 BẢN LÀNG – BẢN ỨNG DỤNG (PWA)
 
-Thư mục này là trò chơi Bản Làng dạng ứng dụng web: có biểu tượng riêng, mở toàn màn hình như app, chơi được khi không có mạng, tiến trình lưu trên máy.
+Trò chơi dựng bản làng vùng cao qua 9 thời kỳ lịch sử Việt Nam, từ thời nguyên thuỷ tới thời kỳ đổi mới. Dạng ứng dụng web: có biểu tượng riêng, mở toàn màn hình như app, chơi được khi không có mạng. Tiến trình tự lưu trên máy; bật Đăng nhập Google (mục 3) để lưu vào tài khoản và chơi trên nhiều máy.
 
-1) ĐƯA LÊN MẠNG (miễn phí)
-   Cách dễ nhất: mở https://app.netlify.com/drop trên máy tính, kéo cả thư mục banlang-app (hoặc file banlang-app.zip) vào ô Drop.
-   Netlify cho một đường link dạng https://ten-gi-do.netlify.app. Đăng ký tài khoản miễn phí và bấm giữ (claim) trang đó, nếu không trang sẽ bị xoá sau khoảng 1 giờ.
-   Cách khác: GitHub Pages, Vercel, Cloudflare Pages… Chỉ cần thả nguyên các file trong thư mục này lên, index.html nằm ở ngoài cùng.
+1) ĐƯA LÊN MẠNG BẰNG GITHUB PAGES (miễn phí)
+   Đẩy toàn bộ các file trong thư mục này lên một kho GitHub (index.html nằm ở ngoài cùng).
+   Trên GitHub: Settings > Pages > Build and deployment > Source: Deploy from a branch > Branch: main, thư mục / (root) > Save.
+   Sau 1–2 phút trò chơi có ở https://<tên-tài-khoản>.github.io/<tên-kho>/
+   Cách khác: kéo cả thư mục vào https://app.netlify.com/drop (nhớ đăng ký và bấm giữ trang).
 
 2) CÀI LÊN ĐIỆN THOẠI
    Android (Chrome): mở link, bấm menu ⋮ > Cài đặt ứng dụng (hoặc Thêm vào màn hình chính).
    iPhone (Safari): mở link, bấm nút Chia sẻ > Thêm vào MH chính.
-   Biểu tượng Bản Làng sẽ nằm trên màn hình chính, mở ra chơi toàn màn hình.
 
-3) MUỐN CÓ FILE APK / ĐƯA LÊN GOOGLE PLAY
+3) ĐĂNG NHẬP GOOGLE ĐỂ LƯU TIẾN TRÌNH (Firebase, gói miễn phí Spark)
+   a. Vào https://console.firebase.google.com > Add project (Tạo dự án). Có thể tắt Google Analytics.
+   b. Build > Authentication > Get started > Sign-in method > Google > Enable > chọn email hỗ trợ > Save.
+   c. Authentication > Settings > Authorized domains > Add domain: tên miền trang của bạn, ví dụ iamboo98.github.io
+   d. Build > Firestore Database > Create database > chọn vị trí (ví dụ asia-southeast1) > Production mode.
+      Sang tab Rules, dán toàn bộ nội dung file firestore.rules trong thư mục này > Publish.
+      (Luật này chỉ cho mỗi người đọc, ghi bản lưu của chính mình.)
+   e. Project settings (bánh răng) > General > Your apps > biểu tượng </> (Web) > đặt tên > Register app.
+      Sao chép phần firebaseConfig = { apiKey: ..., authDomain: ..., projectId: ..., ... }.
+   f. Mở file firebase-config.js (trên GitHub bấm biểu tượng bút chì để sửa), thay dòng
+         window.BANLANG_FIREBASE = null;
+      bằng
+         window.BANLANG_FIREBASE = { apiKey: "...", authDomain: "...", projectId: "...", storageBucket: "...", messagingSenderId: "...", appId: "..." };
+      rồi Commit (lưu).
+   g. Mở lại trang, bấm "Đăng nhập Google để lưu tiến trình". Bản đang chơi trên máy sẽ được đưa lên tài khoản.
+      Máy khác chỉ cần mở trang, đăng nhập cùng tài khoản Google là chơi tiếp.
+   Ghi chú: apiKey của Firebase cho web không phải mật khẩu, để công khai được; dữ liệu được bảo vệ bằng luật ở bước d.
+
+4) MUỐN CÓ FILE APK / ĐƯA LÊN GOOGLE PLAY
    Mở https://www.pwabuilder.com, dán link ở bước 1, bấm Start > Package for stores > Android > Generate.
-   PWABuilder trả về một file zip có .apk (cài thử trên điện thoại Android) và .aab (nộp lên Google Play, cần tài khoản nhà phát triển Google Play).
+   Nếu dùng Đăng nhập Google trong bản APK, thêm tên miền của trang vào Authorized domains như bước 3c.
 
-4) MANG TIẾN TRÌNH TỪ BẢN TRÊN CLAUDE SANG
+5) MANG TIẾN TRÌNH TỪ BẢN TRÊN CLAUDE SANG
    Trong bản trên Claude: tab Bản làng > Mã lưu > Tạo mã lưu > Sao chép.
    Trong ứng dụng: màn hình đầu (hoặc tab Bản làng) > Nhập mã lưu > dán > Nhập.
-   Làm ngược lại để mang bản từ ứng dụng về Claude hoặc sang máy khác.
-
-Lưu ý: bản ứng dụng không đăng nhập tài khoản Claude, tiến trình chỉ nằm trên máy đang chơi. Thỉnh thoảng hãy Tạo mã lưu và cất đi để phòng khi xoá dữ liệu trình duyệt.

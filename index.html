@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Bản Làng</title>
 <meta name="theme-color" content="#1b2445">
-<meta name="description" content="Bản Làng: xây bản làng vùng cao, từ xóm nhỏ thành châu, huyện. Chơi offline, lưu trên máy.">
+<meta name="description" content="Bản Làng: dựng bản làng vùng cao qua 9 thời kỳ lịch sử Việt Nam, từ thời nguyên thuỷ tới thời kỳ đổi mới. Chơi offline, đăng nhập Google để lưu tiến trình.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -14,6 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="Bản Làng">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <script>window.__BANLANG_APP = true;</script>
+<script src="firebase-config.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -201,6 +202,25 @@ svg{display:block}
 .tgl.on{background:var(--ok)}
 .tgl.on i{left:23px}
 .modcard{margin-bottom:8px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;color:#1f1f1f;border:1px solid #dadce0}
+.st-card .gbtn{width:100%;margin:2px 0 10px}
+.glist{list-style:none;margin:0 0 6px;padding:0}
+.glist li{display:flex;align-items:center;gap:8px;padding:8px 2px;border-bottom:1px dashed #e0d3b3}
+.glist li .ck{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;flex:0 0 auto;background:#e6dcc2;color:#8a7f66}
+.glist li.done .ck{background:var(--ok);color:#fff}
+.glist li.done .gtx b{color:var(--muted);font-weight:500}
+.glist .gtx{flex:1;min-width:0}
+.glist .gtx b{display:block;font-size:13.5px;line-height:1.35}
+.glist .gtx small{font-size:11.5px;color:var(--muted)}
+.glist .pbar{height:5px;margin:4px 0 2px}
+.hist h3{margin:6px 0 2px;font-family:var(--disp);font-size:20px;line-height:1.2}
+.hist p{margin:0 0 6px;font-size:13px;line-height:1.5}
+.ev{font-size:13px;line-height:1.5;background:#f6eedb;border-left:3px solid var(--nghe);padding:7px 10px;border-radius:6px;margin:0 0 8px}
+.tl li{align-items:flex-start}
+.tl li.cur{background:#fbf3df;border-radius:8px}
+.tl small{color:var(--muted);font-size:11.5px;line-height:1.4}
+.tl details{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.45}
+.tl summary{cursor:pointer;color:#8a6a2a}
 .modcard.done{opacity:.72}
 .modcard .mhead{display:flex;gap:10px;align-items:center;margin-bottom:4px}
 .modcard .mhead b{font-size:14.5px;display:block;margin-bottom:2px}
@@ -362,7 +382,7 @@ svg{display:block}
 </div>
 <div id="modal" hidden><div class="mcard"><div class="sheet-band"></div><h3 id="mTitle"></h3><div class="mbody" id="mBody"></div><div class="mbtns" id="mBtns"></div></div></div>
 <div id="start">
-  <div class="st-title"><h1>Bản Làng</h1><div class="bandline"></div><p>Dựng bản giữa núi rừng Tây Bắc</p></div>
+  <div class="st-title"><h1>Bản Làng</h1><div class="bandline"></div><p>Dựng bản qua các thời kỳ lịch sử Việt Nam</p></div>
   <div class="st-card" id="stCard"><div class="st-load"><div class="spin"></div>Đang kết nối tài khoản…</div></div>
 </div>
 
@@ -424,35 +444,104 @@ const B = {
   tua_bin_gio:{name:'Tua-bin gió', desc:'Điện gió sạch: mỗi cấp giúp mọi công trình làm ra thêm 2% (cả bản tối đa 20%), mỗi tua-bin +2 vui. Không cần người làm.', rank:11, req:'xanh', max:3, w:[0,0,0], cost:[{da:300,bac:1200},{da:500,bac:2200},{da:800,bac:3500}], h:120},
   trang_trai_doc:{name:'Trang trại thẳng đứng', desc:'Nhà kính nhiều tầng trồng lúa bằng đèn LED, robot chăm sóc, không phụ thuộc mùa vụ. Làm ra rất nhiều lúa.', rank:11, req:'thong_minh', max:3, w:[3,4,5], cost:[{go:300,da:600,bac:2500},{go:400,da:900,bac:4000},{go:500,da:1300,bac:6000}], h:100},
   trung_tam_cn:{name:'Trung tâm công nghệ', desc:'Kỹ sư, robot và trí tuệ nhân tạo: mỗi cấp giúp mọi công trình làm ra thêm 6% (cả bản tối đa 30%), +4 vui.', rank:11, req:'thong_minh', max:2, w:[6,9], cost:[{da:900,bac:5000,tc:40},{da:1400,bac:9000,tc:60}], h:80},
+  lan_san:{name:'Lán săn bắt hái lượm', desc:'Lều lá của người xưa: đi săn, bắt cá, hái rau quả trong rừng quy ra lương thực. Mỗi ô rừng xung quanh cho thêm lương thực (tối đa 4 ô).', rank:0, max:2, w:[1,2], cost:[{go:10},{go:30,da:10}], h:24},
+  lo_duc:{name:'Lò đúc đồng', desc:'Nấu đồng, đúc rìu, lưỡi cày, mũi giáo như người Đông Sơn. Đồ đồng bán lấy bạc; có lò đúc đồng hoạt động thì ruộng và lán tiều phu làm ra thêm 10%.', rank:1, max:3, w:[1,2,3], cost:[{go:30,da:20},{go:60,da:40,bac:30},{go:100,da:70,bac:70}], h:30},
+  trong_dong:{name:'Trống đồng Đông Sơn', desc:'Trống đồng là báu vật của văn hoá Đông Sơn, mặt trống có ngôi sao nhiều cánh ở giữa, quanh là các vành hoa văn. Tiếng trống vang trong lễ hội. +6 vui.', rank:2, max:1, unique:true, w:[0], cost:[{go:40,da:30,bac:40}], h:30},
+  don_luy:{name:'Đồn luỹ', desc:'Luỹ đất, hàng rào cọc và chòi canh bảo vệ dân bản. Nhiều cuộc khởi nghĩa thời Bắc thuộc dựa vào làng xóm, luỹ tre làm căn cứ. Dân yên tâm làm ăn: +6 vui, cấp 2 xây bằng đá: +10 vui.', rank:3, max:2, unique:true, w:[2,3], cost:[{go:120,da:60},{go:150,da:200,bac:120}], h:44},
+  van_mieu:{name:'Văn Miếu', desc:'Năm 1070 vua Lý Thánh Tông cho dựng Văn Miếu ở Thăng Long; năm 1076 lập Quốc Tử Giám, trường đại học đầu tiên của nước ta. Khuyến học: mọi công trình làm ra thêm 5%, +6 vui.', rank:4, max:1, unique:true, w:[2], cost:[{go:180,da:120,bac:200,tc:8}], h:62},
+  hoang_thanh:{name:'Hoàng thành', desc:'Cổng thành kinh đô với ba cửa vòm, lầu gỗ lợp ngói vàng. Năm 1010 nhà Lý dời đô về Thăng Long. Kinh đô thịnh vượng: mọi công trình làm ra thêm 5%, +10 vui.', rank:5, max:1, unique:true, w:[3], cost:[{go:250,da:250,bac:400,tc:12}], h:52},
+  tuong_dai:{name:'Đài tưởng niệm', desc:'Đài tưởng niệm các anh hùng liệt sĩ đã hy sinh vì độc lập, thống nhất. Hầu hết các xã, phường ở Việt Nam đều có đài tưởng niệm. +8 vui.', rank:8, max:1, unique:true, w:[0], cost:[{da:300,bac:500}], h:66},
   cot_co:{name:'Cột cờ', desc:'Cột cờ trên đỉnh núi, niềm tự hào của cả châu. +15 vui.', rank:7, max:1, unique:true, w:[0], cost:[{go:150,da:200,bac:300,tc:20}], h:112},
 };
+const B_ERA = {lan_san:0, lo_duc:1, trong_dong:1, don_luy:2, van_mieu:3, hoang_thanh:3, dai_hoc:3, truong_nghe:4, cot_co:5, tram_y_te:5, thuy_dien:6, tuong_dai:7};
+for (const k in B_ERA) if (B_ERA[k]) B[k].era = B_ERA[k];
 const MODERN = [
-  {id:'duong', name:'Đường bê tông về bản', rank:3, days:6, cost:{da:250, go:80, bac:150}, desc:'Đổ bê tông đường vào bản. Mở công trình Đường bê tông: nơi sản xuất nằm sát đường làm ra thêm 5%. Vài người dân bắt đầu đi xe máy.'},
-  {id:'dien', name:'Kéo điện lưới quốc gia', rank:5, days:8, cost:{da:200, go:100, bac:400}, desc:'Cột điện, đèn đường, bóng điện trong mọi nhà. Mọi công trình làm ra thêm 10%, +5 vui. Một số nhà thay mái tôn.'},
-  {id:'song', name:'Sóng điện thoại và internet', rank:6, days:6, cost:{da:150, bac:600}, desc:'Homestay nhận khách đặt phòng qua mạng (+30%), bán hàng ở chợ được giá hơn 10%, +4 vui. Mở công trình Trạm phát sóng.'},
-  {id:'kien_co', name:'Kiên cố hoá nhà ở', rank:7, days:10, cost:{go:300, da:500, bac:800}, desc:'Nhà sàn lợp ngói, lợp tôn, tường trát vững chắc. Mỗi nhà ở được thêm 20% người, +5 vui. Mở nhà ở cấp 8 trở lên: nhà kiên cố, nhà nhiều tầng, chung cư.'},
-  {id:'co_gioi', name:'Cơ giới hoá nông nghiệp', rank:8, days:8, cost:{go:200, da:300, bac:1000}, desc:'Máy cày, máy gặt về tận ruộng. Ruộng bậc thang và nương chè làm ra thêm 30%.'},
-  {id:'mat_troi', name:'Điện mặt trời áp mái', rank:9, days:8, cost:{da:400, bac:1500}, desc:'Tấm pin mặt trời trên mái nhà. Mọi công trình làm ra thêm 5%, +6 vui. Mở nhà ở cấp 14–15: toà căn hộ và toà tháp xanh.'},
-  {id:'so_hoa', name:'Chuyển đổi số', rank:10, days:8, cost:{da:600, bac:2500}, desc:'Cáp quang tới từng nhà, thanh toán điện tử, dịch vụ công trực tuyến. Mọi công trình làm ra thêm 10%, bán hàng ở chợ được giá hơn 10%, homestay +20%.'},
-  {id:'xanh', name:'Năng lượng sạch, đô thị xanh', rank:11, days:10, cost:{go:500, da:900, bac:4000}, desc:'Điện gió, điện mặt trời phủ khắp, cây xanh rợp phố. +8 vui. Mở công trình Tua-bin gió.'},
-  {id:'thong_minh', name:'Thành phố thông minh', rank:11, days:12, cost:{da:1500, bac:8000, tc:60}, desc:'Trí tuệ nhân tạo, robot và máy bay không người lái giao hàng. Mọi công trình làm ra thêm 15%, +5 vui. Mở Trang trại thẳng đứng và Trung tâm công nghệ.'},
+  {id:'duong', era:7, name:'Đường bê tông về bản', rank:3, days:6, cost:{da:250, go:80, bac:150}, desc:'Đổ bê tông đường vào bản. Mở công trình Đường bê tông: nơi sản xuất nằm sát đường làm ra thêm 5%. Vài người dân bắt đầu đi xe máy.'},
+  {id:'dien', era:7, name:'Kéo điện lưới quốc gia', rank:5, days:8, cost:{da:200, go:100, bac:400}, desc:'Cột điện, đèn đường, bóng điện trong mọi nhà. Mọi công trình làm ra thêm 10%, +5 vui. Một số nhà thay mái tôn.'},
+  {id:'song', era:8, name:'Sóng điện thoại và internet', rank:6, days:6, cost:{da:150, bac:600}, desc:'Homestay nhận khách đặt phòng qua mạng (+30%), bán hàng ở chợ được giá hơn 10%, +4 vui. Mở công trình Trạm phát sóng.'},
+  {id:'kien_co', era:8, name:'Kiên cố hoá nhà ở', rank:7, days:10, cost:{go:300, da:500, bac:800}, desc:'Nhà sàn lợp ngói, lợp tôn, tường trát vững chắc. Mỗi nhà ở được thêm 20% người, +5 vui. Mở nhà ở cấp 8 trở lên: nhà kiên cố, nhà nhiều tầng, chung cư.'},
+  {id:'co_gioi', era:8, name:'Cơ giới hoá nông nghiệp', rank:8, days:8, cost:{go:200, da:300, bac:1000}, desc:'Máy cày, máy gặt về tận ruộng. Ruộng bậc thang và nương chè làm ra thêm 30%.'},
+  {id:'mat_troi', era:8, name:'Điện mặt trời áp mái', rank:9, days:8, cost:{da:400, bac:1500}, desc:'Tấm pin mặt trời trên mái nhà. Mọi công trình làm ra thêm 5%, +6 vui. Mở nhà ở cấp 14–15: toà căn hộ và toà tháp xanh.'},
+  {id:'so_hoa', era:8, name:'Chuyển đổi số', rank:10, days:8, cost:{da:600, bac:2500}, desc:'Cáp quang tới từng nhà, thanh toán điện tử, dịch vụ công trực tuyến. Mọi công trình làm ra thêm 10%, bán hàng ở chợ được giá hơn 10%, homestay +20%.'},
+  {id:'xanh', era:8, name:'Năng lượng sạch, đô thị xanh', rank:11, days:10, cost:{go:500, da:900, bac:4000}, desc:'Điện gió, điện mặt trời phủ khắp, cây xanh rợp phố. +8 vui. Mở công trình Tua-bin gió.'},
+  {id:'thong_minh', era:8, name:'Thành phố thông minh', rank:11, days:12, cost:{da:1500, bac:8000, tc:60}, desc:'Trí tuệ nhân tạo, robot và máy bay không người lái giao hàng. Mọi công trình làm ra thêm 15%, +5 vui. Mở Trang trại thẳng đứng và Trung tâm công nghệ.'},
 ];
-function epochProj(n){ return {id:'ky_nguyen', name:'Kỷ nguyên mới thứ ' + (n + 1), rank:11, stars:3*(n + 1), days:Math.min(30, 10 + 2*n), cost:{da:Math.round(2000*Math.pow(1.35, n)), bac:Math.round(12000*Math.pow(1.45, n)), tc:60 + 25*n}, desc:'Khoa học và công nghệ vượt bậc đưa bản sang một kỷ nguyên mới. Mọi công trình làm ra thêm 5% (cộng dồn qua mỗi kỷ nguyên), +2 vui.'}; }
+function epochProj(n){ return {id:'ky_nguyen', era:ERA_FUT, name:'Kỷ nguyên mới thứ ' + (n + 1), rank:11, stars:3*(n + 1), days:Math.min(30, 10 + 2*n), cost:{da:Math.round(2000*Math.pow(1.35, n)), bac:Math.round(12000*Math.pow(1.45, n)), tc:60 + 25*n}, desc:'Khoa học và công nghệ vượt bậc đưa bản sang một kỷ nguyên mới. Mọi công trình làm ra thêm 5% (cộng dồn qua mỗi kỷ nguyên), +2 vui.'}; }
 function nextProj(S){ const md = S.modern; for (let k = 0; k < MODERN.length; k++) if (!md.done.includes(MODERN[k].id)) return MODERN[k]; return epochProj(S.epoch|0); }
-function projReady(S, m){ if (rankIdx(S.best) < m.rank) return 'Cần thành ' + RANKS[m.rank].name; if (m.stars && starsOf(S) < m.stars) return 'Cần đạt ★' + m.stars; return null; }
+function projReady(S, m){ if (m.era && (S.era|0) < m.era) return 'Từ thời kỳ ' + SOC[m.era].short; if (rankIdx(S.best) < m.rank) return 'Cần thành ' + RANKS[m.rank].name; if (m.stars && starsOf(S) < m.stars) return 'Cần đạt ★' + m.stars; return null; }
 const SOC = [
-  {name:'Xã hội nguyên thuỷ', short:'Nguyên thuỷ', desc:'Dân sống trong lều lá, hái lượm, săn bắt, quây quần bên bếp lửa.', need:'Có 8 dân và 1 ruộng bậc thang', ok:S => S.best >= 8 && cnt(S, 'ruong') >= 1, opens:'Lều lá thành nhà sàn, bắt đầu trồng lúa nước.'},
-  {name:'Công xã trồng lúa', short:'Công xã', desc:'Dân dựng nhà sàn, khai ruộng bậc thang, cùng làm cùng hưởng.', need:'Thành Làng (26 dân) và có Kho thóc', ok:S => rankIdx(S.best) >= 3 && cnt(S, 'kho') >= 1, opens:'Nhà rông, lễ hội, làng xóm đông vui.'},
-  {name:'Làng nông nghiệp', short:'Làng nông nghiệp', desc:'Làng có nhà rông, lễ hội, trâu cày, cối giã gạo nước.', need:'Thành Mường (40 dân), có Chợ phiên và Nhà dệt thổ cẩm', ok:S => rankIdx(S.best) >= 4 && cnt(S, 'cho_phien') >= 1 && cnt(S, 'khung_det') >= 1, opens:'Buôn bán, làng nghề, dự án hiện đại hoá.'},
-  {name:'Làng nghề và buôn bán', short:'Làng nghề', desc:'Chợ phiên tấp nập, nghề dệt, nghề chè phát triển, đường làng mở rộng.', need:'Hoàn thành dự án Kéo điện lưới quốc gia', ok:S => hasMod(S, 'dien'), opens:'Điện về bản, xe máy, máy móc.'},
-  {name:'Xã hội cận đại', short:'Cận đại', desc:'Đường bê tông, điện lưới, xe máy và những cỗ máy đầu tiên.', need:'Hoàn thành dự án Kiên cố hoá nhà ở', ok:S => hasMod(S, 'kien_co'), opens:'Nhà kiên cố, nhà nhiều tầng, internet.'},
-  {name:'Xã hội hiện đại', short:'Hiện đại', desc:'Nhà kiên cố, internet, cơ giới hoá, chung cư mọc lên.', need:'Hoàn thành dự án Chuyển đổi số', ok:S => hasMod(S, 'so_hoa'), opens:'Kinh tế số, năng lượng sạch, đô thị xanh.'},
-  {name:'Xã hội hiện đại cao', short:'Hiện đại cao', desc:'Kinh tế số, năng lượng sạch, phố phường xanh mát.', need:'Hoàn thành dự án Thành phố thông minh', ok:S => hasMod(S, 'thong_minh'), opens:'Robot, trí tuệ nhân tạo, trang trại thẳng đứng, máy bay không người lái.'},
-  {name:'Xã hội tương lai', short:'Tương lai', desc:'Thành phố thông minh: robot làm việc, máy bay không người lái chở hàng trên trời.', need:'Hoàn thành dự án Kỷ nguyên mới thứ 1', ok:S => (S.epoch|0) >= 1, opens:'Mỗi kỷ nguyên mới: sản lượng và niềm vui tăng thêm, mãi không dừng.'},
+  {name:'Thời nguyên thuỷ', short:'Nguyên thuỷ', yrs:'Trước khoảng 2000 TCN', focus:'Sinh tồn, săn bắt, hái lượm',
+   desc:'Người xưa sống thành bầy trong hang đá, mái đá và lều lá, săn bắt, hái lượm, chế tác công cụ bằng đá. Dấu tích còn ở các nền văn hoá Sơn Vi, Hoà Bình, Bắc Sơn.',
+   goals:[{t:'pop', n:8}, {t:'b', k:'lan_san', n:1, d:'Dựng Lán săn bắt hái lượm'}, {t:'b', k:'mo_da', n:1, d:'Chế tác công cụ đá: dựng Bãi khai đá'}, {t:'b', k:'ruong', n:1, d:'Nông nghiệp sơ khai: khai 1 Ruộng bậc thang'}]},
+  {name:'Thời dựng nước Văn Lang – Âu Lạc', short:'Dựng nước', yrs:'Khoảng 2000 TCN – 179 TCN', focus:'Xây dựng làng, trồng lúa, chế tác đồng',
+   desc:'Từ các nền văn hoá Phùng Nguyên, Đồng Đậu, Gò Mun tới văn hoá Đông Sơn rực rỡ. Các Vua Hùng dựng nước Văn Lang; sau đó An Dương Vương lập nước Âu Lạc, xây thành Cổ Loa. Cư dân trồng lúa nước, đúc trống đồng.',
+   ev:'Cư dân rời hang đá xuống ven sông, trồng lúa nước và biết đúc đồng. Theo truyền thuyết, các Vua Hùng dựng nước Văn Lang, nhà nước đầu tiên của người Việt.',
+   goals:[{t:'pop', n:26}, {t:'b', k:'ruong', n:4, d:'Trồng lúa nước: có 4 Ruộng bậc thang'}, {t:'b', k:'kho', n:1, d:'Dựng Kho thóc'}, {t:'b', k:'lo_duc', n:1, d:'Chế tác đồng: dựng Lò đúc đồng'}, {t:'b', k:'trong_dong', n:1, d:'Đúc Trống đồng Đông Sơn'}]},
+  {name:'Thời Bắc thuộc', short:'Bắc thuộc', yrs:'179 TCN – 938', focus:'Bảo vệ cộng đồng, đấu tranh giành độc lập',
+   desc:'Hơn một nghìn năm phương Bắc đô hộ. Người Việt vẫn giữ tiếng nói, phong tục và liên tiếp đứng lên: Hai Bà Trưng (năm 40), Bà Triệu (248), Lý Bí lập nước Vạn Xuân (544), Mai Thúc Loan, Phùng Hưng, Khúc Thừa Dụ (905).',
+   ev:'Năm 179 TCN, Triệu Đà đánh chiếm Âu Lạc. Từ đây đất nước bị phương Bắc đô hộ hơn một nghìn năm.',
+   goals:[{t:'pop', n:40}, {t:'b', k:'don_luy', n:1, d:'Bảo vệ bản: dựng Đồn luỹ'}, {t:'b', k:'nha_rong', n:1, d:'Đoàn kết cộng đồng: dựng Nhà rông'}, {t:'give', id:'g2', res:{lua:300, go:150}, d:'Góp lương thực, vật liệu cho nghĩa quân'}]},
+  {name:'Thời phong kiến độc lập', short:'Phong kiến', yrs:'938 – 1858', focus:'Xây dựng kinh đô, phát triển vương quốc',
+   desc:'Các triều Ngô, Đinh, Tiền Lê, Lý, Trần, Hồ, Lê, Mạc, Tây Sơn, Nguyễn nối tiếp nhau. Năm 1010 nhà Lý dời đô về Thăng Long, năm 1070 dựng Văn Miếu; nhà Trần ba lần đánh thắng quân Nguyên Mông; bờ cõi mở rộng dần về phương Nam.',
+   ev:'Năm 938, Ngô Quyền đánh tan quân Nam Hán trên sông Bạch Đằng, chấm dứt hơn một nghìn năm Bắc thuộc. Năm 939, Ngô Quyền xưng vương, đóng đô ở Cổ Loa.',
+   goals:[{t:'pop', n:85}, {t:'b', k:'hoang_thanh', n:1, d:'Xây dựng kinh đô: dựng Hoàng thành'}, {t:'b', k:'van_mieu', n:1, d:'Mở mang học hành: dựng Văn Miếu'}, {t:'b', k:'cho_phien', n:1, d:'Buôn bán: mở Chợ phiên'}]},
+  {name:'Thời Pháp thuộc', short:'Pháp thuộc', yrs:'1858 – 1945', focus:'Đấu tranh chống thực dân',
+   desc:'Thực dân Pháp từng bước chiếm và đặt ách đô hộ. Phong trào Cần Vương, khởi nghĩa Yên Thế, phong trào Đông Du, Đông Kinh Nghĩa Thục nối tiếp; năm 1930 Đảng Cộng sản Việt Nam ra đời, lãnh đạo cuộc đấu tranh giải phóng dân tộc.',
+   ev:'Ngày 1/9/1858, liên quân Pháp – Tây Ban Nha nổ súng tấn công Đà Nẵng, mở đầu cuộc xâm lược Việt Nam. Nhân dân khắp nơi đứng lên chống giặc.',
+   goals:[{t:'pop', n:120}, {t:'b', k:'truong_th', n:1, d:'Truyền bá chữ Quốc ngữ: có Trường tiểu học'}, {t:'learn', n:20, d:'20 người đang đi học'}, {t:'give', id:'g4', res:{lua:600, bac:400}, d:'Ủng hộ phong trào yêu nước'}]},
+  {name:'Kháng chiến chống Pháp', short:'Chống Pháp', yrs:'1945 – 1954', focus:'Chống giặc đói, giặc dốt, kháng chiến chống Pháp',
+   desc:'Chính quyền non trẻ vừa chống giặc đói, giặc dốt, vừa chống giặc ngoại xâm. Phong trào Bình dân học vụ xoá nạn mù chữ; Việt Bắc trở thành căn cứ địa kháng chiến.',
+   ev:'Cách mạng tháng Tám năm 1945 thành công. Ngày 2/9/1945, tại Quảng trường Ba Đình, Chủ tịch Hồ Chí Minh đọc Tuyên ngôn Độc lập, khai sinh nước Việt Nam Dân chủ Cộng hoà. Ngày 19/12/1946, toàn quốc kháng chiến.',
+   goals:[{t:'pop', n:170}, {t:'b', k:'cot_co', n:1, d:'Dựng Cột cờ'}, {t:'learn', n:40, d:'Bình dân học vụ: 40 người đang đi học'}, {t:'give', id:'g5', res:{lua:1200, go:400}, d:'Lương thực cho chiến dịch Điện Biên Phủ'}]},
+  {name:'Kháng chiến chống Mỹ', short:'Chống Mỹ', yrs:'1954 – 1975', focus:'Giải phóng và thống nhất đất nước',
+   desc:'Đất nước tạm chia cắt hai miền ở vĩ tuyến 17. Miền Bắc xây dựng hậu phương, chi viện cho chiến trường miền Nam qua đường Trường Sơn.',
+   ev:'Ngày 7/5/1954, chiến dịch Điện Biên Phủ toàn thắng. Hiệp định Giơ-ne-vơ được ký ngày 21/7/1954; đất nước tạm thời chia cắt ở vĩ tuyến 17.',
+   goals:[{t:'pop', n:240}, {t:'b', k:'tram_y_te', n:1, d:'Chăm sóc sức khoẻ: dựng Trạm y tế'}, {t:'b', k:'truong_thpt', n:1, d:'Đào tạo lớp trẻ: có Trường THPT'}, {t:'give', id:'g6', res:{lua:2000, bac:1500}, d:'Chi viện tiền tuyến'}]},
+  {name:'Thời kỳ thống nhất', short:'Thống nhất', yrs:'1975 – 1986', focus:'Khôi phục kinh tế',
+   desc:'Hàn gắn vết thương chiến tranh, khôi phục sản xuất, xây dựng lại quê hương trong điều kiện kinh tế kế hoạch hoá tập trung, bao cấp còn nhiều khó khăn.',
+   ev:'Ngày 30/4/1975, chiến dịch Hồ Chí Minh kết thúc thắng lợi, chiến tranh chấm dứt, đất nước thống nhất. Ngày 2/7/1976, nước Cộng hoà xã hội chủ nghĩa Việt Nam ra đời.',
+   goals:[{t:'pop', n:320}, {t:'mod', id:'duong'}, {t:'mod', id:'dien'}, {t:'b', k:'tuong_dai', n:1, d:'Dựng Đài tưởng niệm'}, {t:'give', id:'g7', res:{go:1500, da:1500}, d:'Xây dựng lại quê hương'}]},
+  {name:'Thời kỳ đổi mới', short:'Đổi mới', yrs:'1986 – nay', focus:'Xây dựng Việt Nam hiện đại',
+   desc:'Phát triển kinh tế thị trường định hướng xã hội chủ nghĩa, công nghiệp hoá, hiện đại hoá và hội nhập quốc tế: gia nhập ASEAN và bình thường hoá quan hệ với Hoa Kỳ (1995), gia nhập WTO (2007).',
+   ev:'Tháng 12/1986, Đại hội VI của Đảng Cộng sản Việt Nam đề ra đường lối Đổi mới: phát triển kinh tế hàng hoá nhiều thành phần, mở cửa và hội nhập.',
+   goals:[{t:'pop', n:420}, {t:'mod', id:'kien_co'}, {t:'mod', id:'so_hoa'}, {t:'mod', id:'thong_minh'}]},
+  {name:'Việt Nam phát triển hơn nữa', short:'Phát triển', yrs:'Tương lai', focus:'Xây dựng Việt Nam hiện đại và phát triển hơn nữa',
+   desc:'Kinh tế số, năng lượng sạch, thành phố thông minh. Mỗi kỷ nguyên mới lại đưa bản làng phát triển hơn nữa, mãi không dừng.',
+   ev:'Bản làng bước vào chặng đường mới: robot, trí tuệ nhân tạo, máy bay không người lái chở hàng, năng lượng xanh phủ khắp núi đồi.'},
 ];
-const ERA_FUT = 7;
-function eraInfo(e){ if (e < SOC.length) return SOC[e]; const n = e - ERA_FUT; return {name:'Kỷ nguyên mới thứ ' + n, short:'Kỷ nguyên ' + n, desc:'Khoa học và công nghệ vượt bậc, cuộc sống ngày càng sung túc.', need:'Hoàn thành dự án Kỷ nguyên mới thứ ' + (n + 1), opens:'Thêm 5% sản lượng, thêm niềm vui.'}; }
-function eraOf(S){ let e = 0; while (e < ERA_FUT && SOC[e].ok(S)) e++; if (e === ERA_FUT) e += S.epoch|0; return Math.max(e, S.era|0); }
+const ERA_FUT = 9, OLD2NEW = [0, 1, 2, 3, 4, 5, 6, 9];
+const manLabel = e => e < ERA_FUT ? 'Màn ' + (e + 1) : e === ERA_FUT ? 'Chặng tiếp nối' : 'Kỷ nguyên ' + (e - ERA_FUT);
+function eraInfo(e){ if (e < SOC.length) return SOC[e]; const n = e - ERA_FUT; return {name:'Kỷ nguyên mới thứ ' + n, short:'Kỷ nguyên ' + n, yrs:'Tương lai', focus:'Xây dựng Việt Nam phát triển hơn nữa', desc:'Khoa học và công nghệ vượt bậc, cuộc sống ngày càng sung túc. Mỗi kỷ nguyên mới: mọi công trình làm ra thêm 5%, thêm niềm vui.', ev:'Hoàn thành dự án Kỷ nguyên mới thứ ' + n + '. Khoa học và công nghệ lại tiến thêm một bước.'}; }
+function goalProg(S, g){
+  if (g.t === 'pop') return [Math.min(S.best, g.n), g.n];
+  if (g.t === 'b') return [Math.min(cnt(S, g.k), g.n), g.n];
+  if (g.t === 'mod') return [hasMod(S, g.id) ? 1 : 0, 1];
+  if (g.t === 'learn'){ let c = 0; for (const p of S.people || []) if (p.sl) c++; return [Math.min(c, g.n), g.n]; }
+  if (g.t === 'give'){ const gv = (S.gave && S.gave[g.id]) || {}; let x = 0, y = 0; for (const r in g.res){ x += Math.min(gv[r] || 0, g.res[r]); y += g.res[r]; } return [Math.floor(x), y]; }
+  return [0, 1];
+}
+const goalDone = (S, g) => { const [x, y] = goalProg(S, g); return x >= y; };
+function goalText(g){
+  if (g.d) return g.d;
+  if (g.t === 'pop'){ const r = RANKS.findIndex(R => R.min === g.n); return 'Đạt ' + g.n + ' dân' + (r >= 0 ? ' (thành ' + RANKS[r].name + ')' : ''); }
+  if (g.t === 'b') return 'Có ' + g.n + ' ' + B[g.k].name;
+  if (g.t === 'mod'){ const m = MODERN.find(x => x.id === g.id); return 'Hoàn thành dự án ' + (m ? m.name : g.id); }
+  return '';
+}
+function periodDone(S, e){ const P = SOC[e]; return !!(P && P.goals && P.goals.every(g => goalDone(S, g))); }
+function eraOf(S){ let e = S.era|0; while (e < ERA_FUT && periodDone(S, e)) e++; if (e >= ERA_FUT) e = Math.max(e, ERA_FUT + (S.epoch|0)); return e; }
+function oldEraGuess(S){
+  const ri = rankIdx(Math.max(S.best || 0, S.pop || 0)); let e = 0;
+  if (ri >= 1 && cnt(S, 'ruong') >= 1) e = 1;
+  if (e === 1 && ri >= 3 && cnt(S, 'kho') >= 1) e = 2;
+  if (e === 2 && ri >= 4 && cnt(S, 'cho_phien') >= 1 && cnt(S, 'khung_det') >= 1) e = 3;
+  if (e === 3 && hasMod(S, 'dien')) e = 4;
+  if (e === 4 && hasMod(S, 'kien_co')) e = 5;
+  if (e === 5 && hasMod(S, 'so_hoa')) e = 6;
+  if (e === 6 && hasMod(S, 'thong_minh')) e = 7 + (S.epoch|0);
+  return e;
+}
+const eraReward = e => 80*e*e;
 const eraName = S => eraInfo(S.era|0).name;
 const FAME_K = 2000;
 const fameStars = f => Math.floor(Math.pow(Math.max(0, f)/FAME_K, 2/3) + 1e-9);
@@ -463,6 +552,7 @@ const hasMod = (S, id) => !!(S && S.modern && S.modern.done.includes(id));
 function modSet(S){ const m = {}; if (S && S.modern) for (const id of S.modern.done) m[id] = true; return m; }
 const houseCap = (S, l) => Math.round(B.nha_san.housing[l-1]*(hasMod(S, 'kien_co') ? 1.2 : 1));
 const ROAD_NAME = ['Đường đất','Đường bê tông','Đường nhựa'], ROAD_BONUS = [1, 1.05, 1.10, 1.15], HUB = {kho:1, cho_phien:1, nha_rong:1, ben_xe:1};
+function bLock(S, k){ const d = B[k]; if (d.era && (S.era|0) < d.era) return 'Từ thời kỳ ' + SOC[d.era].short; if (rankIdx(S.best) < d.rank) return 'Khi thành ' + RANKS[d.rank].name; if (d.req && !hasMod(S, d.req)) return 'Cần dự án ' + MODERN.find(m => m.id === d.req).name.toLowerCase(); return null; }
 function lvBlock(S, k, l){ const lr = lvRank(l); if (rankIdx(S.best) < lr) return 'Cần thành ' + RANKS[lr].name; const q = B[k].lvReq && B[k].lvReq[l]; if (q && !hasMod(S, q)) return 'Cần dự án ' + MODERN.find(m => m.id === q).name.toLowerCase(); return null; }
 function placeCost(S, k, i, j){ const t = tileAt(S, i, j); return k === 'duong' && t && t.t === 'w' ? {go:12} : B[k].cost[0]; }
 const FOOT = {truong_mn:[1,2,3], truong_th:[2,3,4], truong_hoc:[2,3,4], truong_thpt:[2,3,4], truong_nghe:[3,4], dai_hoc:[3,4]};
@@ -536,7 +626,7 @@ function migrateFoot(out){
 function addNotice(msg){ if (!G.notice || !G.notice.includes(msg)) G.notice = (G.notice ? G.notice + ' ' : '') + msg; }
 const OLD_KHO_COST = [{go:30,da:5},{go:50,da:25},{go:80,da:50,bac:30},{go:120,da:80,bac:60},{go:160,da:110,bac:100},{go:220,da:150,bac:160},{go:300,da:200,bac:250}];
 const NO_CAP = 1e12;
-const BUILD_ORDER = ['nha_san','ruong','muong','duong','tieu_phu','mo_da','mo_bac','kho','vuon','truong_mn','truong_th','chuong_trau','coi_nuoc','khung_det','cho_phien','truong_hoc','nha_rong','cong_ban','truong_thpt','nuong_che','homestay','truong_nghe','cot_co','tram_y_te','dai_hoc','thuy_dien','tram_song','ben_xe','tua_bin_gio','trang_trai_doc','trung_tam_cn'];
+const BUILD_ORDER = ['nha_san','ruong','muong','duong','lan_san','tieu_phu','mo_da','lo_duc','mo_bac','kho','vuon','trong_dong','truong_mn','truong_th','chuong_trau','coi_nuoc','khung_det','cho_phien','truong_hoc','nha_rong','don_luy','cong_ban','van_mieu','truong_thpt','hoang_thanh','nuong_che','homestay','truong_nghe','cot_co','tram_y_te','dai_hoc','tuong_dai','thuy_dien','tram_song','ben_xe','tua_bin_gio','trang_trai_doc','trung_tam_cn'];
 
 const QUESTS = [
   {t:'Khai hoang', d:'Chạm vào một ô rừng và chọn Chặt cây để lấy gỗ.', p:S=>[S.stats.cleared,1], r:{lua:10}},
@@ -749,7 +839,7 @@ function genMap(seed){
   return T;
 }
 function newState(name, seed){
-  const S = {v:1, seed, name:name || 'Bản Mây', day:1, dayT:0, tiles:genMap(seed), res:{lua:40, go:30, da:10, tc:0, bac:15}, pop:3, best:3, growth:0, happy:55, hunger:0, quest:0, fest:null, mods:[], prices:{lua:1, go:1, da:1, tc:1}, stats:{cleared:0, sold:0, fest:0, built:0, planted:0, weddings:0, births:0, arrived:0, passed:0}, nextId:1, created:Date.now(), saved:Date.now(), playMs:0, regrowV:1, size:BASE_N, qv:2, roadV:1, famPolicy:true, modern:{done:[], cur:null}, eduV:1, eduMax:6, gradAcc:[0,0,0,0,0,0,0], footV:1, era:0, fame:0, epoch:0, starsSeen:0};
+  const S = {v:1, seed, name:name || 'Bản Mây', day:1, dayT:0, tiles:genMap(seed), res:{lua:40, go:30, da:10, tc:0, bac:15}, pop:3, best:3, growth:0, happy:55, hunger:0, quest:0, fest:null, mods:[], prices:{lua:1, go:1, da:1, tc:1}, stats:{cleared:0, sold:0, fest:0, built:0, planted:0, weddings:0, births:0, arrived:0, passed:0}, nextId:1, created:Date.now(), saved:Date.now(), playMs:0, regrowV:1, size:BASE_N, qv:2, roadV:1, famPolicy:true, modern:{done:[], cur:null}, eduV:1, eduMax:6, gradAcc:[0,0,0,0,0,0,0], footV:1, era:0, fame:0, epoch:0, starsSeen:0, vnV:1, gave:{}};
   let bk = -1, bd = 1e9;
   S.tiles.forEach((t,k) => { if (t.t !== 'g') return; const d = Math.hypot(k%BASE_N - 7, ((k/BASE_N)|0) - 6); if (d < bd){ bd = d; bk = k; } });
   S.tiles[bk].b = {k:'nha_san', l:1, id:S.nextId++};
@@ -812,7 +902,11 @@ function normalize(s){
   }
   out.footV = 1;
   out.epoch = Math.max(0, s.epoch|0); out.fame = Math.max(0, +s.fame || 0);
-  out.era = 0; out.era = eraOf(Object.assign({}, out, {era:Math.max(0, s.era|0)}));
+  out.gave = {}; if (s.gave && typeof s.gave === 'object') for (const id in s.gave){ const v = s.gave[id]; if (!v || typeof v !== 'object') continue; const o = {}; for (const r of RES_KEYS) if (+v[r] > 0) o[r] = Math.floor(+v[r]); out.gave[String(id).slice(0, 8)] = o; }
+  { let e0 = Math.max(0, s.era|0);
+    if (!s.vnV){ const old = Math.max(e0, oldEraGuess(out)); e0 = old < 7 ? OLD2NEW[old] : old + 2; addNotice('Bản làng nay đi theo 9 thời kỳ lịch sử Việt Nam, từ thời nguyên thuỷ tới thời kỳ đổi mới. Bản của bạn đang ở ' + manLabel(e0).toLowerCase() + ': ' + eraInfo(e0).name + '. Bấm nút thời kỳ ở góc trên để xem mục tiêu.'); }
+    out.era = e0; out.era = eraOf(out); }
+  out.vnV = 1;
   out.starsSeen = s.starsSeen == null ? starsOf(out) : Math.max(0, s.starsSeen|0);
   out.best = Math.max(out.best || 0, out.pop || 0);
   return out;
@@ -905,7 +999,7 @@ function eduStats(S){
   wait[4] = wait[5];
   return {wait};
 }
-const PRI = {trang_trai_doc:0.5, trung_tam_cn:5.65, ben_xe:4.5, ruong:0, chuong_trau:1, tieu_phu:2, mo_da:3, mo_bac:3.5, cho_phien:4, nha_rong:5, truong_mn:5.45, truong_th:5.5, truong_hoc:5.52, truong_thpt:5.54, truong_nghe:5.56, dai_hoc:5.58, tram_y_te:5.6, thuy_dien:5.7, khung_det:6, nuong_che:7, homestay:8};
+const PRI = {lan_san:0.2, lo_duc:3.8, don_luy:4.8, van_mieu:5.3, hoang_thanh:5.35, trang_trai_doc:0.5, trung_tam_cn:5.65, ben_xe:4.5, ruong:0, chuong_trau:1, tieu_phu:2, mo_da:3, mo_bac:3.5, cho_phien:4, nha_rong:5, truong_mn:5.45, truong_th:5.5, truong_hoc:5.52, truong_thpt:5.54, truong_nghe:5.56, dai_hoc:5.58, tram_y_te:5.6, thuy_dien:5.7, khung_det:6, nuong_che:7, homestay:8};
 const WORK = {trang_trai_doc:[3,4,5], ruong:[2,3,4,5,6], tieu_phu:[2,3,4], mo_da:[2,3,4], mo_bac:[3,4,5,6], khung_det:[2,3,4], nuong_che:[2,3,4,5], homestay:[2,3,4], cho_phien:[2]};
 const slotsOf = b => WORK[b.k] ? WORK[b.k][Math.min(b.l, WORK[b.k].length) - 1] : (B[b.k].w[b.l-1] || 0);
 const workersOf = slotsOf;
@@ -943,7 +1037,8 @@ function computeEconomy(S, laborOverride){
   const MD = modSet(S); E.mod = MD; E.benxe = list.some(k => S.tiles[k].b.k === 'ben_xe' && active.has(k));
   let wind = 0, tech = 0; for (const k of list){ const b = S.tiles[k].b; if (b.k === 'tua_bin_gio') wind += b.l; else if (b.k === 'trung_tam_cn' && active.has(k)) tech += b.l; }
   E.windB = Math.min(0.2, 0.02*wind); E.techB = Math.min(0.3, 0.06*tech); E.mile = 0.05*Math.floor(starsOf(S)/5); E.epochB = 0.05*(S.epoch|0);
-  const hm0 = (0.8 + S.happy/250)*(hydro ? 1.1 : 1)*(MD.dien ? 1.1 : 1)*(MD.mat_troi ? 1.05 : 1)*(MD.so_hoa ? 1.1 : 1)*(MD.thong_minh ? 1.15 : 1)*(1 + E.windB + E.techB + E.mile + E.epochB), hm = hm0*E.eduMul; E.hm = hm0; E.hydro = hydro;
+  E.bronze = list.some(k => S.tiles[k].b.k === 'lo_duc' && active.has(k)); E.vanmieu = list.some(k => S.tiles[k].b.k === 'van_mieu' && active.has(k)); E.kinhdo = list.some(k => S.tiles[k].b.k === 'hoang_thanh' && active.has(k));
+  const hm0 = (0.8 + S.happy/250)*(E.vanmieu ? 1.05 : 1)*(E.kinhdo ? 1.05 : 1)*(hydro ? 1.1 : 1)*(MD.dien ? 1.1 : 1)*(MD.mat_troi ? 1.05 : 1)*(MD.so_hoa ? 1.1 : 1)*(MD.thong_minh ? 1.15 : 1)*(1 + E.windB + E.techB + E.mile + E.epochB), hm = hm0*E.eduMul; E.hm = hm0; E.hydro = hydro;
   const season = SEASONS[seasonIdx(S.day)];
   let fieldMod = 1; for (const m of S.mods) if (m.k === 'field') fieldMod *= m.mult;
   const cois = list.filter(k => S.tiles[k].b.k === 'coi_nuoc');
@@ -966,10 +1061,18 @@ function computeEconomy(S, laborOverride){
         info.notes.push('Mùa ' + season.name + ': ×' + fmt1(season.field));
         if (fieldMod !== 1) info.notes.push((fieldMod > 1 ? 'Mưa thuận gió hoà' : 'Sương muối') + ': ×' + fmt1(fieldMod));
         if (hydro) info.notes.push('Thuỷ điện: +10%');
+        if (E.bronze){ a *= 1.1; info.notes.push('Công cụ đồng: +10%'); }
         info.res = 'lua'; info.amt = a*season.field*fieldMod*hm; break; }
-      case 'tieu_phu': { const f = Math.min(4, nb(S,i,j,D8,x => x.t === 'f')); const sp = nb(S,i,j,D8,x => x.rg && x.rg.k === 'f' && !x.b); info.res = 'go'; info.amt = (0.6 + 0.4*f)*cf*hm; info.notes.push(f + ' ô rừng xung quanh' + (sp ? ', ' + sp + ' ô rừng non đang mọc' : '')); break; }
+      case 'tieu_phu': { const f = Math.min(4, nb(S,i,j,D8,x => x.t === 'f')); const sp = nb(S,i,j,D8,x => x.rg && x.rg.k === 'f' && !x.b); info.res = 'go'; info.amt = (0.6 + 0.4*f)*cf*hm*(E.bronze ? 1.1 : 1); if (E.bronze) info.notes.push('Rìu đồng: +10%'); info.notes.push(f + ' ô rừng xung quanh' + (sp ? ', ' + sp + ' ô rừng non đang mọc' : '')); break; }
       case 'mo_bac': { const r = Math.min(4, nb(S,i,j,D8,x => x.t === 'r')); info.res = 'bac'; info.amt = (0.4 + 0.15*r)*cf*hm; info.notes.push(r + ' núi đá xung quanh (tối đa 4)'); break; }
       case 'mo_da': { const r = Math.min(4, nb(S,i,j,D8,x => x.t === 'r')); const sp = nb(S,i,j,D8,x => x.rg && x.rg.k === 'r' && !x.b); info.res = 'da'; info.amt = (0.6 + 0.25*r)*cf*hm; info.notes.push(r + ' núi đá xung quanh' + (sp ? ', ' + sp + ' ô đá đang lộ lên' : '')); break; }
+      case 'lan_san': { const f = Math.min(4, nb(S,i,j,D8,x => x.t === 'f')); info.res = 'lua'; info.amt = (0.8 + 0.45*f)*cf*hm; info.notes.push(f + ' ô rừng xung quanh để săn bắt, hái lượm (tối đa 4)'); break; }
+      case 'lo_duc': info.res = 'bac'; info.amt = 0.35*cf*hm; info.notes.push('Đúc đồ đồng bán lấy bạc'); if (on) info.notes.push('Ruộng và lán tiều phu cả bản: +10%'); break;
+      case 'trong_dong': E.drum = true; break;
+      case 'don_luy': if (on) E.fort = b.l; break;
+      case 'van_mieu': if (on) info.notes.push('Khuyến học: mọi công trình +5%'); break;
+      case 'hoang_thanh': if (on) info.notes.push('Kinh đô thịnh vượng: mọi công trình +5%'); break;
+      case 'tuong_dai': E.memorial = true; break;
       case 'khung_det': info.res = 'tc'; info.amt = 0.22*cf*hm; break;
       case 'cho_phien': info.res = 'bac'; info.amt = 0.8*cf*E.eduMul; E.hasCho = true; break;
       case 'vuon': info.res = 'bac'; info.amt = 0.3; E.decor += 3; break;
@@ -990,6 +1093,7 @@ function computeEconomy(S, laborOverride){
       E.conn[k] = rl; E.prodCount++; if (rl){ E.connCount++; info.amt *= ROAD_BONUS[rl]; info.notes.push(ROAD_NAME[rl-1] + ' nối tới trung tâm: +' + Math.round((ROAD_BONUS[rl]-1)*100) + '%'); }
       else info.notes.push(adjRoad ? 'Đường cạnh đây chưa nối tới Kho, Chợ, Nhà rông hay Bến xe' : 'Chưa có đường: làm đường nối tới Kho, Chợ, Nhà rông hay Bến xe để được thêm 5–15%');
       if (MD.dien) info.notes.push('Có điện: +10%'); if (MD.mat_troi) info.notes.push('Điện mặt trời: +5%'); if (MD.so_hoa) info.notes.push('Chuyển đổi số: +10%'); if (MD.thong_minh) info.notes.push('Thành phố thông minh: +15%');
+      if (E.vanmieu) info.notes.push('Văn Miếu khuyến học: +5%'); if (E.kinhdo) info.notes.push('Kinh đô thịnh vượng: +5%');
       { const xb = E.windB + E.techB + E.mile + E.epochB; if (xb > 0.001) info.notes.push('Điện gió, công nghệ, cột mốc, kỷ nguyên: +' + Math.round(xb*100) + '%'); }
       if (sl > 0 && Math.abs(E.eduMul - 1) >= 0.005) info.notes.push('Trình độ người đi làm: ' + pctTxt(E.eduMul));
     }
@@ -1010,6 +1114,7 @@ function computeEconomy(S, laborOverride){
   if (E.homes) E.happyParts.push(['Homestay', 2*E.homes]);
   if (E.hasCot) E.happyParts.push(['Cột cờ', 15]);
   if (E.clinic) E.happyParts.push(['Trạm y tế', 6]);
+  if (E.drum) E.happyParts.push(['Trống đồng', 6]); if (E.fort) E.happyParts.push(['Đồn luỹ', E.fort >= 2 ? 10 : 6]); if (E.vanmieu) E.happyParts.push(['Văn Miếu', 6]); if (E.kinhdo) E.happyParts.push(['Kinh đô', 10]); if (E.memorial) E.happyParts.push(['Đài tưởng niệm', 8]);
   if (MD.dien) E.happyParts.push(['Điện về bản', 5]); if (MD.song) E.happyParts.push(['Sóng điện thoại', 4]); if (MD.kien_co) E.happyParts.push(['Nhà kiên cố', 5]); if (MD.mat_troi) E.happyParts.push(['Điện mặt trời', 6]); if (E.tower) E.happyParts.push(['Trạm phát sóng', 4]);
   if (E.hydro) E.happyParts.push(['Điện về bản', 4]);
   if (MD.xanh) E.happyParts.push(['Đô thị xanh', 8]); if (MD.thong_minh) E.happyParts.push(['Thành phố thông minh', 5]);
@@ -2379,7 +2484,187 @@ function drawVehicle(c, v, t){
   }
   vehBox(c, mkP(x, y), 0, 0, di !== 0, di !== 0 ? di : dj, v.type, v.seed, null);
 }
-const NO_FLIP = {muong:1, duong:1, tua_bin_gio:1};
+const NO_FLIP = {muong:1, duong:1, tua_bin_gio:1, trong_dong:1};
+function dLanSan(c, cx, cy, l, env, ex){
+  const p = mkP(cx, cy), n = env.night || 0, t = env.t || 0;
+  shadow(c, cx, cy + 2, HW*0.66, HH*0.52, 0.16);
+  fp(c, [p(-0.44,-0.44), p(0.44,-0.44), p(0.44,0.44), p(-0.44,0.44)], 'rgba(138,104,58,.32)');
+  const rk = (u, v, z) => p(0.17 + u, -0.27 + v, z);
+  ln(c, rk(-0.16, 0, 0), rk(-0.16, 0, 17), '#5a3d22', 1.5); ln(c, rk(0.16, 0, 0), rk(0.16, 0, 17), '#5a3d22', 1.5);
+  ln(c, rk(-0.19, 0, 16), rk(0.19, 0, 16), '#6b4a28', 1.6);
+  for (let k = 0; k < 4; k++){
+    const q = rk(-0.12 + k*0.08, 0, 15.5), sw = Math.sin(t/700 + k)*0.6;
+    if (k % 2){ ell(c, q[0] + sw, q[1] + 5, 1.6, 4.2, '#9fa7a8'); fp(c, [[q[0] + sw - 1.8, q[1] + 10], [q[0] + sw + 1.8, q[1] + 10], [q[0] + sw, q[1] + 8]], '#7f8789'); }
+    else fp(c, [[q[0] - 1.2, q[1]], [q[0] + 1.2, q[1]], [q[0] + 0.9 + sw, q[1] + 8], [q[0] - 0.9 + sw, q[1] + 8]], '#8a3e24');
+  }
+  const u0 = -0.1, v0 = 0, A = 0.2 + 0.05*l, Bv = 0.2, h = 15 + 3*l;
+  const r1 = p(u0 - A - 0.04, v0, h), r2 = p(u0 + A + 0.04, v0, h);
+  fp(c, [p(u0-A, v0-Bv, 0), p(u0+A, v0-Bv, 0), r2, r1], '#5f7a30');
+  fp(c, [p(u0+A, v0-Bv, 0), p(u0+A, v0+Bv, 0), r2], '#3f5422');
+  if (!env.back) fp(c, [p(u0+A+0.003, v0-Bv*0.45, 0), p(u0+A+0.003, v0+Bv*0.45, 0), p(u0+A+0.003, v0, h*0.62)], n > 0.3 ? '#d98a34' : '#1c140a');
+  fp(c, [p(u0-A, v0+Bv, 0), p(u0+A, v0+Bv, 0), r2, r1], '#76933c');
+  c.beginPath(); for (let s = 0.05; s < 1; s += 0.08){ const e1 = p(lerp(u0-A, u0+A, s), v0+Bv, 0), e2 = p(lerp(u0-A-0.04, u0+A+0.04, s), v0, h); c.moveTo(e1[0], e1[1]); c.lineTo(e2[0], e2[1]); } c.strokeStyle = 'rgba(30,45,12,.35)'; c.lineWidth = 0.8; c.stroke();
+  for (let s = 0.04; s < 1; s += 0.12){ const e = p(lerp(u0-A, u0+A, s), v0+Bv, 0); fp(c, [[e[0]-2, e[1]], [e[0]+2, e[1]], [e[0], e[1]+2.5]], '#4f6a28'); }
+  ln(c, r1, r2, '#3a2a12', 1.5);
+  if (!env.back){
+    const b0 = p(u0 + A + 0.08, v0 + Bv + 0.06, 0);
+    c.beginPath(); c.moveTo(b0[0], b0[1]); c.quadraticCurveTo(b0[0] + 7, b0[1] - 8, b0[0] + 2, b0[1] - 17); c.strokeStyle = '#6b4425'; c.lineWidth = 1.5; c.stroke();
+    ln(c, b0, [b0[0] + 2, b0[1] - 17], '#e8dfc8', 0.6);
+    ln(c, [b0[0] + 6, b0[1] + 1], [b0[0] + 1, b0[1] - 21], '#5a3d22', 1.1);
+    fp(c, [[b0[0] + 1, b0[1] - 21], [b0[0] - 0.6, b0[1] - 17], [b0[0] + 2.2, b0[1] - 17.6]], '#bfc4c7');
+  }
+  const bk = p(0.27, 0.25, 0);
+  fp(c, [[bk[0] - 5, bk[1] - 5], [bk[0] + 5, bk[1] - 5], [bk[0] + 3.6, bk[1]], [bk[0] - 3.6, bk[1]]], '#a8803f'); ell(c, bk[0], bk[1] - 5, 5, 2, '#7e5b2a');
+  for (const [dx, dy, col] of [[-2.2,-6,'#d9452f'],[0.6,-6.6,'#f0a531'],[2.6,-5.8,'#d9452f'],[-0.6,-7.6,'#7cae3a']]) circ(c, bk[0] + dx, bk[1] + dy, 1.5, col);
+  const f = p(-0.3, 0.34), fl = Math.sin(t/90)*0.6;
+  for (let j = 0; j < 6; j++){ const an = j/6*Math.PI*2; ell(c, f[0] + Math.cos(an)*3.4, f[1] + Math.sin(an)*1.7, 1.2, 0.9, '#8e8a80'); }
+  fp(c, [[f[0] - 2, f[1] - 0.5], [f[0] + fl, f[1] - 6.5], [f[0] + 2, f[1] - 0.5]], '#f08a24'); fp(c, [[f[0] - 1, f[1] - 0.5], [f[0] + fl*0.5, f[1] - 4], [f[0] + 1, f[1] - 0.5]], '#ffd45e');
+  if (env.lights && n > 0.05) env.lights.push([f[0], f[1] - 3, 11]);
+  if (env.smoke && l >= 2) env.smoke(f[0], f[1] - 6);
+}
+function dLoDuc(c, cx, cy, l, env, ex){
+  const p = mkP(cx, cy), n = env.night || 0, t = env.t || 0;
+  shadow(c, cx, cy + 2, HW*0.7, HH*0.55, 0.18);
+  fp(c, [p(-0.44,-0.44), p(0.44,-0.44), p(0.44,0.44), p(-0.44,0.44)], 'rgba(120,96,70,.35)');
+  const su = -0.15, sv = -0.15, a = 0.2, b = 0.17, sh = 15;
+  for (const [u, v] of [[-a,-b],[a,-b],[-a,b],[a,b]]) ln(c, p(su+u, sv+v, 0), p(su+u, sv+v, sh), '#5a3d22', 1.6);
+  box(c, p, su, sv, 0.1, 0.06, 0, 5, '#8a6a46', '#6e5236', '#5a4229');
+  { const q = p(su - 0.04, sv, 5); fp(c, [[q[0]-3, q[1]-1], [q[0]+1, q[1]-2.5], [q[0]+2.5, q[1]+0.5], [q[0]-1.5, q[1]+1.5]], '#c99a3e');
+    const d0 = p(su + 0.05, sv + 0.01, 5); ell(c, d0[0], d0[1], 2.6, 1.3, '#a77d31'); c.fillStyle = '#9a7028'; c.fillRect(d0[0] - 2.6, d0[1] - 3, 5.2, 3); ell(c, d0[0], d0[1] - 3, 2.6, 1.3, '#d8b04e'); }
+  gableRoof(c, p, su, sv, a + 0.05, b + 0.07, sh, 9, roofFor(env, ex && ex.seed, THATCH));
+  if (l >= 2){ const bq = p(0.38, -0.08, 0); for (const dx of [-2.5, 2.5]){ c.fillStyle = '#7a5532'; c.fillRect(bq[0] + dx - 1.5, bq[1] - 12, 3, 12); ell(c, bq[0] + dx, bq[1] - 12, 1.5, 0.8, '#4a3220'); } ln(c, [bq[0] - 4.5, bq[1] - 13], [bq[0] + 4.5, bq[1] - 13], '#5a3d22', 1.2); }
+  const k0 = p(0.17, 0.15, 0), rx = 9 + l, ry = rx/2, kh = 14 + 2*l;
+  c.beginPath(); c.moveTo(k0[0] - rx, k0[1]); c.bezierCurveTo(k0[0] - rx, k0[1] - kh*1.25, k0[0] + rx, k0[1] - kh*1.25, k0[0] + rx, k0[1]); c.ellipse(k0[0], k0[1], rx, ry, 0, 0, Math.PI); c.closePath(); c.fillStyle = '#a65f37'; c.fill();
+  c.beginPath(); c.moveTo(k0[0] + rx*0.15, k0[1] - kh*0.93); c.bezierCurveTo(k0[0] + rx*0.7, k0[1] - kh*0.85, k0[0] + rx, k0[1] - kh*0.5, k0[0] + rx, k0[1]); c.ellipse(k0[0], k0[1], rx, ry, 0, 0, Math.PI*0.42); c.closePath(); c.fillStyle = 'rgba(70,30,15,.33)'; c.fill();
+  const ch = [k0[0] + 1, k0[1] - kh*0.93]; c.fillStyle = '#8c4c2a'; c.fillRect(ch[0] - 2, ch[1] - 6, 4, 6); ell(c, ch[0], ch[1] - 6, 2, 1, '#3a2014');
+  const my = k0[1] + ry*0.7, fl = 0.6 + 0.4*Math.sin(t/120);
+  c.beginPath(); c.moveTo(k0[0] - 3.5, my); c.lineTo(k0[0] - 3.5, my - 4); c.quadraticCurveTo(k0[0] - 0.5, my - 8, k0[0] + 2.5, my - 4); c.lineTo(k0[0] + 2.5, my); c.closePath(); c.fillStyle = '#2a1408'; c.fill();
+  ell(c, k0[0] - 0.5, my - 1.5, 2.6, 1.6*fl + 0.6, n > 0.3 ? '#ffb347' : '#ff8a2a');
+  if (env.lights && n > 0.05) env.lights.push([k0[0], my - 2, 14]);
+  if (env.smoke) env.smoke(ch[0], ch[1] - 7);
+  if (l >= 3){ const iq = p(-0.3, 0.3, 0); for (let k = 0; k < 3; k++){ const x = iq[0] + (k - 1)*4.4, y = iq[1] - (k === 1 ? 2 : 0); ell(c, x, y, 2.4, 1.2, '#b08a3a'); c.fillStyle = '#9a7028'; c.fillRect(x - 2.4, y - 3, 4.8, 3); ell(c, x, y - 3, 2.4, 1.2, '#dcb455'); } }
+}
+function dTrongDong(c, cx, cy, l, env){
+  const p = mkP(cx, cy), t = env.t || 0;
+  shadow(c, cx, cy + 3, HW*0.72, HH*0.6, 0.2);
+  box(c, p, 0, 0, 0.38, 0.38, 0, 3, '#b9b2a0', '#9e9785', '#837c6b');
+  box(c, p, 0, 0, 0.29, 0.29, 3, 4, '#a8a08c', '#8f8775', '#757060');
+  const bs = p(0, 0, 7), K = HW*Math.SQRT2*0.95;
+  const prof = [[0, 0.21], [2, 0.225], [5, 0.185], [11, 0.172], [14, 0.2], [18, 0.238], [21, 0.25]];
+  const rAt = z => { for (let k = 0; k < prof.length - 1; k++){ const [z1, r1] = prof[k], [z2, r2] = prof[k + 1]; if (z <= z2) return lerp(r1, r2, (z - z1)/(z2 - z1)); } return prof[prof.length - 1][1]; };
+  const g = c.createLinearGradient(bs[0] - 12, 0, bs[0] + 12, 0); g.addColorStop(0, '#cfa752'); g.addColorStop(0.4, '#a9822f'); g.addColorStop(1, '#5f461b');
+  for (let z = 0; z <= 21; z += 0.75){ const r = rAt(z)*K; ell(c, bs[0], bs[1] - z, r, r/2, g); }
+  for (const z of [3, 12, 16.5]){ const r = rAt(z)*K; c.beginPath(); c.ellipse(bs[0], bs[1] - z, r, r/2, 0, 0, Math.PI); c.strokeStyle = 'rgba(60,40,10,.55)'; c.lineWidth = 0.7; c.stroke(); }
+  for (const s of [-1, 1]){ const r = rAt(15)*K; c.beginPath(); c.arc(bs[0] + s*(r + 0.6), bs[1] - 14, 2, s > 0 ? -Math.PI/2 : Math.PI/2, s > 0 ? Math.PI/2 : Math.PI*1.5); c.strokeStyle = '#7d5c22'; c.lineWidth = 1; c.stroke(); }
+  const tp = [bs[0], bs[1] - 21], R = 0.25*K;
+  ell(c, tp[0], tp[1], R, R/2, '#d9b25a');
+  c.lineWidth = 0.6; c.strokeStyle = 'rgba(110,80,25,.75)';
+  for (const f of [0.92, 0.74, 0.56, 0.38]){ c.beginPath(); c.ellipse(tp[0], tp[1], R*f, R*f/2, 0, 0, Math.PI*2); c.stroke(); }
+  c.beginPath(); for (let k = 0; k < 14; k++){ const an = k/14*Math.PI*2, a1 = an - 0.12, a2 = an + 0.12; c.moveTo(tp[0] + Math.cos(a1)*R*0.13, tp[1] + Math.sin(a1)*R*0.065); c.lineTo(tp[0] + Math.cos(an)*R*0.34, tp[1] + Math.sin(an)*R*0.17); c.lineTo(tp[0] + Math.cos(a2)*R*0.13, tp[1] + Math.sin(a2)*R*0.065); } c.fillStyle = '#f3d27a'; c.fill();
+  ell(c, tp[0], tp[1], R*0.12, R*0.06, '#f6dc8e');
+  for (const [dx, dy, rr] of [[-6, -6, 1.6], [5, -11, 1.2], [3, -3, 1.1]]) ell(c, bs[0] + dx, bs[1] + dy, rr*1.4, rr, 'rgba(88,140,110,.55)');
+  if (env.fest){ for (let k = 0; k < 4; k++){ const ph = t/300 + k*1.7, x = tp[0] + Math.cos(ph)*12, y = tp[1] - 6 + Math.sin(ph*1.3)*4; circ(c, x, y, 1 + 0.5*Math.sin(ph*3), '#ffe9a0'); } }
+}
+function dDonLuy(c, cx, cy, l, env){
+  const p = mkP(cx, cy), t = env.t || 0, n = env.night || 0, E = 0.42, stone = l >= 2;
+  shadow(c, cx, cy + 3, HW*0.92, HH*0.8, 0.16);
+  fp(c, [p(-E,-E), p(E,-E), p(E,E), p(-E,E)], 'rgba(150,120,70,.4)');
+  const stake = (u, v, h) => { const b0 = p(u, v, 2.5), t0 = p(u, v, h); ln(c, b0, t0, '#6b4a26', 2.3); fp(c, [[t0[0] - 1.15, t0[1] + 0.4], [t0[0] + 1.15, t0[1] + 0.4], [t0[0], t0[1] - 2.8]], '#8a6236'); };
+  const wall = (u1, v1, u2, v2, gap) => {
+    const len = Math.hypot(u2 - u1, v2 - v1), steps = Math.round(len/0.07);
+    if (stone){
+      const segs = gap ? [[0, 0.5 - gap], [0.5 + gap, 1]] : [[0, 1]];
+      for (const [s1, s2] of segs){ const uc = lerp(u1, u2, (s1 + s2)/2), vc = lerp(v1, v2, (s1 + s2)/2), hl = len*(s2 - s1)/2, alongU = Math.abs(u2 - u1) > Math.abs(v2 - v1);
+        box(c, p, uc, vc, alongU ? hl : 0.035, alongU ? 0.035 : hl, 0, 11, '#c2baa5', '#a59d88', '#878070');
+        const m = Math.max(1, Math.round(hl*2/0.1)); for (let k = 0; k < m; k += 2){ const f = (k + 0.5)/m, cu = alongU ? uc - hl + f*hl*2 : uc, cv = alongU ? vc : vc - hl + f*hl*2; box(c, p, cu, cv, 0.03, 0.03, 11, 3, '#cfc8b4', '#b0a893', '#928b78'); } }
+    } else {
+      { const uc = (u1 + u2)/2, vc = (v1 + v2)/2, alongU = Math.abs(u2 - u1) > Math.abs(v2 - v1); box(c, p, uc, vc, alongU ? len/2 : 0.05, alongU ? 0.05 : len/2, 0, 2.5, '#9a7442', '#7f5f36', '#6a4f2c'); }
+      for (let k = 0; k <= steps; k++){ const f = k/steps; if (gap && Math.abs(f - 0.5) < gap) continue; stake(lerp(u1, u2, f), lerp(v1, v2, f), 12 + ((k*7) % 3)); }
+    }
+  };
+  wall(-E, -E, -E, E); wall(-E, -E, E, -E);
+  const tu = -0.2, tv = -0.2, ta = 0.09, tz = 24;
+  for (const [u, v] of [[-ta,-ta],[ta,-ta],[-ta,ta],[ta,ta]]) ln(c, p(tu+u, tv+v, 0), p(tu+u, tv+v, tz), '#5a3d22', 1.7);
+  ln(c, p(tu-ta, tv+ta, 6), p(tu+ta, tv+ta, 16), '#5a3d22', 0.9); ln(c, p(tu+ta, tv-ta, 6), p(tu+ta, tv+ta, 16), '#5a3d22', 0.9);
+  box(c, p, tu, tv, ta + 0.03, ta + 0.03, tz, 3, '#94602f', '#74481f', '#583616');
+  hipRoof(c, p, tu, tv, ta + 0.07, ta + 0.07, tz + 6, 8, 0.25, stone ? ROOF_TILE : THATCH_D);
+  for (const [u, v] of [[-ta,ta],[ta,ta],[ta,-ta]]) ln(c, p(tu+u, tv+v, tz + 3), p(tu+u, tv+v, tz + 6), '#5a3d22', 1.2);
+  { const pt = p(tu, tv, tz + 14), fl = Math.sin(t/260)*1.5; ln(c, pt, [pt[0], pt[1] - 12], '#3a2414', 1); fp(c, [[pt[0], pt[1] - 12], [pt[0] + 9 + fl, pt[1] - 9.5 + fl*0.4], [pt[0], pt[1] - 7]], '#e9b434'); }
+  if (n > 0.05){ const m = p(tu, tv, tz + 4); circ(c, m[0], m[1], 1.6, '#ffcf6a'); if (env.lights) env.lights.push([m[0], m[1], 12]); }
+  const hu = 0.14, hv = -0.17; box(c, p, hu, hv, 0.13, 0.08, 0, 8, null, '#a77d4c', '#7f5c36'); gableRoof(c, p, hu, hv, 0.17, 0.12, 8, 8, stone ? ROOF_TILE : THATCH);
+  if (l >= 1){ const d = p(0.1, 0.12, 0); ell(c, d[0], d[1], 3.4, 1.7, '#7a4a28'); c.fillStyle = '#8a5a30'; c.fillRect(d[0] - 3.4, d[1] - 4, 6.8, 4); ell(c, d[0], d[1] - 4, 3.4, 1.7, '#d9c9a0'); }
+  wall(-E, E, E, E); wall(E, -E, E, E, 0.15);
+  for (const v of [-0.13, 0.13]){ const q = (z) => p(E, v, z); if (stone) box(c, p, E, v, 0.06, 0.05, 0, 19, '#cfc8b4', '#b0a893', '#928b78'); else ln(c, q(0), q(18), '#5a3d22', 2.6); }
+  if (stone) gableRoof(c, p, E, 0, 0.09, 0.22, 19, 6, ROOF_TILE); else { ln(c, p(E, -0.16, 16), p(E, 0.16, 16), '#5a3d22', 2); gableRoof(c, p, E, 0, 0.07, 0.19, 17, 5, THATCH_D); }
+}
+function dVanMieu(c, cx, cy, l, env){
+  const p = mkP(cx, cy), n = env.night || 0, t = env.t || 0;
+  shadow(c, cx, cy + 3, HW*0.85, HH*0.75, 0.16);
+  fp(c, [p(-0.46,-0.46), p(0.46,-0.46), p(0.46,0.46), p(-0.46,0.46)], '#d8c9a6');
+  c.beginPath(); for (let s = -0.46; s <= 0.461; s += 0.115){ const a1 = p(s, -0.46), a2 = p(s, 0.46), b1 = p(-0.46, s), b2 = p(0.46, s); c.moveTo(a1[0], a1[1]); c.lineTo(a2[0], a2[1]); c.moveTo(b1[0], b1[1]); c.lineTo(b2[0], b2[1]); } c.strokeStyle = 'rgba(140,110,70,.22)'; c.lineWidth = 0.6; c.stroke();
+  { const q = p(-0.36, -0.06); tree(c, q[0], q[1], 0.95, 1, env.season, t, 0.37); }
+  { const q = p(0.38, -0.36); tree(c, q[0], q[1], 0.9, 1, env.season, t, 0.71); }
+  const pu = -0.08, pv = 0.27;
+  fp(c, [p(pu-0.21, pv-0.13), p(pu+0.21, pv-0.13), p(pu+0.21, pv+0.15), p(pu-0.21, pv+0.15)], '#a0957e');
+  fp(c, [p(pu-0.18, pv-0.1), p(pu+0.18, pv-0.1), p(pu+0.18, pv+0.12), p(pu-0.18, pv+0.12)], n > 0.4 ? '#2d4a6a' : '#5aa6c8');
+  { const sh = Math.sin(t/800)*0.04; ln(c, p(pu-0.1+sh, pv), p(pu+0.06+sh, pv), 'rgba(255,255,255,.55)', 0.8); }
+  const u0 = 0.05, v0 = -0.14, a = 0.16, ph = 13, roof = ['#6e5a48', '#4a3b2f', '#5c4b3c'];
+  for (const [u, v] of [[-a,-a],[a,-a],[-a,a],[a,a]].sort((m, q) => (m[0]+m[1]) - (q[0]+q[1]))) box(c, p, u0+u, v0+v, 0.045, 0.045, 0, ph, '#f1ece0', '#e2dccb', '#c5bda8');
+  if (!env.back){ const q = p(u0, v0 + a, 0); fp(c, [[q[0] - 4, q[1] - 0.5], [q[0] + 4, q[1] - 0.5], [q[0] + 4, q[1] - 9], [q[0], q[1] - 12], [q[0] - 4, q[1] - 9]], 'rgba(40,25,15,.25)'); }
+  box(c, p, u0, v0, a + 0.06, a + 0.06, ph, 2, '#c8b89a', '#a8977a', '#8e7e63');
+  box(c, p, u0, v0, a, a, ph + 2, 11, null, '#9c3b25', '#7a2c1b');
+  for (const face of [0, 1]){
+    const q = face === 0 ? p(u0, v0 + a + 0.003, ph + 7.5) : p(u0 + a + 0.003, v0, ph + 7.5);
+    circ(c, q[0], q[1], 3.5, n > 0.3 ? '#ffe2a0' : '#f3e3b8');
+    c.beginPath(); for (let k = 0; k < 12; k++){ const an = k/12*Math.PI*2; c.moveTo(q[0], q[1]); c.lineTo(q[0] + Math.cos(an)*3.3, q[1] + Math.sin(an)*3.3); } c.strokeStyle = '#8a5a2a'; c.lineWidth = 0.6; c.stroke(); circ(c, q[0], q[1], 1, '#8a5a2a');
+    if (env.lights && n > 0.05) env.lights.push([q[0], q[1], 8]);
+  }
+  hipRoof(c, p, u0, v0, a + 0.11, a + 0.11, ph + 13, 6, 0.3, roof);
+  box(c, p, u0, v0, a - 0.05, a - 0.05, ph + 16, 4, null, '#9c3b25', '#7a2c1b');
+  hipRoof(c, p, u0, v0, a + 0.05, a + 0.05, ph + 20, 9, 0.15, roof);
+  for (const [u, v, dir] of [[-(a + 0.05), a + 0.05, -1], [a + 0.05, a + 0.05, 0], [a + 0.05, -(a + 0.05), 1]]){ const q = p(u0 + u, v0 + v, ph + 20); c.beginPath(); c.moveTo(q[0], q[1]); c.quadraticCurveTo(q[0] + dir*3, q[1] - 1, q[0] + dir*3.5, q[1] - 5); c.strokeStyle = '#3a2c20'; c.lineWidth = 1.4; c.stroke(); }
+  { const q = p(u0, v0, ph + 29); circ(c, q[0], q[1] - 1.5, 1.8, '#e9b434'); }
+}
+function dHoangThanh(c, cx, cy, l, env){
+  const p = mkP(cx, cy), n = env.night || 0, t = env.t || 0, a = 0.42, b = 0.2, bh = 17, YEL = ['#e7b93e', '#a87a1e', '#c99a2a'];
+  shadow(c, cx, cy + 3, HW*0.95, HH*0.72, 0.2);
+  fp(c, [p(-0.47,-0.47), p(0.47,-0.47), p(0.47,0.47), p(-0.47,0.47)], 'rgba(205,190,160,.55)');
+  box(c, p, 0, 0, a, b, 0, bh, '#cdb98e', '#b9a173', '#977f55');
+  c.beginPath(); for (let z = 4; z < bh; z += 4.2){ const a1 = p(-a, b + 0.002, z), a2 = p(a, b + 0.002, z), b1 = p(a + 0.002, -b, z), b2 = p(a + 0.002, b, z); c.moveTo(a1[0], a1[1]); c.lineTo(a2[0], a2[1]); c.moveTo(b1[0], b1[1]); c.lineTo(b2[0], b2[1]); } c.strokeStyle = 'rgba(90,70,40,.22)'; c.lineWidth = 0.6; c.stroke();
+  const arch = (uc, w, hh) => { const pts = [p(uc - w, b + 0.004, 0)]; for (let k = 0; k <= 8; k++){ const an = Math.PI - k/8*Math.PI; pts.push(p(uc + Math.cos(an)*w, b + 0.004, hh + Math.sin(an)*3.2)); } pts.push(p(uc + w, b + 0.004, 0)); fp(c, pts, n > 0.3 ? '#5a3c18' : '#2a1d10'); };
+  arch(0, 0.075, 8.5); arch(-0.25, 0.052, 6); arch(0.25, 0.052, 6);
+  if (env.lights && n > 0.05) for (const u of [-0.25, 0, 0.25]){ const m = p(u, b, 5); env.lights.push([m[0], m[1], 9]); }
+  box(c, p, 0, 0, a + 0.01, b + 0.01, bh, 1.5, '#a89270', '#8f7a5a', '#76633f');
+  for (const u of [-0.38, 0.38]){ const q = p(u, 0, bh + 1.5), fl = Math.sin(t/260 + u*4)*1.4; ln(c, q, [q[0], q[1] - 22], '#4a3422', 1); fp(c, [[q[0], q[1] - 22], [q[0] + 7 + fl, q[1] - 21 + fl*0.3], [q[0] + 7 + fl, q[1] - 14 + fl*0.3], [q[0], q[1] - 15]], '#e9b434'); }
+  box(c, p, 0, 0, 0.29, 0.13, bh + 1.5, 7, null, '#a52a1e', '#7f1f16');
+  for (let k = 0; k < 5; k++){ const u = -0.24 + k*0.12; fp(c, [p(u - 0.025, 0.132, bh + 2.5), p(u + 0.025, 0.132, bh + 2.5), p(u + 0.025, 0.132, bh + 7), p(u - 0.025, 0.132, bh + 7)], n > 0.3 ? '#ffd88a' : '#5a1a12'); }
+  hipRoof(c, p, 0, 0, 0.36, 0.19, bh + 8.5, 5, 0.7, YEL);
+  box(c, p, 0, 0, 0.21, 0.085, bh + 11, 5, null, '#a52a1e', '#7f1f16');
+  hipRoof(c, p, 0, 0, 0.27, 0.13, bh + 16, 8, 0.55, YEL);
+  for (const [u, dir] of [[-0.27, -1], [0.27, 1]]){ const q = p(u, 0.13, bh + 16); c.beginPath(); c.moveTo(q[0], q[1]); c.quadraticCurveTo(q[0] + dir*3, q[1] - 1, q[0] + dir*3.4, q[1] - 5); c.strokeStyle = '#8a6216'; c.lineWidth = 1.3; c.stroke(); }
+  if (env.lights && n > 0.05) for (const u of [-0.2, 0.2]){ const m = p(u, 0.15, bh + 7); circ(c, m[0], m[1], 1.5, '#ff6a3a'); env.lights.push([m[0], m[1], 8]); }
+}
+function dTuongDai(c, cx, cy, l, env){
+  const p = mkP(cx, cy), n = env.night || 0, t = env.t || 0;
+  shadow(c, cx, cy + 3, HW*0.8, HH*0.65, 0.2);
+  fp(c, [p(-0.46,-0.46), p(0.46,-0.46), p(0.46,0.46), p(-0.46,0.46)], 'rgba(214,210,198,.6)');
+  for (const [u, v, sd] of [[-0.36, -0.36, 0.2], [0.36, -0.36, 0.5], [-0.36, 0.36, 0.8]]){ const q = p(u, v); tree(c, q[0], q[1], 0.85, 0, env.season, t, sd); }
+  box(c, p, 0, 0, 0.34, 0.34, 0, 2.5, '#d9d4c6', '#bdb7a7', '#a29c8b');
+  box(c, p, 0, 0, 0.25, 0.25, 2.5, 2.5, '#e4dfd1', '#c8c2b2', '#ada796');
+  box(c, p, 0, 0, 0.16, 0.16, 5, 3, '#ece8dc', '#d0cabb', '#b5af9f');
+  const oh = 46;
+  box(c, p, 0, 0, 0.075, 0.075, 8, oh, null, '#f2efe6', '#d2cdbf');
+  const tip = p(0, 0, 8 + oh + 8);
+  fp(c, [p(-0.075, 0.075, 8 + oh), p(0.075, 0.075, 8 + oh), tip], '#e6e2d6'); fp(c, [p(0.075, -0.075, 8 + oh), p(0.075, 0.075, 8 + oh), tip], '#c4bfb1');
+  { const q = p(0, 0.077, 8 + oh - 7); star(c, q[0], q[1], 3.2, '#e9b434'); }
+  fp(c, [p(-0.058, 0.077, 14), p(0.058, 0.077, 14), p(0.058, 0.077, 27), p(-0.058, 0.077, 27)], '#b8322a');
+  for (const z of [17.5, 20.5, 23.5]) ln(c, p(-0.04, 0.078, z), p(0.04, 0.078, z), '#e9b434', 0.8);
+  { const q = p(0.22, 0.22, 5); ell(c, q[0], q[1], 3.2, 1.6, '#7a5a26'); c.fillStyle = '#9a7432'; c.fillRect(q[0] - 3.2, q[1] - 3.5, 6.4, 3.5); ell(c, q[0], q[1] - 3.5, 3.2, 1.6, '#c9a24a');
+    for (let k = 0; k < 3; k++){ ln(c, [q[0] - 1 + k, q[1] - 3.5], [q[0] - 1 + k, q[1] - 8], '#7a2a1a', 0.6); }
+    const ph = (t/1600) % 1; c.globalAlpha = 0.45*(1 - ph); ell(c, q[0] + Math.sin(ph*6)*1.5, q[1] - 9 - ph*10, 1.5 + ph*2, 1 + ph, '#e8e6e0'); c.globalAlpha = 1;
+    if (env.lights && n > 0.05) env.lights.push([q[0], q[1] - 5, 6]); }
+  for (const [u, v] of [[0.4, -0.1], [0.4, 0.12], [-0.1, 0.4], [0.12, 0.4]]){ const q = p(u, v); ell(c, q[0], q[1] - 1, 3, 1.6, '#4f8a3a'); circ(c, q[0] - 1, q[1] - 2, 1, '#e9b434'); circ(c, q[0] + 1.2, q[1] - 1.6, 1, '#d84a3a'); }
+}
 function drawBuildingAt(c, k, cx, cy, l, env, ex, flip){
   const fr = (flip|0) & 3;
   if (FOOT[k] && footOf(k, l) > 1){ DRAW[k](c, cx, cy, l, fr ? Object.assign({}, env, {rot:fr}) : env, ex); return; }
@@ -2395,7 +2680,7 @@ function drawBuildingAt(c, k, cx, cy, l, env, ex, flip){
   DRAW[k](c, cx, cy, l, env2, ex2);
   c.restore();
 }
-const DRAW = {tua_bin_gio:dTuaBin, trang_trai_doc:dTrangTrai, trung_tam_cn:dTrungTamCN, ben_xe:dBenXe, duong:dDuong, tram_song:dTramSong, mo_bac:dMoBac, tram_y_te:dTramYTe, thuy_dien:dThuyDien, nuong_che:dNuongChe, truong_hoc:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_hoc'), truong_mn:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_mn'), truong_th:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_th'), truong_thpt:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_thpt'), truong_nghe:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_nghe'), dai_hoc:dDaiHoc, homestay:dHomestay, cot_co:dCotCo, nha_san:dNhaSan, ruong:dRuong, tieu_phu:dTieuPhu, muong:dMuong, vuon:dVuon, kho:dKho, mo_da:dMoDa, chuong_trau:dChuongTrau, coi_nuoc:dCoiNuoc, khung_det:dKhungDet, cho_phien:dChoPhien, nha_rong:dNhaRong, cong_ban:dCongBan};
+const DRAW = {lan_san:dLanSan, lo_duc:dLoDuc, trong_dong:dTrongDong, don_luy:dDonLuy, van_mieu:dVanMieu, hoang_thanh:dHoangThanh, tuong_dai:dTuongDai, tua_bin_gio:dTuaBin, trang_trai_doc:dTrangTrai, trung_tam_cn:dTrungTamCN, ben_xe:dBenXe, duong:dDuong, tram_song:dTramSong, mo_bac:dMoBac, tram_y_te:dTramYTe, thuy_dien:dThuyDien, nuong_che:dNuongChe, truong_hoc:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_hoc'), truong_mn:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_mn'), truong_th:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_th'), truong_thpt:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_thpt'), truong_nghe:(c, x, y, l, e) => dSchool(c, x, y, l, e, 'truong_nghe'), dai_hoc:dDaiHoc, homestay:dHomestay, cot_co:dCotCo, nha_san:dNhaSan, ruong:dRuong, tieu_phu:dTieuPhu, muong:dMuong, vuon:dVuon, kho:dKho, mo_da:dMoDa, chuong_trau:dChuongTrau, coi_nuoc:dCoiNuoc, khung_det:dKhungDet, cho_phien:dChoPhien, nha_rong:dNhaRong, cong_ban:dCongBan};
 function tileEx(S, k){
   const i = k % N, j = (k/N)|0, t = S.tiles[k], ex = {seed:hash2(i, j, 99)};
   if (t.b && t.b.k === 'duong'){ ex.conns = D4.filter(([di,dj]) => { const n = tileAt(S, i+di, j+dj); return n && n.b && n.b.k !== 'muong' && (n.b.k === 'duong' || t.t !== 'w'); }); }
@@ -2982,6 +3267,7 @@ function placeCheck(S, k, i, j, skip){
   if (!t) return 'Ngoài bản đồ';
   const fsz = FOOT[k] ? footOf(k, sk && sk.b && sk.b.k === k ? sk.b.l : 1) : 1;
   if (fsz > 1){
+    if (d.era && (S.era|0) < d.era && !(sk && sk.b && sk.b.k === k)) return 'Mở ở thời kỳ ' + SOC[d.era].short;
     if (rankIdx(S.best) < d.rank) return 'Cần đạt danh hiệu ' + RANKS[d.rank].name;
     if (d.req && !hasMod(S, d.req)) return 'Cần hoàn thành dự án ' + MODERN.find(m => m.id === d.req).name;
     if (d.unique && cnt(S, k) - (sk && sk.b && sk.b.k === k ? 1 : 0) > 0) return 'Bản chỉ có một ' + d.name;
@@ -2993,6 +3279,7 @@ function placeCheck(S, k, i, j, skip){
   if (t.t === 'f') return 'Cần chặt rừng trước';
   if (t.t === 'r') return 'Cần phá đá trước';
   if (t.t === 'w' && k !== 'duong') return 'Không xây trên suối';
+  if (d.era && (S.era|0) < d.era && !(sk && sk.b && sk.b.k === k)) return 'Mở ở thời kỳ ' + SOC[d.era].short;
   if (rankIdx(S.best) < d.rank) return 'Cần đạt danh hiệu ' + RANKS[d.rank].name;
   if (d.req && !hasMod(S, d.req)) return 'Cần hoàn thành dự án ' + MODERN.find(m => m.id === d.req).name;
   if (d.unique && cnt(S, k) - (sk && sk.b && sk.b.k === k ? 1 : 0) > 0) return 'Bản chỉ có một ' + d.name;
@@ -3111,7 +3398,7 @@ function setWorkAll(k, d){
 }
 function progressCheck(S, live){
   const e = eraOf(S);
-  if (e > (S.era|0)){ const from = S.era|0; S.era = e; S.res.bac += 100*e*e; if (live) setTimeout(() => eraUp(from, e), 400); }
+  if (e > (S.era|0)){ const from = S.era|0; S.era = e; let bac = 0; for (let x = from + 1; x <= e; x++) bac += eraReward(x); S.res.bac += bac; if (live) setTimeout(() => eraUp(from, e, bac), 400); }
   const st = starsOf(S), seen = S.starsSeen|0;
   if (st > seen){
     let bac = 0, big = 0; for (let n = seen + 1; n <= st; n++){ bac += 400 + 150*n; if (n % 5 === 0) big = n; }
@@ -3122,12 +3409,27 @@ function progressCheck(S, live){
     }
   }
 }
-function eraUp(from, e){
+function eraUp(from, e, bac){
   Sound.sfx('rank');
-  const I = eraInfo(e), nx = eraInfo(e + 1);
-  showModal('Xã hội tiến hoá!', '<p><b>' + esc(G.S.name) + '</b> bước sang <b>' + I.name + '</b>.</p><p>' + I.desc + '</p>' + (eraInfo(from).opens ? '<p>Mới: ' + eraInfo(from).opens + '</p>' : '') + '<p>Thưởng ' + fmt(100*e*e) + ' bạc.</p><p style="color:var(--muted)">Bước tiếp theo: ' + nx.name + ' khi ' + I.need.charAt(0).toLowerCase() + I.need.slice(1) + '.</p>', [{label:'Xem tiến hoá xã hội', cls:'gold', fn:() => openPanel('modern')}, {label:'Đóng', cls:'ghost'}]);
+  const I = eraInfo(e);
+  let body = (I.ev ? '<p class="ev">' + I.ev + '</p>' : '') + '<p><b>' + esc(G.S.name) + '</b> bước sang <b>' + (e < ERA_FUT ? manLabel(e) + ': ' : '') + I.name + '</b>' + (I.yrs ? ' (' + I.yrs + ')' : '') + '.</p>';
+  if (e < ERA_FUT && I.focus) body += '<p>Lối chơi: ' + I.focus.charAt(0).toLowerCase() + I.focus.slice(1) + '.</p>';
+  if (I.goals && I.goals.length) body += '<p style="margin-bottom:2px">Mục tiêu để sang thời kỳ sau:</p><ul class="notes" style="color:inherit">' + I.goals.map(g => '<li>' + goalText(g) + '</li>').join('') + '</ul>';
+  const un = BUILD_ORDER.filter(k => B[k].era > from && B[k].era <= e).map(k => B[k].name); if (un.length) body += '<p>Mở khoá: ' + un.join(', ') + '.</p>';
+  const mp = MODERN.filter(m => m.era > from && m.era <= e).map(m => m.name.charAt(0).toLowerCase() + m.name.slice(1)); if (mp.length) body += '<p>Dự án mới: ' + mp.join(', ') + '.</p>';
+  body += '<p>Thưởng ' + fmt(bac || eraReward(e)) + ' bạc.</p>';
+  showModal(e <= ERA_FUT ? 'Lịch sử sang trang!' : 'Kỷ nguyên mới!', body, [{label:'Xem hành trình', cls:'gold', fn:() => openPanel('modern')}, {label:'Đóng', cls:'ghost'}]);
   const h = houseSpot(); if (h) spawnConfetti(h[0], h[1], 60);
   changed(true);
+}
+function giveReserve(S){ return {lua:Math.ceil(((G.E && G.E.cons) || S.pop*0.6)*3)}; }
+function canGive(S, g){ const gv = (S.gave && S.gave[g.id]) || {}, rs = giveReserve(S); for (const r in g.res){ const need = g.res[r] - (gv[r] || 0); if (need > 0 && (S.res[r] || 0) - (rs[r] || 0) < need) return false; } return true; }
+function doGive(id){
+  const S = G.S, P = SOC[S.era|0], g = P && P.goals && P.goals.find(x => x.id === id); if (!g) return;
+  S.gave = S.gave || {}; const gv = S.gave[id] || (S.gave[id] = {}), rs = giveReserve(S), parts = []; let kept = false;
+  for (const r in g.res){ const need = g.res[r] - (gv[r] || 0); if (need <= 0) continue; const have = Math.floor((S.res[r] || 0) - (rs[r] || 0)); if (rs[r] && have < need) kept = true; const amt = Math.max(0, Math.min(need, have)); if (amt > 0){ S.res[r] -= amt; gv[r] = (gv[r] || 0) + amt; parts.push(fmt(amt) + ' ' + RES_NAME[r].toLowerCase()); } }
+  if (!parts.length){ toast('Chưa có ' + Object.keys(g.res).map(r => RES_NAME[r].toLowerCase()).join(', ') + ' để góp' + (kept ? ' (phải giữ lại lúa cho dân ăn 3 ngày)' : '') + '.', 'bad'); return; }
+  Sound.sfx('reward'); toast('Đã góp ' + parts.join(', ') + (goalDone(S, g) ? '. Hoàn thành mục tiêu!' : '.') + (kept ? ' Giữ lại lúa cho dân ăn 3 ngày.' : ''), 'good'); changed(true);
 }
 function modernDone(m){
   Sound.sfx('rank');
@@ -3151,7 +3453,7 @@ function startModern(id){
   if (!m || md.done.includes(id)) return;
   if (md.cur){ toast('Đang thi công một dự án khác.', 'bad'); return; }
   if (k > 0 && !md.done.includes(MODERN[k-1].id)){ toast('Cần hoàn thành dự án trước.', 'bad'); return; }
-  if (rankIdx(S.best) < m.rank){ toast('Cần thành ' + RANKS[m.rank].name + '.', 'bad'); return; }
+  { const why = projReady(S, m); if (why){ toast(why + '.', 'bad'); return; } }
   if (!canAfford(S, m.cost)){ toast(missingText(S, m.cost), 'bad'); return; }
   payCost(S, m.cost); md.cur = {id, d:m.days, n:m.days};
   Sound.sfx('build'); toast('Khởi công: ' + m.name + '. Hoàn thành sau ' + m.days + ' ngày.', 'gold');
@@ -3292,7 +3594,7 @@ function claimQuest(){
 }
 function rankUp(r){
   Sound.sfx('rank');
-  const unlocked = BUILD_ORDER.filter(k => B[k].rank === r).map(k => B[k].name);
+  const unlocked = BUILD_ORDER.filter(k => B[k].rank === r && !((B[k].era|0) > (G.S.era|0))).map(k => B[k].name);
   const extra = (r === EXPAND_RANK ? '<p>Giờ bạn có thể <b>mở rộng đất</b> trong tab Xây dựng.</p>' : '') + (r === HIGH_LV_RANK ? '<p>Nhà sàn, kho thóc lên được cấp 5, ruộng lên cấp 4.</p>' : '') + (r === TOP_LV_RANK ? '<p>Nhà sàn, kho thóc lên được cấp 7, ruộng cấp 5. Có dự án Kiên cố hoá nhà ở thì nhà lên được cấp 8.</p>' : '') + (r === 9 ? '<p>Nhà ở lên được cấp 10: nhà 3 tầng mái Thái.</p>' : '') + (r === 10 ? '<p>Nhà ở lên được cấp 12: chung cư 5 tầng.</p>' : '') + (r === 11 ? '<p>Nhà ở lên được cấp 15: toà tháp xanh 20 tầng (cấp 14–15 cần dự án Điện mặt trời áp mái).</p>' : '') + (r === 7 || r === 9 ? '<p>Được mở rộng đất thêm nữa.</p>' : '');
   showModal('Thành ' + RANKS[r].name + '!', '<p><b>' + esc(G.S.name) + '</b> đã đông vui hơn và được gọi là <b>' + RANKS[r].name + '</b>.</p>' + (unlocked.length ? '<p>Mở khoá: ' + unlocked.join(', ') + '.</p>' : '') + extra, [{label:'Xem công trình mới', cls:'gold', fn:() => openPanel('build')}]);
   if (G.E && G.E.rongK != null){ const [x,y] = tileCenter(G.E.rongK); spawnConfetti(x, y, 40); }
@@ -3307,6 +3609,7 @@ function startBuild(k){
     return;
   }
   const S = G.S, d = B[k];
+  if (d.era && (S.era|0) < d.era){ toast('Mở ở thời kỳ ' + SOC[d.era].short + ' (nút thời kỳ ở góc trên).', 'bad'); return; }
   if (rankIdx(S.best) < d.rank){ toast('Cần đạt danh hiệu ' + RANKS[d.rank].name, 'bad'); return; }
   if (d.req && !hasMod(S, d.req)){ toast('Cần hoàn thành dự án «' + MODERN.find(m => m.id === d.req).name + '» (nút Hiện đại hoá).', 'bad'); return; }
   if (!canAfford(S, d.cost[0])){ toast(missingText(S, d.cost[0]), 'bad'); return; }
@@ -3362,7 +3665,7 @@ async function save(){
   G.S.saved = Date.now();
   const data = serial(G.S), size = JSON.stringify(data).length;
   writeLocal(Cloud.uid, data);
-  if (size > 240000){ G.dirty = false; setStatus('error', 'Bản quá lớn để lưu lên tài khoản (' + Math.round(size/1024) + ' KB), đã lưu trên máy này.'); return; }
+  if (size > (Cloud.provider === 'google' ? 900000 : 240000)){ G.dirty = false; setStatus('error', 'Bản quá lớn để lưu lên tài khoản (' + Math.round(size/1024) + ' KB), đã lưu trên máy này.'); return; }
   if (!Cloud.ref || !Cloud.readOK){ G.dirty = false; setStatus(Cloud.ref ? 'offline' : 'local'); return; }
   if (saving){ pendingSave = true; return; }
   saving = true; setStatus('saving');
@@ -3374,6 +3677,7 @@ async function save(){
     else if (code === 'invalid_argument'){ if (size > 200000) setStatus('error', 'Bản quá lớn để lưu lên tài khoản, đã lưu trên máy này.'); else { Cloud.ref = null; setStatus('local', 'Tài khoản này không có quyền lưu vào trang. Tiến trình được lưu trên máy này.'); } }
     else if (code === 'quota_exceeded'){ setStatus('error', 'Bộ nhớ của trang đã đầy, không lưu thêm được.'); }
     else if (code === 'revoked'){ Cloud.ref = null; setStatus('local', 'Quyền truy cập đã thay đổi. Tiến trình được lưu trên máy này.'); }
+    else if (code === 'permission-denied'){ setStatus('error', 'Firebase chưa cho phép lưu (kiểm tra Firestore Rules). Đã lưu tạm trên máy này.'); }
     else setStatus('error', 'Không lưu được lên tài khoản, đã lưu tạm trên máy này.');
   }
   saving = false;
@@ -3384,8 +3688,61 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 window.addEventListener('pagehide', () => { if (G.playing && G.S){ G.S.saved = Date.now(); writeLocal(Cloud.uid, serial(G.S)); } });
 
 const IS_APP = !!window.__BANLANG_APP;
+/* ---- Đăng nhập Google cho bản ứng dụng (Firebase Auth + Firestore) ---- */
+const FB_CFG = IS_APP && window.BANLANG_FIREBASE && window.BANLANG_FIREBASE.apiKey && window.BANLANG_FIREBASE.projectId ? window.BANLANG_FIREBASE : null;
+const FB = {ok:false, auth:null, db:null, err:''}, FB_V = '10.12.2';
+function loadScript(src){ return new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.async = true; el.onload = () => res(); el.onerror = () => rej(new Error('load')); document.head.appendChild(el); }); }
+async function fbInit(){
+  if (FB.ok) return true; if (!FB_CFG) return false;
+  try {
+    const base = 'https://www.gstatic.com/firebasejs/' + FB_V + '/';
+    const need = async src => { const r = await withTimeout(loadScript(base + src), 15000); if (r === TIMEOUT) throw new Error('timeout'); };
+    if (!window.firebase) await need('firebase-app-compat.js');
+    await Promise.all([window.firebase.auth ? null : need('firebase-auth-compat.js'), window.firebase.firestore ? null : need('firebase-firestore-compat.js')]);
+    if (!firebase.apps.length) firebase.initializeApp(FB_CFG);
+    FB.auth = firebase.auth(); FB.db = firebase.firestore(); FB.ok = true; return true;
+  } catch (e){ FB.err = 'Không tải được Firebase. Kiểm tra kết nối mạng.'; return false; }
+}
+function fbMsg(e){ const c = (e && e.code) || ''; return c === 'auth/unauthorized-domain' ? 'Tên miền này chưa được cho phép trong Firebase (Authentication > Settings > Authorized domains).' : c === 'auth/network-request-failed' ? 'Không có mạng, chưa đăng nhập được.' : c === 'auth/operation-not-allowed' ? 'Chưa bật đăng nhập Google trong Firebase (Authentication > Sign-in method).' : 'Đăng nhập không thành công' + (c ? ' (' + c + ')' : '') + '.'; }
+function fbRef(uid){
+  const d = FB.db.collection('banlang').doc(uid);
+  return {
+    async get(){ const sn = await d.get(); const v = sn.exists ? sn.data() : null; let game = null; if (v && typeof v.json === 'string'){ try { game = JSON.parse(v.json); } catch (e){} } return {exists:!!game, data:() => ({game})}; },
+    async set(o){ const r = await withTimeout(d.set({json:JSON.stringify(o.game), savedAt:o.savedAt || Date.now(), day:o.day|0, pop:o.pop|0, name:String(o.name || '').slice(0, 40), v:1}), 15000); if (r === TIMEOUT){ const er = new Error('timeout'); er.code = 'unavailable'; throw er; } },
+  };
+}
+async function fbAttach(){
+  try { await withTimeout(FB.auth.getRedirectResult(), 8000); } catch (e){ setTimeout(() => toast(fbMsg(e), 'bad'), 1500); }
+  const u = await withTimeout(new Promise(res => { const un = FB.auth.onAuthStateChanged(x => { un(); res(x); }); }), 8000);
+  if (u === null){ FB.state = 'out'; try { localStorage.removeItem('banlang:gu'); } catch (e){} return; }
+  if (!u || u === TIMEOUT) return;
+  try { localStorage.setItem('banlang:gu', JSON.stringify({uid:u.uid, name:u.displayName || '', email:u.email || '', photo:u.photoURL || ''})); } catch (e){}
+  Cloud.provider = 'google'; Cloud.uid = 'g:' + u.uid; Cloud.me = {name:u.displayName || u.email || 'Tài khoản Google', email:u.email || '', avatarUrl:u.photoURL || ''};
+  Cloud.ref = fbRef(u.uid);
+}
+async function gLogin(){
+  if (!FB_CFG){ showModal('Chưa bật đăng nhập Google', '<p>Bản ứng dụng này chưa được gắn với dự án Firebase nên chưa đăng nhập Google được.</p><p>Chủ trò chơi làm theo mục <b>Đăng nhập Google</b> trong file HUONG-DAN.txt (hoặc README trên GitHub), rồi điền cấu hình vào file <b>firebase-config.js</b>. Trong lúc chờ, tiến trình vẫn tự lưu trên máy này và có thể chuyển máy bằng Mã lưu.</p>', [{label:'Đã hiểu', cls:'gold'}]); return; }
+  toast('Đang mở đăng nhập Google…');
+  if (!(await fbInit())){ toast(FB.err, 'bad'); return; }
+  if (G.playing && G.S){ G.S.saved = Date.now(); writeLocal(Cloud.uid, serial(G.S)); }
+  const prov = new firebase.auth.GoogleAuthProvider(); prov.setCustomParameters({prompt:'select_account'});
+  try { await FB.auth.signInWithPopup(prov); location.reload(); }
+  catch (e){
+    const c = (e && e.code) || '';
+    if (c === 'auth/popup-blocked' || c === 'auth/operation-not-supported-in-this-environment' || c === 'auth/web-storage-unsupported'){ try { await FB.auth.signInWithRedirect(prov); } catch (e2){ toast(fbMsg(e2), 'bad'); } }
+    else if (c !== 'auth/popup-closed-by-user' && c !== 'auth/cancelled-popup-request') toast(fbMsg(e), 'bad');
+  }
+}
+function gLogout(){
+  showModal('Đăng xuất Google?', '<p>Bản đang chơi vẫn được giữ lại trên máy này. Đăng nhập lại bất cứ lúc nào để lưu tiếp vào tài khoản.</p>', [{label:'Thôi', cls:'ghost'}, {label:'Đăng xuất', cls:'primary', fn:async () => { if (G.playing && G.S){ try { await save(); } catch (e){} G.S.saved = Date.now(); writeLocal(null, serial(G.S)); } try { localStorage.removeItem('banlang:gu'); } catch (e){} try { await FB.auth.signOut(); } catch (e){} location.reload(); }}]);
+}
+const G_ICON = '<svg viewBox="0 0 48 48" style="width:20px;height:20px;flex:0 0 auto"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
 async function initCloud(){
-  if (IS_APP){ Cloud.status = 'local'; return; }
+  if (IS_APP){
+    if (FB_CFG){ if (await fbInit()) await fbAttach();
+      if (!Cloud.ref && FB.state !== 'out'){ let gu = null; try { gu = JSON.parse(localStorage.getItem('banlang:gu') || 'null'); } catch (e){} if (gu && gu.uid){ Cloud.provider = 'google-off'; Cloud.uid = 'g:' + gu.uid; Cloud.me = {name:gu.name || gu.email || 'Tài khoản Google', email:gu.email || '', avatarUrl:gu.photo || ''}; } } }
+    if (!Cloud.ref) Cloud.status = 'local'; return;
+  }
   try {
     let c = null; const t0 = Date.now();
     while (!(window.claude && typeof window.claude.use === 'function')){ if (Date.now() - t0 > 3500) break; await sleep(100); }
@@ -3490,12 +3847,12 @@ function renderCloudIcon(){
 function updateModBtn(){
   const el = $('#modBtn'), S = G.S;
   if (!S || !G.playing || !S.modern || G.buildK || G.showNet){ el.hidden = true; return; }
-  const md = S.modern, nx = nextProj(S);
-  let txt, avail = false;
-  if (md.cur) txt = eraInfo(S.era|0).short + ' · thi công còn ' + md.cur.d + ' ngày';
-  else { txt = eraInfo(S.era|0).short; avail = !projReady(S, nx) && canAfford(S, nx.cost) && rankIdx(S.best) >= 2; }
-  el.hidden = false; el.classList.toggle('avail', avail);
-  el.innerHTML = (md.cur ? MOD_ICON[md.cur.id] : nx ? MOD_ICON[nx.id] : MOD_ICON.mat_troi) + '<span>' + txt + '</span><i class="dot"></i>';
+  const md = S.modern, nx = nextProj(S), e = S.era|0, I = eraInfo(e), lab = e < ERA_FUT ? manLabel(e) + ' · ' + I.short : I.short;
+  const projOk = !md.cur && !projReady(S, nx) && canAfford(S, nx.cost) && rankIdx(S.best) >= 2;
+  const giveOk = !!(SOC[e] && SOC[e].goals && SOC[e].goals.some(g => g.t === 'give' && !goalDone(S, g) && canGive(S, g)));
+  const txt = md.cur ? lab + ' · thi công còn ' + md.cur.d + ' ngày' : lab;
+  el.hidden = false; el.classList.toggle('avail', projOk || giveOk);
+  el.innerHTML = (md.cur ? MOD_ICON[md.cur.id] : projOk ? MOD_ICON[nx.id] : MOD_ICON.su) + '<span>' + txt + '</span><i class="dot"></i>';
 }
 function renderHUD(){
   updateModBtn();
@@ -3583,6 +3940,7 @@ function drawThumb(el, k, l, flip){
   else { if (k === 'duong') dDuongGround(c, 0, 0, env, {conns:[[1,0],[-1,0]]}, l, false); drawBuildingAt(c, k, 0, 0, l, env, {conns:[[1,0],[-1,0]], waterDir:[1,0], seed:0.3}, flip); }
 }
 const MOD_ICON = {
+  su:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6.5" rx="8.5" ry="3.2"/><path d="M3.5 6.5v5.5c0 1.8 3.8 3.2 8.5 3.2s8.5-1.4 8.5-3.2V6.5"/><path d="M6 14.2V20M18 14.2V20M12 15.2V21"/><path d="M12 4.6v3.8M10.1 6.5h3.8"/></svg>',
   so_hoa:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/></svg>',
   xanh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V11"/><path d="M12 11l-6.5-4M12 11l6.5-4M12 11V3"/><circle cx="12" cy="11" r="1.6"/></svg>',
   thong_minh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 8V4M9.5 4h5"/><circle cx="9.5" cy="13" r="1.2"/><circle cx="14.5" cy="13" r="1.2"/><path d="M9.5 16.5h5M3 12v3M21 12v3"/></svg>',
@@ -3596,15 +3954,38 @@ const MOD_ICON = {
 };
 const PANELS = {
   modern(){
-    const S = G.S, md = S.modern, ri = rankIdx(S.best), era = S.era|0, I = eraInfo(era), nx = eraInfo(era + 1);
-    let h = '<div class="card" style="margin-bottom:10px"><span class="tag gold">Thời đại ' + (era + 1) + '</span><h3 style="margin:6px 0 2px;font-family:var(--disp);font-size:20px">' + I.name + '</h3><p style="margin:0 0 6px;font-size:13px;line-height:1.45">' + I.desc + '</p><div class="kv"><span>Tiến lên ' + nx.name + '</span><b style="font-size:12.5px;text-align:right;max-width:58%">' + I.need + '</b></div></div>';
-    h += '<div class="sec">Các thời đại</div><ul class="qlist">' + Array.from({length:Math.max(SOC.length, era + 2)}, (_, k) => k).map(k => '<li class="' + (k <= era ? 'done' : '') + '"><span class="ck">' + (k < era ? '✓' : k === era ? '●' : k + 1) + '</span><span style="flex:1"><b style="font-weight:' + (k === era ? 700 : 500) + '">' + eraInfo(k).name + '</b>' + (k === era + 1 ? '<br><small style="color:var(--muted)">' + eraInfo(k - 1).need + '</small>' : '') + '</span></li>').join('') + '<li><span class="ck">∞</span>Mỗi Kỷ nguyên mới lại mở ra kỷ nguyên tiếp theo, không có điểm dừng</li></ul>';
-    h += '<div class="sec">Dự án</div><p class="hint" style="margin:0 0 8px">Mỗi dự án thay đổi diện mạo bản làng và giúp dân làm ăn khá hơn. Làm lần lượt, mỗi lần một dự án.</p>';
+    const S = G.S, md = S.modern, ri = rankIdx(S.best), era = S.era|0, I = eraInfo(era), fut = era >= ERA_FUT;
+    let h = '<div class="card hist" style="margin-bottom:10px"><div class="row" style="gap:6px;flex-wrap:wrap"><span class="tag gold">' + manLabel(era) + (era < ERA_FUT ? '/9' : '') + '</span><span class="tag">' + I.yrs + '</span></div><h3>' + I.name + '</h3><p>' + I.desc + '</p>' + (I.focus ? '<div class="kv"><span>Lối chơi</span><b style="font-size:12.5px;text-align:right;max-width:62%">' + I.focus + '</b></div>' : '') + '</div>';
+    if (!fut){
+      const G0 = I.goals, nd = G0.filter(g => goalDone(S, g)).length;
+      h += '<div class="sec">Mục tiêu để sang ' + SOC[era + 1].short + ' (' + nd + '/' + G0.length + ')</div><ul class="glist">';
+      for (const g of G0){
+        const [x, y] = goalProg(S, g), done = x >= y; let act = '', sub = '';
+        if (!done && g.t === 'give') act = '<button class="btn small ' + (canGive(S, g) ? 'gold' : 'primary') + '" data-act="give" data-id="' + g.id + '">Góp</button>';
+        else if (!done && g.t === 'b' && !bLock(S, g.k) && !(B[g.k].unique && cnt(S, g.k))) act = '<button class="btn small dark" data-act="build" data-k="' + g.k + '">Xây</button>';
+        if (!done && g.t === 'b' && bLock(S, g.k)) sub = bLock(S, g.k);
+        if (!done && g.t === 'mod'){ const m = MODERN.find(z => z.id === g.id), why = m && projReady(S, m); sub = md.cur && md.cur.id === g.id ? 'Đang thi công, còn ' + md.cur.d + ' ngày' : why || 'Khởi công ở mục Dự án bên dưới'; }
+        if (g.t === 'give'){ const gv = (S.gave && S.gave[g.id]) || {}; sub = Object.keys(g.res).map(r => RES_NAME[r] + ' ' + fmt(Math.min(gv[r] || 0, g.res[r])) + '/' + fmt(g.res[r])).join(' · '); }
+        else if (y > 1) sub = (sub ? sub + ' · ' : '') + fmt(x) + '/' + fmt(y);
+        h += '<li class="' + (done ? 'done' : '') + '"><span class="ck">' + (done ? '✓' : '') + '</span><span class="gtx"><b>' + goalText(g) + '</b>' + (y > 1 && !done ? '<div class="pbar"><i style="width:' + clamp(x/y, 0, 1)*100 + '%"></i></div>' : '') + (sub ? '<small>' + sub + '</small>' : '') + '</span>' + act + '</li>';
+      }
+      h += '</ul><p class="hint" style="margin:0 0 4px">Xong hết mục tiêu là sang thời kỳ mới, thưởng ' + fmt(eraReward(era + 1)) + ' bạc.' + (G0.some(g => g.t === 'give') ? ' Khi góp lúa, bản luôn giữ lại đủ ăn 3 ngày.' : '') + '</p>';
+    } else {
+      const m = epochProj(S.epoch|0);
+      h += '<div class="sec">Chặng tiếp theo</div><p class="hint" style="margin:0 0 4px">Hoàn thành dự án <b>' + m.name + '</b> (mục Dự án bên dưới) để bước sang kỷ nguyên tiếp theo. Mỗi kỷ nguyên: mọi công trình làm ra thêm 5%, thêm niềm vui.</p>';
+    }
+    h += '<div class="sec">9 thời kỳ lịch sử Việt Nam</div><ul class="qlist tl">';
+    SOC.forEach((P, k) => {
+      const last = k === ERA_FUT, done = k < era || (last && era > ERA_FUT), cur = k === era || (last && era > ERA_FUT);
+      h += '<li class="' + (done ? 'done' : '') + (cur ? ' cur' : '') + '"><span class="ck">' + (done && !last ? '✓' : last ? '∞' : k + 1) + '</span><span style="flex:1;min-width:0"><b style="font-weight:' + (cur ? 700 : 500) + '">' + P.name + '</b><br><small>' + P.yrs + ' · ' + P.focus + (last && era >= ERA_FUT ? ' · đã qua ' + (S.epoch|0) + ' kỷ nguyên mới' : '') + '</small>' + (k <= era && P.ev ? '<details><summary>Sự kiện mở đầu</summary>' + P.ev + '</details>' : '') + '</span></li>';
+    });
+    h += '</ul>';
+    h += '<div class="sec">Dự án</div><p class="hint" style="margin:0 0 8px">Mỗi dự án thay đổi diện mạo bản làng và giúp dân làm ăn khá hơn. Làm lần lượt, mỗi lần một dự án. Đường bê tông, điện lưới mở từ thời kỳ Thống nhất; internet, nhà kiên cố và các dự án hiện đại khác mở từ thời kỳ Đổi mới.</p>';
     if (md.cur){ const m = md.cur.id === 'ky_nguyen' ? epochProj(S.epoch|0) : MODERN.find(x => x.id === md.cur.id); h += '<div class="banner gold" style="flex-wrap:wrap"><b>Đang thi công: ' + m.name + '</b><span style="flex:1 1 100%">Còn ' + md.cur.d + ' ngày</span><div class="pbar" style="flex:1 1 100%;background:rgba(255,255,255,.4)"><i style="width:' + ((1 - md.cur.d/md.cur.n)*100) + '%"></i></div></div>'; }
     MODERN.forEach((m, k) => {
-      const done = md.done.includes(m.id), cur = md.cur && md.cur.id === m.id, prevOk = k === 0 || md.done.includes(MODERN[k-1].id), rankOk = ri >= m.rank;
-      const status = done ? '<span class="tag">Đã xong</span>' : cur ? '<span class="tag gold">Đang làm</span>' : !rankOk ? '<span class="tag off">Khi thành ' + RANKS[m.rank].name + '</span>' : !prevOk ? '<span class="tag off">Sau dự án trước</span>' : '<span class="tag gold">Sẵn sàng</span>';
-      const can = !done && !cur && !md.cur && prevOk && rankOk;
+      const done = md.done.includes(m.id), cur = md.cur && md.cur.id === m.id, prevOk = k === 0 || md.done.includes(MODERN[k-1].id), eraOk = (S.era|0) >= (m.era|0), rankOk = ri >= m.rank;
+      const status = done ? '<span class="tag">Đã xong</span>' : cur ? '<span class="tag gold">Đang làm</span>' : !eraOk ? '<span class="tag off">Từ thời kỳ ' + SOC[m.era].short + '</span>' : !rankOk ? '<span class="tag off">Khi thành ' + RANKS[m.rank].name + '</span>' : !prevOk ? '<span class="tag off">Sau dự án trước</span>' : '<span class="tag gold">Sẵn sàng</span>';
+      const can = !done && !cur && !md.cur && prevOk && rankOk && eraOk;
       h += '<div class="card modcard' + (done ? ' done' : '') + '"><div class="mhead"><span class="mic">' + MOD_ICON[m.id] + '</span><div style="flex:1;min-width:0"><b>' + m.name + '</b><div>' + status + '</div></div></div><p>' + m.desc + '</p>' +
         (done ? '' : '<div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:6px"><span class="costs">' + costHTML(m.cost) + ' <span style="font-size:12px;color:var(--muted);font-family:inherit;font-weight:500">· ' + m.days + ' ngày thi công</span></span>' + (can ? '<button class="btn small primary" data-act="modern" data-id="' + m.id + '">Khởi công</button>' : '') + '</div>') + '</div>';
     });
@@ -3613,7 +3994,7 @@ const PANELS = {
       if (S.epoch) h += '<div class="card modcard done"><div class="mhead"><span class="mic">' + MOD_ICON.ky_nguyen + '</span><div style="flex:1;min-width:0"><b>Đã qua ' + S.epoch + ' kỷ nguyên mới</b><div><span class="tag">+' + 5*S.epoch + '% sản lượng</span></div></div></div></div>';
       h += '<div class="card modcard"><div class="mhead"><span class="mic">' + MOD_ICON.ky_nguyen + '</span><div style="flex:1;min-width:0"><b>' + m.name + '</b><div>' + (cur ? '<span class="tag gold">Đang làm</span>' : why ? '<span class="tag off">' + why + '</span>' : '<span class="tag gold">Sẵn sàng</span>') + '</div></div></div><p>' + m.desc + '</p>' + (cur ? '' : '<div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:6px"><span class="costs">' + costHTML(m.cost) + ' <span style="font-size:12px;color:var(--muted);font-family:inherit;font-weight:500">· ' + m.days + ' ngày thi công</span></span>' + (can ? '<button class="btn small primary" data-act="modern" data-id="ky_nguyen">Khởi công</button>' : '') + '</div>') + '</div>';
     }
-    return ['Tiến hoá xã hội', h];
+    return ['Hành trình lịch sử', h];
   },
   works(){
     const S = G.S, E = G.E, rows = {};
@@ -3721,9 +4102,9 @@ const PANELS = {
     const S = G.S, ri = rankIdx(S.best);
     let h = '<p class="hint">Chọn công trình rồi chạm vào ô sáng trên bản đồ. Mẹo: chạm thẳng vào một ô đất trống cũng xây được.</p><div class="grid">';
     for (const k of BUILD_ORDER){
-      const d = B[k], reqLock = d.req && !hasMod(S, d.req), locked = ri < d.rank || reqLock, built = d.unique && (G.E.counts[k] || 0) > 0;
+      const d = B[k], lockTxt = bLock(S, k), locked = !!lockTxt, built = d.unique && (G.E.counts[k] || 0) > 0;
       h += '<button class="card bcard ' + (locked ? 'locked' : '') + '" data-act="build" data-k="' + k + '"' + (locked || built ? ' disabled' : '') + '><canvas data-thumb="' + k + '"></canvas><div class="bname">' + d.name + '</div>' +
-        (locked ? '<div class="lock">' + ICON.lock + (reqLock ? 'Cần dự án ' + MODERN.find(m => m.id === d.req).name.toLowerCase() : 'Khi thành ' + RANKS[d.rank].name) + '</div>' : built ? '<div class="lock">Đã dựng</div>' : '<div class="costs">' + costHTML(d.cost[0]) + '</div>') +
+        (locked ? '<div class="lock">' + ICON.lock + lockTxt + '</div>' : built ? '<div class="lock">Đã dựng</div>' : '<div class="costs">' + costHTML(d.cost[0]) + '</div>') +
         (slotsOf({k, l:1}) && !locked ? '<div class="wk">' + ICON.dan + slotsOf({k, l:1}) + (WORK[k] ? ' chỗ làm' : ' người làm') + '</div>' : '') + (FOOT[k] && footOf(k, 1) > 1 ? '<div class="wk">Rộng ' + footOf(k, 1) + '×' + footOf(k, 1) + ' ô</div>' : '') + (d.housing ? '<div class="wk">' + ICON.dan + 'Ở được ' + d.housing[0] + '–' + d.housing[d.housing.length - 1] + ' người</div>' : '') + '</button>';
     }
     const n0 = S.size || BASE_N;
@@ -3745,10 +4126,11 @@ const PANELS = {
     } else h += '<div class="banner gold">Bạn đã hoàn thành mọi nhiệm vụ!</div>';
     { const era = S.era|0, I = eraInfo(era), nxE = eraInfo(era + 1), ri = rankIdx(S.best), last = RANKS.length - 1, st = starsOf(S);
       h += '<div class="sec">Cột mốc</div><div class="card">';
-      h += '<div class="kv"><span>Xã hội</span><b style="font-size:14px">' + I.name + '</b></div><p class="hint" style="margin:2px 0 6px">Tiến lên <b>' + nxE.name + '</b>: ' + I.need.charAt(0).toLowerCase() + I.need.slice(1) + '.</p>';
-      if (ri < last){ const nr = RANKS[ri + 1], un = BUILD_ORDER.filter(k => B[k].rank === ri + 1).map(k => B[k].name); h += '<div class="kv"><span>Danh hiệu kế tiếp</span><b style="font-size:14px">' + nr.name + ' (' + nr.min + ' dân)</b></div><div class="pbar"><i style="width:' + clamp((S.best - RANKS[ri].min)/(nr.min - RANKS[ri].min), 0, 1)*100 + '%"></i></div>' + (un.length ? '<p class="hint" style="margin:0 0 6px">Mở khoá: ' + un.join(', ') + '.</p>' : ''); }
+      if (era < ERA_FUT){ const nd = I.goals.filter(g => goalDone(S, g)).length; h += '<div class="kv"><span>Thời kỳ</span><b style="font-size:14px;text-align:right">' + manLabel(era) + ' · ' + I.short + '</b></div><p class="hint" style="margin:2px 0 6px">Mục tiêu đã xong ' + nd + '/' + I.goals.length + '. Xong hết để sang <b>' + nxE.name + '</b>.</p>'; }
+      else h += '<div class="kv"><span>Thời kỳ</span><b style="font-size:14px;text-align:right">' + I.name + '</b></div><p class="hint" style="margin:2px 0 6px">Hoàn thành dự án ' + epochProj(S.epoch|0).name + ' để sang kỷ nguyên tiếp theo.</p>';
+      if (ri < last){ const nr = RANKS[ri + 1], un = BUILD_ORDER.filter(k => B[k].rank === ri + 1 && !((B[k].era|0) > era)).map(k => B[k].name); h += '<div class="kv"><span>Danh hiệu kế tiếp</span><b style="font-size:14px">' + nr.name + ' (' + nr.min + ' dân)</b></div><div class="pbar"><i style="width:' + clamp((S.best - RANKS[ri].min)/(nr.min - RANKS[ri].min), 0, 1)*100 + '%"></i></div>' + (un.length ? '<p class="hint" style="margin:0 0 6px">Mở khoá: ' + un.join(', ') + '.</p>' : ''); }
       else { const fs = fameStars(S.fame || 0), a = fameNeed(fs), b = fameNeed(fs + 1), nb = (Math.floor(st/5) + 1)*5; h += '<div class="kv"><span>Sao thịnh vượng</span><b>★' + st + '</b></div><div class="pbar"><i style="width:' + clamp(((S.fame || 0) - a)/(b - a), 0, 1)*100 + '%"></i></div><p class="hint" style="margin:0 0 6px">Điểm thịnh vượng ' + fmt(S.fame || 0) + '/' + fmt(b) + ' cho ★ tiếp theo, hoặc thêm dân (cứ 100 dân một sao). Mỗi sao thưởng bạc; cột mốc ★' + nb + ': mọi công trình làm ra thêm 5% vĩnh viễn' + (E0mile(S) ? ' (đang có +' + E0mile(S) + '%)' : '') + '.</p>'; }
-      h += '<div class="btns" style="margin-top:2px"><button class="btn small dark" data-act="panel" data-p="modern">Tiến hoá xã hội</button></div></div>'; }
+      h += '<div class="btns" style="margin-top:2px"><button class="btn small dark" data-act="panel" data-p="modern">Hành trình lịch sử</button></div></div>'; }
     h += '<div class="sec">Hành trình</div><ul class="qlist">';
     const q0 = Math.max(0, Math.min(S.quest, QUESTS.length) - 3);
     if (q0 > 0) h += '<li class="done"><span class="ck">✓</span>' + q0 + ' nhiệm vụ đầu đã xong</li>';
@@ -3792,16 +4174,20 @@ const PANELS = {
     const S = G.S, E = G.E, ri = rankIdx(S.best), next = RANKS[ri + 1];
     const me = Cloud.me, name = me && me.name;
     let acct;
-    if (Cloud.uid && Cloud.ref){
+    if (Cloud.provider === 'google'){
+      acct = '<div class="acct">' + (me && me.avatarUrl ? '<img alt="" referrerpolicy="no-referrer" src="' + esc(me.avatarUrl) + '">' : '') + '<div><b>' + esc(name || 'Tài khoản Google') + '</b><span>' + (me && me.email ? esc(me.email) + '. ' : '') + 'Tiến trình tự lưu vào tài khoản Google này. Mở ứng dụng trên máy khác, đăng nhập cùng tài khoản là chơi tiếp.</span></div></div>';
+    } else if (Cloud.provider === 'google-off'){
+      acct = '<div class="acct"><div><b>' + esc(name || 'Tài khoản Google') + '</b><span>Chưa kết nối được tới tài khoản (có thể đang mất mạng). Tiến trình lưu tạm trên máy này, khi có mạng bấm Kết nối lại để lưu lên tài khoản.</span></div></div>';
+    } else if (Cloud.uid && Cloud.ref){
       acct = '<div class="acct">' + (me && me.avatarUrl ? '<img alt="" src="' + esc(me.avatarUrl) + '">' : '') + '<div><b>' + esc(name || 'Tài khoản của bạn') + '</b><span>Tiến trình tự động lưu vào tài khoản Claude bạn đang đăng nhập. Mở trang này trên máy khác bằng cùng tài khoản (ví dụ tài khoản Google bạn dùng để vào Claude) là chơi tiếp được.</span></div></div>';
     } else if (Cloud.uid){
       acct = '<div class="acct">' + (me && me.avatarUrl ? '<img alt="" src="' + esc(me.avatarUrl) + '">' : '') + '<div><b>' + esc(name || 'Tài khoản của bạn') + '</b><span>Bạn đã đăng nhập nhưng chưa có quyền lưu vào trang này (cần quyền Contributor trở lên). Tiến trình đang được lưu trên trình duyệt này.</span></div></div>';
     } else {
-      acct = IS_APP ? '<div class="acct"><div><b>Bản ứng dụng</b><span>Tiến trình tự lưu trên máy này. Dùng Mã lưu bên dưới để chuyển bản sang máy khác hoặc từ bản trên Claude sang.</span></div></div>' : '<div class="acct"><div><b>Chưa đăng nhập</b><span>Đăng nhập Claude (có thể bằng Google) rồi mở lại trang này để lưu tiến trình vào tài khoản. Hiện tiến trình chỉ được lưu trên trình duyệt này.</span></div></div>';
+      acct = IS_APP ? '<div class="acct"><div><b>Bản ứng dụng</b><span>Tiến trình đang lưu trên máy này. Đăng nhập Google để lưu vào tài khoản và chơi tiếp trên máy khác, hoặc dùng Mã lưu bên dưới.</span></div></div>' : '<div class="acct"><div><b>Chưa đăng nhập</b><span>Đăng nhập Claude (có thể bằng Google) rồi mở lại trang này để lưu tiến trình vào tài khoản. Hiện tiến trình chỉ được lưu trên trình duyệt này.</span></div></div>';
     }
     const stTxt = {ok:'Đã lưu vào tài khoản', saving:'Đang lưu…', error:'Lỗi khi lưu', offline:'Chưa kết nối tài khoản', local:'Chỉ lưu trên máy này', init:'Đang khởi động'}[Cloud.status] || '';
     let h = '<div class="card">' + acct + '<div class="kv"><span>Trạng thái</span><b style="font-size:14px">' + stTxt + '</b></div>' + (Cloud.msg ? '<p class="hint" style="margin:4px 0 0">' + esc(Cloud.msg) + '</p>' : '') +
-      '<div class="btns"><button class="btn dark small" data-act="savenow">Lưu ngay</button>' + ((Cloud.status === 'offline' || Cloud.status === 'error') ? '<button class="btn ghost small" data-act="retry">Kết nối lại</button>' : '') + '</div></div>';
+      '<div class="btns"><button class="btn dark small" data-act="savenow">Lưu ngay</button>' + ((Cloud.status === 'offline' || Cloud.status === 'error' || Cloud.provider === 'google-off') ? '<button class="btn ghost small" data-act="retry">Kết nối lại</button>' : '') + (IS_APP && !Cloud.provider ? '<button class="btn small gbtn" data-act="glogin">' + G_ICON + 'Đăng nhập Google</button>' : '') + (Cloud.provider === 'google' ? '<button class="btn ghost small" data-act="glogout">Đăng xuất</button>' : '') + '</div></div>';
     h += '<div class="sec">Tên bản</div><div class="field"><input id="nameIn" maxlength="24" value="' + esc(S.name) + '"><button class="btn small dark" data-act="rename">Đổi</button></div>';
     h += '<div class="sec">Mã lưu</div><div class="card"><p class="hint" style="margin:0 0 6px">Chuyển bản sang máy khác, hoặc giữa bản chơi trên Claude và bản ứng dụng: tạo mã lưu ở đây, sao chép, rồi dán vào Nhập mã lưu ở bên kia.</p><div class="btns" style="margin-top:0"><button class="btn dark small" data-act="exportcode">Tạo mã lưu</button><button class="btn ghost small" data-act="importcode">Nhập mã lưu</button></div></div>';
     h += '<div class="sec">Danh hiệu</div><div class="card"><div class="row" style="justify-content:space-between"><b style="font-family:var(--disp);font-size:18px">' + rankTitle(S.best, starsOf(S)) + '</b><span style="font-size:13px;color:var(--muted)">' + (next ? 'Lên ' + next.name + ' khi có ' + next.min + ' dân' : 'Thêm 100 dân hoặc đủ điểm thịnh vượng được thêm ★') + '</span></div>' + (next ? '<div class="rankbar"><i style="width:' + clamp((S.best - RANKS[ri].min)/(next.min - RANKS[ri].min), 0, 1)*100 + '%"></i></div>' : '') + '</div>';
@@ -3872,16 +4258,16 @@ const PANELS = {
     h += '<p class="hint">Chọn công trình để xây ngay tại ô này:</p>';
     const ri = rankIdx(S.best); let any = false;
     for (const k of BUILD_ORDER){
-      const d = B[k]; if (ri < d.rank || (d.req && !hasMod(S, d.req))) continue; if (d.unique && (G.E.counts[k] || 0) > 0) continue;
+      const d = B[k]; if (bLock(S, k)) continue; if (d.unique && (G.E.counts[k] || 0) > 0) continue;
       const why = placeCheck(S, k, arg.i, arg.j); if (why) continue;
       any = true; const can = canAfford(S, d.cost[0]);
       h += '<button class="card opt" data-act="place" data-k="' + k + '" data-ix="' + ix + '"' + (can ? '' : ' style="opacity:.6"') + '><canvas data-thumb="' + k + '"></canvas><span class="oinfo"><b>' + d.name + '</b><span class="costs">' + costHTML(d.cost[0]) + '</span></span></button>';
     }
     if (!any) h += '<p class="hint">Không có công trình nào xây được ở đây.</p>';
     const cant = [];
-    for (const k of BUILD_ORDER){ const d = B[k]; if (ri < d.rank || (d.unique && (G.E.counts[k] || 0) > 0)) continue; const why = placeCheck(S, k, arg.i, arg.j); const NEED = {muong:'phải nối với suối hoặc mương khác', coi_nuoc:'phải đặt sát suối', thuy_dien:'phải đặt sát suối', mo_da:'phải ở gần núi đá', mo_bac:'phải ở gần núi đá'}; if (why && NEED[k] && !why.startsWith('Ô này')) cant.push('<li><b>' + d.name + '</b>: ' + NEED[k] + '</li>'); }
+    for (const k of BUILD_ORDER){ const d = B[k]; if (bLock(S, k) || (d.unique && (G.E.counts[k] || 0) > 0)) continue; const why = placeCheck(S, k, arg.i, arg.j); const NEED = {muong:'phải nối với suối hoặc mương khác', coi_nuoc:'phải đặt sát suối', thuy_dien:'phải đặt sát suối', mo_da:'phải ở gần núi đá', mo_bac:'phải ở gần núi đá'}; if (why && NEED[k] && !why.startsWith('Ô này')) cant.push('<li><b>' + d.name + '</b>: ' + NEED[k] + '</li>'); }
     if (cant.length) h += '<div class="sec" style="font-size:13px">Không xây được ở ô này</div><ul class="notes" style="margin-top:2px">' + cant.join('') + '</ul>';
-    const lockedNext = BUILD_ORDER.filter(k => B[k].rank === ri + 1).map(k => B[k].name);
+    const lockedNext = BUILD_ORDER.filter(k => B[k].rank === ri + 1 && !((B[k].era|0) > (S.era|0))).map(k => B[k].name);
     if (lockedNext.length) h += '<p class="hint" style="margin-top:8px">Khi thành ' + RANKS[ri + 1].name + ': ' + lockedNext.join(', ') + '.</p>';
     return [title, h];
   },
@@ -3908,6 +4294,7 @@ document.addEventListener('click', e => {
   else if (a === 'relocate') previewRelocate();
   else if (a === 'shownet'){ G.showNet = !G.showNet; $('#netBar').hidden = !G.showNet; if (G.showNet){ closeSheet(); updateModBtn(); } else updateModBtn(); }
   else if (a === 'modern') startModern(el.dataset.id);
+  else if (a === 'give') doGive(el.dataset.id);
   else if (a === 'wk') setWork(+el.dataset.ix, el.dataset.d === 'max' ? 'max' : +el.dataset.d);
   else if (a === 'wkall') setWorkAll(el.dataset.k || null, el.dataset.d === 'max' ? 'max' : +el.dataset.d);
   else if (a === 'locate') doLocate(el.dataset.k);
@@ -3925,6 +4312,8 @@ document.addEventListener('click', e => {
   else if (a === 'fest') doFest(el.dataset.k);
   else if (a === 'claim') claimQuest();
   else if (a === 'savenow'){ save().then(() => toast(Cloud.status === 'ok' ? 'Đã lưu vào tài khoản.' : 'Đã lưu trên máy này.', 'good')); }
+  else if (a === 'glogin') gLogin();
+  else if (a === 'glogout') gLogout();
   else if (a === 'retry') retryCloud();
   else if (a === 'rename'){ const v = ($('#nameIn').value || '').trim().slice(0, 24); if (!v){ toast('Tên bản không được để trống.', 'bad'); return; } G.S.name = v; toast('Đã đổi tên thành ' + v + '.', 'good'); changed(true); }
   else if (a === 'reset'){ showModal('Lập bản mới?', '<p>Bản hiện tại sẽ bị xoá và thay bằng một bản mới ở một thung lũng khác. Không hoàn tác được.</p><div class="field"><input id="newName" maxlength="24" placeholder="Tên bản mới" value="Bản Mây"></div>', [{label:'Thôi', cls:'ghost'}, {label:'Lập bản mới', cls:'primary', fn:() => { const nm = (document.getElementById('newName')?.value || '').trim() || 'Bản Mây'; newGame(nm); }}]); }
@@ -4090,11 +4479,12 @@ function newGame(name){
   G.notice = null;
   const S = newState(name, (Math.random()*1e9)|0);
   enterGame(S, true);
-  showModal('Chào mừng tới ' + S.name + '!', '<p>Ba người dân vừa dựng nóc nhà sàn đầu tiên bên suối. Hãy giúp họ dựng bản:</p><p>◆ <b>Chạm vào ô đất</b> để xây, chạm vào <b>rừng</b> để chặt cây.<br>◆ <b>Ruộng sát suối</b> cho nhiều lúa hơn.<br>◆ Làm theo <b>Nhiệm vụ</b> ở góc dưới để nhận thưởng.<br>◆ Kéo để di chuyển, chụm hai ngón để phóng to.</p>', [{label:'Bắt đầu', cls:'gold'}]);
+  showModal('Chào mừng tới ' + S.name + '!', '<p>Ba người dân vừa dựng túp lều đầu tiên bên suối, giữa thời nguyên thuỷ. Hãy giúp họ dựng bản:</p><p>◆ <b>Chạm vào ô đất</b> để xây, chạm vào <b>rừng</b> để chặt cây.<br>◆ <b>Ruộng sát suối</b> cho nhiều lúa hơn.<br>◆ Làm theo <b>Nhiệm vụ</b> ở góc dưới để nhận thưởng.<br>◆ Bản đi qua <b>9 thời kỳ lịch sử Việt Nam</b>, từ thời nguyên thuỷ tới thời kỳ đổi mới. Bấm nút <b>Màn</b> ở góc trên để xem mục tiêu từng thời kỳ.<br>◆ Kéo để di chuyển, chụm hai ngón để phóng to.</p>', [{label:'Bắt đầu', cls:'gold'}]);
 }
 function demoState(){
   const S = newState('Bản Mây', 4242);
-  const want = ['ruong','ruong','ruong','nha_san','nha_san','vuon','kho','tieu_phu','nha_rong','chuong_trau','coi_nuoc','cho_phien','khung_det','muong','nha_san'];
+  const want = ['ruong','ruong','ruong','nha_san','nha_san','vuon','kho','tieu_phu','nha_rong','trong_dong','chuong_trau','coi_nuoc','cho_phien','khung_det','muong','nha_san','lo_duc'];
+  S.era = 2;
   S.best = 50; S.pop = 14; syncPop(S); for (let k = 0; k < 4; k++) S.people.push(mkPerson(S, Math.random() < 0.5 ? 'm' : 'f', 3 + Math.floor(Math.random()*10))); S.people.push(mkPerson(S, 'f', 66)); S.pop = S.people.length;
   for (const k of want){ for (let tries = 0; tries < 200; tries++){ const ix = Math.floor(mulberry32(tries*31 + k.length*7 + S.nextId)()*N*N); const i = ix % N, j = (ix/N)|0; if (Math.hypot(i - 6, j - 6) > 4.5) continue; if (!placeCheck(S, k, i, j)){ S.tiles[ix].b = {k, l:1 + (k === 'nha_san' ? S.nextId % 3 : 0), id:S.nextId++}; break; } } }
   return S;
@@ -4104,11 +4494,12 @@ function renderStart(info){
   const me = Cloud.me;
   let acct;
   if (Cloud.uid){
-    acct = '<div class="st-acct">' + (me && me.avatarUrl ? '<img alt="" src="' + esc(me.avatarUrl) + '">' : '') + '<div><b>' + esc((me && me.name) || 'Đã đăng nhập') + '</b><span>' + (info.cloudOk ? 'Tiến trình được lưu vào tài khoản của bạn.' : 'Chưa đọc được dữ liệu trên tài khoản, tạm lưu trên máy này.') + '</span></div></div>';
+    acct = '<div class="st-acct">' + (me && me.avatarUrl ? '<img alt="" referrerpolicy="no-referrer" src="' + esc(me.avatarUrl) + '">' : '') + '<div><b>' + esc((me && me.name) || 'Đã đăng nhập') + '</b><span>' + (info.cloudOk ? 'Tiến trình được lưu vào tài khoản của bạn.' : 'Chưa đọc được dữ liệu trên tài khoản, tạm lưu trên máy này.') + '</span></div></div>';
   } else {
-    acct = '<div class="st-acct">' + ICON.device.replace('#e8dfc8', '#6c6a78').replace('<svg', '<svg style="width:30px;height:30px;flex:0 0 auto"') + '<div>' + (IS_APP ? '<b>Bản ứng dụng</b><span>Tiến trình tự lưu trên máy này. Muốn mang bản đang chơi trên Claude sang đây, dùng Nhập mã lưu bên dưới.</span>' : '<b>Chưa đăng nhập</b><span>Đăng nhập Claude (bằng Google hoặc email) rồi mở lại trang để lưu tiến trình vào tài khoản. Hiện chỉ lưu trên trình duyệt này.</span>') + '</div></div>';
+    acct = '<div class="st-acct">' + ICON.device.replace('#e8dfc8', '#6c6a78').replace('<svg', '<svg style="width:30px;height:30px;flex:0 0 auto"') + '<div>' + (IS_APP ? '<b>Bản ứng dụng</b><span>Tiến trình đang lưu trên máy này. Đăng nhập Google để lưu vào tài khoản và chơi trên nhiều máy.</span>' : '<b>Chưa đăng nhập</b><span>Đăng nhập Claude (bằng Google hoặc email) rồi mở lại trang để lưu tiến trình vào tài khoản. Hiện chỉ lưu trên trình duyệt này.</span>') + '</div></div>';
   }
   let h = acct;
+  if (IS_APP) h += Cloud.provider === 'google' ? '<button class="link" data-act="glogout" style="margin:-4px 0 6px">Đăng xuất Google</button>' : Cloud.provider === 'google-off' ? '' : '<button class="btn gbtn" data-act="glogin">' + G_ICON + 'Đăng nhập Google để lưu tiến trình</button>';
   if (info.save){
     const s = info.save;
     h += '<div class="st-save"><b>' + esc(s.name) + '</b><span>' + rankTitle(s.best, starsOf(s)) + ' · ' + eraInfo(s.era|0).short + ' · Năm ' + yearOf(s.day) + ', mùa ' + SEASONS[seasonIdx(s.day)].name + ' · ' + s.pop + ' dân</span></div>';
@@ -4118,7 +4509,8 @@ function renderStart(info){
   }
   h += '<button class="link" data-act="importcode">Nhập mã lưu</button>';
   card.innerHTML = h;
-  const go = $('#btnGo'); if (go) go.onclick = () => enterGame(info.save);
+  if (info.save && info.alt){ const ab = document.createElement('button'); ab.className = 'link'; ab.textContent = 'Dùng bản trên máy này: ' + info.alt.name + ' (' + info.alt.pop + ' dân)'; ab.onclick = () => enterGame(info.alt, true); card.insertBefore(ab, card.querySelector('[data-act="importcode"]')); }
+  const go = $('#btnGo'); if (go) go.onclick = () => enterGame(info.save, !!info.push);
   const nw = $('#btnNew'); if (nw) nw.onclick = () => { renderStart(Object.assign({}, info, {save:null, prev:info.save, replacing:true})); };
   if (info.replacing){ const bk = document.createElement('button'); bk.className = 'link'; bk.textContent = 'Quay lại bản cũ'; bk.onclick = () => renderStart(Object.assign({}, info, {save:info.prev, replacing:false})); card.appendChild(bk); }
   const st = $('#btnStart'); if (st) st.onclick = () => { const v = ($('#stName').value || '').trim().slice(0, 24) || 'Bản Mây'; newGame(v); };
@@ -4176,9 +4568,10 @@ requestAnimationFrame(frame);
   else best = save0 || loc || guest;
   Cloud.status = Cloud.ref ? (cloudOk ? 'ok' : 'offline') : 'local';
   renderCloudIcon();
-  renderStart({save:best, cloudOk});
+  const alt = Cloud.uid && guest && best && best !== guest && (guest.created !== best.created || (guest.saved || 0) > (best.saved || 0) + 60000) ? guest : null;
+  renderStart({save:best, cloudOk, alt, push:!!(Cloud.ref && cloudOk && best && best !== save0)});
 })();
-window.__banlang = {EDU, SEATS, eduDay, eduStats, encodePeople, decodePeople, seedEdu, getVehicles: () => vehicles, syncVehicles, autoAssign, planRelocate, applyRelocate, startModern, MODERN, getPeople: () => people, setWork, setWorkAll, slotsOf, curQuest, serial, drawPerson, doFlip, drawBuildingAt, expandLand, setN, Sound, render, normalize, doPlant, startMove, doMove, G, Cloud, B, QUESTS, FESTS, newState, computeEconomy, dayTick, doPlace, doUpgrade, doTrade, doFest, doClear, claimQuest, placeCheck, openPanel, enterGame, save, cam};
+window.__banlang = {expandLand, doUpgradeAll, SOC, cnt, doGive, goalProg, eraOf, bLock, EDU, SEATS, eduDay, eduStats, encodePeople, decodePeople, seedEdu, getVehicles: () => vehicles, syncVehicles, autoAssign, planRelocate, applyRelocate, startModern, MODERN, getPeople: () => people, setWork, setWorkAll, slotsOf, curQuest, serial, drawPerson, doFlip, drawBuildingAt, expandLand, setN, Sound, render, normalize, doPlant, startMove, doMove, G, Cloud, B, QUESTS, FESTS, newState, computeEconomy, dayTick, doPlace, doUpgrade, doTrade, doFest, doClear, claimQuest, placeCheck, openPanel, enterGame, save, cam};
 })();
 </script>
 <script>
